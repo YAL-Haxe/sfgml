@@ -1,10 +1,10 @@
 {
   "name": "sfgml",
   "url" : "https://yal.cc",
-  "license": "Proprietary",
+  "license": "LGPL",
   "tags": ["gml", "gamemaker"],
-  "description": "Experimental GML generator.",
-  "version": "1.0.0",
+  "description": "A Haxe->GameMaker compiler",
+  "version": "0.8.0",
   "releasenote": "",
   "contributors": ["YellowAfterlife"],
 }
