@@ -1,0 +1,6 @@
+-D gml
+-D no-analyzer
+-D use-rtti-doc
+--macro define('sys')
+--macro allowPackage('sys')
+--macro sf.SfCore.main()

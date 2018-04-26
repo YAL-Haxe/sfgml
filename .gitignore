@@ -1,0 +1,13 @@
+dump/
+bin/
+Nothing__
+sf/test/Test.hx
+sf.dump
+test/
+sf.sfdump
+/docs/index.html
+/gml/__macro/api/fnames
+/gml/__macro/api/fnames14
+/gml/__macro/api/GmlGenAPI.n
+/gml/__macro/GmlAPI1.hx
+/gml/__macro/GmlAPI2.hx
