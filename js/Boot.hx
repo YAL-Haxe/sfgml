@@ -82,14 +82,14 @@ class Boot {
 	/** { a: 1, b: 2 } -> odecl("a", 1, "b", 2) */
 	@:keep private static function odecl<T:Dynamic>(meta:String, size:Int, pairs:Dynamic):T {
 		var r:Array<Dynamic>;
-		var i:Int = size;
+		var i:Int;
 		#if (sfgml_version && sfgml_version <= 1763)
 		r = null;
+		i = size; while (--i >= 0) r[i] = null;
 		#else
-		r = NativeArray.create(i);
+		r = NativeArray.create(size, null);
 		#end
 		MetaType.copyset(r, meta);
-		while (--i >= 0) r[i] = null;
 		var n:Int = gml.Lib.argc;
 		i = 2;
 		while (i < n) {
