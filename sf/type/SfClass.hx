@@ -176,7 +176,7 @@ class SfClass extends SfClassImpl {
 					if (!nativeGen) printf(r, "this.__class__`=`mt_%(type_auto);\n", this);
 				} else if (nativeGen && !sfConfig.fieldNames) {
 					printf(r, "var this");
-					if (sfConfig.hasArrayCreate()) {
+					if (sfConfig.hasArrayCreate) {
 						printf(r, "`=`array_create(%d);\n", indexes);
 					} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
 					

@@ -25,22 +25,21 @@ class SfGmlArrayDecl extends SfOptImpl {
 		var rType:SfClass = cast sfGenerator.realMap["Type"];
 		if (rType != null && rType.staticMap.exists("enumConstructor")) arrayDeclUsed = true;
 		#end
+		var hasArrayCreate = sfConfig.hasArrayCreate;
+		var noArrayDecl = !sfConfig.hasArrayDecl;
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			switch (e.def) {
-				#if !sfgml_next
-				case SfArrayDecl(values): {
-					#if (!sfgml_version || sfgml_version > 1763)
-					if (values.length == 0) {
+				case SfArrayDecl(values): if (noArrayDecl) {
+					if (values.length == 0 && hasArrayCreate) {
 						e.setTo(SfCall(
 							e.mod(SfDynamic("array_create", [])),
 							[e.mod(SfConst(TInt(0)))]
 						));
-					} else 
-					#end
-					e.setTo(SfCall(e.mod(SfStaticField(bootType, arrayDecl)), values));
-					arrayDeclUsed = true;
+					} else {
+						e.setTo(SfCall(e.mod(SfStaticField(bootType, arrayDecl)), values));
+						arrayDeclUsed = true;
+					}
 				};
-				#end
 				case SfNew(c, _, args) if (c == arrayType): {
 					if (args.length == 0) args.push(e.mod(SfConst(TInt(0))));
 				};

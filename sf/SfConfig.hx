@@ -66,16 +66,21 @@ class SfConfig extends SfConfigImpl {
 	/** Whether to allow custom metadata setting */
 	public var customMeta:Bool = bool("sfgml-custom-meta");
 	
-	public inline function hasArrayCreate():Bool {
-		return version < 0 || version > 1763;
-	}
-	public inline function hasArrayDecl():Bool {
-		return next;
-	}
+	/** Whether array_create() is suppported */
+	public var hasArrayCreate:Bool;
+	
+	/** Whether [...] array initializer is supported */
+	public var hasArrayDecl:Bool;
 	
 	public function new() {
 		super();
 		instanceof = true;
-		ternary = next;
+		update();
+	}
+	public function update() {
+		var newish = next || (version < 0 || version > 1763);
+		hasArrayCreate = newish;
+		ternary = next || gmxMode && newish;
+		hasArrayDecl = next || gmxMode && newish;
 	}
 }

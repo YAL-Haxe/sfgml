@@ -8,6 +8,7 @@ import haxe.macro.JSGenApi;
 import haxe.macro.Expr.Binop.*;
 import haxe.macro.Expr.Unop.*;
 import haxe.macro.Type.TConstant;
+import haxe.macro.Type.TypedExpr;
 import sf.opt.*;
 import sf.type.*;
 import sf.type.SfTypeMap;
@@ -25,21 +26,8 @@ class SfGenerator extends SfGeneratorImpl {
 	var startTime:Float = Sys.time();
 	public function new() {
 		super();
-		//Compiler.define("sys");
-		//Compiler.allowPackage("sys");
-		// add /gml/std/ class path:
-		var cps = Context.getClassPath();
-		var cpi = cps.length;
-		while (--cpi >= 0) {
-			var cp = cps[cpi];
-			var cpq = StringTools.replace(cp, "\\", "/");
-			if (cpq.indexOf("lib/sfgml/") >= 0) {
-				if (cpq.charCodeAt(cpq.length - 1) != "/".code) cp += "/";
-				Compiler.addClassPath(cp + "gml/std");
-				break;
-			}
-		}
-		if (cpi < 0) Context.error("SfGenerator: Couldn't find sfgml classpath.", Context.currentPos());
+		//
+		Compiler.addClassPath(Context.resolvePath("gml/std"));
 	}
 	
 	/**
@@ -135,12 +123,14 @@ class SfGenerator extends SfGeneratorImpl {
 		// Extension generation (which will execute printTo for actual extension path):
 		if (StringTools.endsWith(path.toLowerCase(), ".extension.gmx")) {
 			sfConfig.gmxMode = true;
+			sfConfig.update();
 			SfGmxGen.run(path);
 			return;
 		}
 		if (StringTools.endsWith(path.toLowerCase(), ".yy")) {
 			sfConfig.next = true;
 			sfConfig.gmxMode = true;
+			sfConfig.update();
 			SfYyGen.run(path);
 			return;
 		}
@@ -278,6 +268,28 @@ class SfGenerator extends SfGeneratorImpl {
 		mixed.addBuffer(init);
 		mixed.addBuffer(out);
 		sys.io.File.saveContent(path, mixed.toString());
+	}
+	
+	override public function compile(apiTypes:Array<haxe.macro.Type>, apiMain:Null<TypedExpr>, outputPath:String) {
+		//
+		var op = outputPath;
+		inline function extLq(path:String):String {
+			return Path.extension(path).toLowerCase();
+		}
+		if (extLq(op) == "_") op = Path.withoutExtension(op);
+		switch (extLq(op)) {
+			case "gmx" if (extLq(Path.withoutExtension(op)) == "extension"): {
+				sfConfig.gmxMode = true;
+				sfConfig.update();
+			};
+			case "yy": {
+				sfConfig.next = true;
+				sfConfig.gmxMode = true;
+				sfConfig.update();
+			};
+		}
+		//
+		super.compile(apiTypes, apiMain, outputPath);
 	}
 	
 	private static var identRx:EReg = ~/[A-Za-z_]/g;
@@ -811,7 +823,7 @@ class SfGenerator extends SfGeneratorImpl {
 						}
 					};
 					case SfEnumField(_enum, _field): {
-						if (_enum.nativeGen && sfConfig.hasArrayDecl()) {
+						if (_enum.nativeGen && sfConfig.hasArrayDecl) {
 							printf(r, "[%d", _field.index);
 							if (sfConfig.hint) {
 								r.addHintOpen();
