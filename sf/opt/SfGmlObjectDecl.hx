@@ -24,6 +24,8 @@ class SfGmlObjectDecl extends SfOptImpl {
 		}
 		var used = false;
 		var xm = sfConfig.gmxMode;
+		var hasArrayDecl = sfConfig.hasArrayDecl;
+		var hint = sfConfig.hint;
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			switch (e.def) {
 			case SfObjectDecl(fields): {
@@ -49,12 +51,41 @@ class SfGmlObjectDecl extends SfOptImpl {
 							var idm = at.indexMap;
 							var found = false;
 							var prev = w[0];
-							if (prev != null) switch (prev.def) {
+							var args:Array<SfExpr>;
+							if (at.nativeGen && hasArrayDecl) { // {...} -> [...]
+								args = [];
+								var size = at.indexes, i:Int;
+								i = size; while (--i >= 0) args.push(null);
+								found = true;
+								i = -1; // index of last non-simple value
+								for (pair in fields) {
+									var k = idm.get(pair.name);
+									var px = pair.expr;
+									if (!px.isSimple()) {
+										if (k < i) {
+											found = false;
+											break;
+										} else i = k;
+									}
+									if (hint) {
+										px = px.mod(SfDynamic("/* " + pair.name + ": */{0}", [px]));
+									}
+									args[k] = px;
+								}
+								if (found) {
+									i = size;
+									while (--i >= 0) if (args[i] == null) {
+										args[i] = e.mod(SfConst(TNull));
+									}
+									e.def = SfArrayDecl(args);
+								}
+							}
+							if (!found && prev != null) switch (prev.def) { // expand into block?
 								case SfVarDecl(v, _)
 								| SfBinop(OpAssign, _.def => SfLocal(v), _)
 								: {
 									var rb:Array<SfExpr> = [];
-									var modern = sfConfig.version < 0 || sfConfig.version > 1763;
+									var modern = sfConfig.hasArrayCreate;
 									// `obj = array_create(<size of T>)`:
 									var resetExpr = prev.mod(modern
 										? SfDynamic("array_create(" + at.indexes + ")", [])
@@ -119,8 +150,8 @@ class SfGmlObjectDecl extends SfOptImpl {
 								};
 								default:
 							}
-							if (!found) {
-								var args:Array<SfExpr> = [
+							if (!found) { // -> odecl("tag", sizeof, ...pairs)
+								args = [
 									e.mod(SfConst(TString(dt.name))),
 									e.mod(SfConst(TInt(at.indexes))),
 								];
