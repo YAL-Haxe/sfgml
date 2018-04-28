@@ -78,13 +78,13 @@ extern class Sprite extends Asset {
 		c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
 	//
 	@:expose("draw_sprite_stretched") function drawStretched(subimg:Float,
-		x:Float, y:Float, w:Float, h:Float);
-	@:expose("draw_sprite_stretched_ext") function drawStretched(subimg:Float,
-		x:Float, y:Float, w:Float, h:Float, color:Color, alpha:Float);
+		x:Float, y:Float, w:Float, h:Float):Void;
+	@:expose("draw_sprite_stretched_ext") function drawStretchedExt(subimg:Float,
+		x:Float, y:Float, w:Float, h:Float, color:Color, alpha:Float):Void;
 	//
 	@:expose("draw_sprite_tiled") function drawTiled(subimg:Float, x:Float, y:Float):Void;
 	@:expose("draw_sprite_tiled_ext") function drawTiledExt(subimg:Float, x:Float, y:Float,
-		xscale:Float, yscale:Float, color:Color, alpha:Float);
+		xscale:Float, yscale:Float, color:Color, alpha:Float):Void;
 	//
 	@:expose("draw_sprite_pos") function drawQuad(subimg:Float, x1:Float, y1:Float,
 		x2:Float, y2:Float, x3:Float, y3:Float, x4:Float, y4:Float, alpha:Float):Void;
