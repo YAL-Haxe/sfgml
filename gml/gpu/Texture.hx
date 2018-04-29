@@ -7,7 +7,6 @@ package gml.gpu;
 @:std @:native("texture") @:snakeCase
 extern class Texture {
 	static inline var defValue:Texture = cast -1;
-	static inline var none:Texture = cast -1;
 	//
 	
 	//
