@@ -63,11 +63,12 @@ class SfGenerator extends SfGeneratorImpl {
 	 * Renames all non-@:native fields/types from camelCase to snake_case.
 	 */
 	private function procSnakeCase() {
+		var req = sfConfig.snakeCase;
 		inline function check(q:SfType):Bool {
-			return !(q.isHidden || q.meta.has(":std"));
+			return q.meta.has(":snakeCase") || req && !(q.isHidden || q.meta.has(":std"));
 		}
 		inline function apply(q:SfType):Void {
-			if (!q.meta.has(":native")) {
+			if (!q.meta.has(":native") && !q.meta.has(":expose")) {
 				var qp = q.pack;
 				for (i in 0 ... qp.length) qp[i] = toSnakeCase(qp[i]);
 				q.name = toSnakeCase(q.name);
@@ -136,7 +137,7 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		//
 		var next = sfConfig.next;
-		if (sfConfig.snakeCase) procSnakeCase();
+		procSnakeCase();
 		//
 		var mixed:SfBuffer = new SfBuffer();
 		var out:SfBuffer = new SfBuffer();
