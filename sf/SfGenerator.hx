@@ -297,7 +297,7 @@ class SfGenerator extends SfGeneratorImpl {
 	override public function printConst(r:SfBuffer, value:TConstant, pos:Position) {
 		switch (value) {
 			case TInt(i): {
-				#if (sfgml_hex)
+				#if (sf_hint_const)
 				var src = pos.getSource();
 				var z = true;
 				if (src.indexOf("0x") >= 0) {
@@ -332,7 +332,7 @@ class SfGenerator extends SfGeneratorImpl {
 				#end
 			};
 			case TFloat(s): {
-				#if (sfgml_hex)
+				#if (sf_hint_const)
 				var p = s.indexOf(".");
 				if (p >= 0 && s.length - p > 6) {
 					var src = pos.getSource();
