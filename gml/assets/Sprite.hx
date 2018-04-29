@@ -1,5 +1,6 @@
 package gml.assets;
 import gml.ds.Color;
+import gml.gpu.Texture;
 
 @:native("sprite") @:final @:std
 extern class Sprite extends Asset {
@@ -70,9 +71,10 @@ extern class Sprite extends Asset {
 	//
 	@:expose("draw_sprite_part") function drawPart(subimg:Float, left:Float, top:Float,
 		width:Float, height:Float, x:Float, y:Float):Void;
-	@:expose("draw_sprite_part_ext") function drawPartBlend(subimg:Float, left:Float, top:Float,
+	@:expose("draw_sprite_part_ext") function drawPartExt(subimg:Float, left:Float, top:Float,
 		width:Float, height:Float, x:Float, y:Float, color:Color, alpha:Float):Void;
-	@:expose("draw_sprite_general") function drawPartGeneral(subimg:Float,
+	//
+	@:expose("draw_sprite_general") function drawGeneral(subimg:Float,
 		left:Float, top:Float, width:Float, height:Float,
 		x:Float, y:Float, xscale:Float, yscale:Float, angle:Float,
 		c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;

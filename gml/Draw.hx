@@ -1,9 +1,10 @@
 package gml;
 import gml.assets.*;
-import gml.draw.BlendMode;
 import gml.ds.Color;
+import gml.gpu.PrimitiveKind;
+import gml.gpu.Texture;
 
-@:std @:native("draw")
+@:std @:native("draw") @:snakeCase
 extern class Draw {
 	//
 	static var color(get, set):Color;
@@ -19,36 +20,54 @@ extern class Draw {
 	static function clear(c:Color):Void;
 	@:native("clear_alpha") static function clearAlpha(c:Color, a:Float):Void;
 	
-	//{ shape
+	//
 	static function circle(x:Float, y:Float, r:Float, outline:Bool):Void;
-	//}
+	static function circleColor(x:Float, y:Float, r:Float, c1:Color, c2:Color, outline:Bool):Void;
 	
-	//{ sprite
-	static function sprite(spr:Sprite, subimg:Float, x:Float, y:Float):Void;
+	//
+	static function ellipse(x1:Float, y1:Float, x2:Float, y2:Float, outline:Bool):Void;
+	static function ellipseColor(x1:Float, y1:Float, x2:Float, y2:Float, c1:Color, c2:Color, outline:Bool):Void;
 	
-	@:native("sprite_ext")
-	static function spriteExt(spr:Sprite, subimg:Float, x:Float, y:Float, scaleX:Float, scaleY:Float, angle:Float, color:Color, alpha:Float):Void;
-	//}
+	//
+	static function line(x1:Float, y1:Float, x2:Float, y2:Float):Void;
+	static function lineWidth(x1:Float, y1:Float, x2:Float, y2:Float, w:Float):Void;
+	static function lineColor(x1:Float, y1:Float, x2:Float, y2:Float, c1:Color, c2:Color):Void;
+	@:native("line_width_color") static function lineExt(x1:Float, y1:Float, x2:Float, y2:Float, w:Float, c1:Color, c2:Color):Void;
 	
-	#if !sfgml_next
-	static function background(bck:Background, x:Float, y:Float):Void;
+	//
+	static function point(x:Float, y:Float):Void;
+	static function pointColor(x:Float, y:Float, c:Color):Void;
 	
-	@:native("background_ext")
-	static function backgroundExt(bck:Background, x:Float, y:Float, scaleX:Float, scaleY:Float, angle:Float, color:Color, alpha:Float):Void;
+	//
+	static function rectangle(x1:Float, y1:Float, x2:Float, y2:Float, outline:Bool):Void;
+	static function rectangleColor(x1:Float, y1:Float, x2:Float, y2:Float, c1:Color, c2:Color, c3:Color, c4:Color, outline:Bool):Void;
 	
-	@:native("background_part")
-	static function backgroundPart(bck:Background, left:Float, top:Float, width:Float, height:Float, x:Float, y:Float):Void;
+	//
+	static function roundrect(x1:Float, y1:Float, x2:Float, y2:Float, outline:Bool):Void;
+	static function roundrectColor(x1:Float, y1:Float, x2:Float, y2:Float, c1:Color, c2:Color, outline:Bool):Void;
+	static function roundrectExt(x1:Float, y1:Float, x2:Float, y2:Float, xrad:Float, yrad:Float, outline:Bool):Void;
+	static function roundrectColorExt(x1:Float, y1:Float, x2:Float, y2:Float, xrad:Float, yrad:Float, c1:Color, c2:Color, outline:Bool):Void;
 	
-	@:native("background_part_ext")
-	static function backgroundPartExt(bck:Background, left:Float, top:Float, width:Float, height:Float, x:Float, y:Float, xscale:Float, yscale:Float, color:Int, alpha:Float):Void;
-	#end
+	//
+	static function text(x:Float, y:Float, s:String):Void;
+	static function textColor(x:Float, y:Float, s:String, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
+	static function textExt(x:Float, y:Float, s:String, sep:Float, w:Float):Void;
+	static function textExtColor(x:Float, y:Float, s:String, sep:Float, w:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
+	static function textTransformed(x:Float, y:Float, s:String, xscale:Float, yscale:Float, angle:Float):Void;
+	static function textTransformedColor(x:Float, y:Float, s:String, xscale:Float, yscale:Float, angle:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
+	static function textExtTransformed(x:Float, y:Float, s:String, s:String, sep:Float, xscale:Float, yscale:Float, angle:Float):Void;
+	static function textExtTransformedColor(x:Float, y:Float, s:String, s:String, sep:Float, xscale:Float, yscale:Float, angle:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
 	
-	//{
-	static function surface(sf:Surface, x:Float, y:Float):Void;
+	//
+	static function triangle(x1:Float, y1:Float, x2:Float, y2:Float, x3:Float, y3:Float, outline:Bool):Void;
+	static function triangleColor(x1:Float, y1:Float, x2:Float, y2:Float, x3:Float, y3:Float, c1:Color, c2:Color, c3:Color, outline:Bool):Void;
 	
-	@:native("surface_ext")
-	static function surfaceExt(sf:Surface, x:Float, y:Float, sx:Float, sy:Float, f:Float, c:Color, a:Float):Void;
-	//}
-	
-	@:native("set_blend_mode") static function setBlendMode(mode:BlendMode):Void;
+	//
+	static function primitiveBegin(kind:PrimitiveKind):Void;
+	static function primitiveBeginTexture(kind:PrimitiveKind, tex:Texture):Void;
+	static function primitiveEnd():Void;
+	static function vertex(x:Float, y:Float):Void;
+	static function vertexColor(x:Float, y:Float, c:Color, alpha:Float):Void;
+	static function vertexTexture(x:Float, y:Float, tx:Float, ty:Float):Void;
+	static function vertexTextureColor(x:Float, y:Float, tx:Float, ty:Float, c:Color, alpha:Float):Void;
 }

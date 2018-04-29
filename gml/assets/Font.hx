@@ -1,4 +1,5 @@
 package gml.assets;
+import gml.gpu.Texture;
 
 @:native("font") @:final @:std
 extern class Font extends Asset {

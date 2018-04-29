@@ -1,10 +1,11 @@
-package gml.assets;
+package gml.gpu;
 
 /**
  * ...
  * @author YellowAfterlife
  */
-@:native("texture") extern class Texture {
+@:std @:native("texture") @:snakeCase
+extern class Texture {
 	static inline var defValue:Texture = cast -1;
 	static inline var none:Texture = cast -1;
 	//

@@ -1,5 +1,8 @@
 package gml.assets;
 import gml.Lib.raw;
+import gml.ds.Color;
+import gml.gpu.Texture;
+
 /**
  * ...
  * @author YellowAfterlife
@@ -53,5 +56,20 @@ extern class Background extends Asset {
 	
 	@:native("assign") function copyFrom(src:Background):Void;
 	
-	
+	@:expose("draw_background") function draw(x:Float, y:Float):Void;
+	@:expose("draw_background_ext") function drawExt(x:Float, y:Float, xscale:Float, yscale:Float, angle:Float, color:Color, alpha:Float):Void;
+	//
+	@:expose("draw_background_stretched") function drawStretched(x:Float, y:Float, w:Float, h:Float):Void;
+	@:expose("draw_background_stretched_ext") function drawStretchedExt(x:Float, y:Float, w:Float, h:Float, color:Color, alpha:Float):Void;
+	//
+	@:expose("draw_background_tiled") function drawTiled(x:Float, y:Float):Void;
+	@:expose("draw_background_tiled_ext") function drawTiledExt(x:Float, y:Float, xscale:Float, yscale:Float, color:Color, alpha:Float):Void;
+	//
+	@:expose("draw_background_part") function drawPart(left:Float, top:Float, width:Float, height:Float, x:Float, y:Float):Void;
+	@:expose("draw_background_part_ext") function drawPartExt(left:Float, top:Float, width:Float, height:Float, x:Float, y:Float, xscale:Float, yscale:Float, color:Color, alpha:Float):Void;
+	//
+	@:expose("draw_background_general") function drawGeneral(
+		left:Float, top:Float, width:Float, height:Float,
+		x:Float, y:Float, xscale:Float, yscale:Float, angle:Float,
+		c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
 }
