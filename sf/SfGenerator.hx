@@ -137,6 +137,7 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		//
 		var next = sfConfig.next;
+		var hasArrayDecl = sfConfig.hasArrayDecl;
 		procSnakeCase();
 		//
 		var mixed:SfBuffer = new SfBuffer();
@@ -174,7 +175,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (c.isHidden || c.constructor == null) continue;
 				if (c.nativeGen && !fns) continue;
 				printf(init, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
-				if (!next) {
+				if (!hasArrayDecl) {
 					if (stdPack != null) printf(init, "%s_", stdPack);
 					init.addString("haxe_type_proto(");
 				} else init.addChar("[".code);
@@ -223,7 +224,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (Std.is(t, SfEnum)) {
 					var e:SfEnum = cast t;
 					if (e.ctrNames) {
-						if (next) {
+						if (hasArrayDecl) {
 							printf(init, ",`[");
 						} else {
 							printf(init, ",`%s(", typeBoot.realMap["decl"].getPathAuto());
@@ -233,7 +234,7 @@ class SfGenerator extends SfGeneratorImpl {
 							if (sep) init.addComma(); else sep = true;
 							printf(init, '"%s"', c.name);
 						}
-						if (next) {
+						if (hasArrayDecl) {
 							printf(init, "]");
 						} else {
 							printf(init, ")");
@@ -941,17 +942,15 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfIf(c, a, z, b): { // if (c) a else b
 				if (wrap) {
-					#if (sfgml_next)
-					if (z) {
-						printf(r, "%x`?`%x`:`", c, a);
-						switch (b.unpack().def) {
-							case SfIf(_, _, _, _): printf(r, "(%x)", b);
-							default: printf(r, "%x", b);
-						}
-					} else error(expr, "Inline single-branch if..?");
-					#else
-					error(expr, "Can't print an inline if-block.");
-					#end
+					if (sfConfig.ternary) {
+						if (z) {
+							printf(r, "%x`?`%x`:`", c, a);
+							switch (b.unpack().def) {
+								case SfIf(_, _, _, _): printf(r, "(%x)", b);
+								default: printf(r, "%x", b);
+							}
+						} else error(expr, "Inline single-branch if..?");
+					} else error(expr, "Can't print an inline if-block.");
 				} else printIf(r, c, a, b, true);
 			};
 			case SfWhile(_cond, _expr, _normal): {

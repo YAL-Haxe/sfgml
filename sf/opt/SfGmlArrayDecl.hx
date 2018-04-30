@@ -21,12 +21,12 @@ class SfGmlArrayDecl extends SfOptImpl {
 		var arrayDeclUsed = SfGmlType.usesProto && !sfConfig.next;
 		var arrayTrail = bootType.staticMap["trail"];
 		var arrayTrailUsed = false;
-		#if !sfgml_next
-		var rType:SfClass = cast sfGenerator.realMap["Type"];
-		if (rType != null && rType.staticMap.exists("enumConstructor")) arrayDeclUsed = true;
-		#end
 		var hasArrayCreate = sfConfig.hasArrayCreate;
 		var noArrayDecl = !sfConfig.hasArrayDecl;
+		if (noArrayDecl) {
+			var rType:SfClass = cast sfGenerator.realMap["Type"];
+			if (rType != null && rType.staticMap.exists("enumConstructor")) arrayDeclUsed = true;
+		}
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			switch (e.def) {
 				case SfArrayDecl(values): if (noArrayDecl) {
