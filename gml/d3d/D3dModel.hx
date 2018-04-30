@@ -1,5 +1,5 @@
 package gml.d3d;
-import gml.assets.Texture;
+import gml.gpu.Texture;
 import SfTools.raw;
 import gml.ds.Color;
 
