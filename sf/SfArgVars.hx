@@ -41,6 +41,7 @@ class SfArgVars {
 				}
 				arid += 1;
 			}
+			var ternary = sfConfig.ternary;
 			i = -1; while (++i < argc) {
 				v = args[i].v;
 				if (expr.countLocal(args[i].v) > 0) {
@@ -52,9 +53,14 @@ class SfArgVars {
 						printf(r, "`=`argument[%d]", arid);
 					} else {
 						if (ropt == null) ropt = new SfBuffer();
-						printf(ropt, "if`(argument_count`>`%d)", arid);
-						printf(ropt, "`%s%s`=`argument[%d];", lp, vname, arid);
-						printf(ropt, "`else %s%s`=`%(const);\n", lp, vname, vdef);
+						if (ternary) {
+							printf(ropt, "%s%s`=`argument_count`>`%d`", lp, vname, arid);
+							printf(ropt, "?`argument[%d]:%(const);\n", arid, vdef);
+						} else {
+							printf(ropt, "if`(argument_count`>`%d)", arid);
+							printf(ropt, "`%s%s`=`argument[%d];", lp, vname, arid);
+							printf(ropt, "`else %s%s`=`%(const);\n", lp, vname, vdef);
+						}
 					}
 				}
 				arid += 1;
