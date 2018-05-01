@@ -165,6 +165,11 @@ class SfGenerator extends SfGeneratorImpl {
 			for (line in sfConfig.header.split("\\n")) printf(mixed, "// %s\n", line);
 		}
 		if (SfGmlInstanceOf.isUsed) printTypeGrid(init);
+		if (SfGmlEnumCtr.code != "") {
+			if (hintFolds) printf(init, "//{ enum names\n");
+			init.addString(SfGmlEnumCtr.code);
+			if (hintFolds) printf(init, "//}\n");
+		}
 		// 
 		var stdPack = sfConfig.stdPack;
 		if (SfGmlType.usesProto) {
@@ -475,6 +480,7 @@ class SfGenerator extends SfGeneratorImpl {
 			new SfOptIndexes(),
 			new SfOptBinop(),
 			new SfGmlObjectDecl(),
+			new SfGmlEnumCtr(),
 		]; pre.reverse(); for (o in pre) r.unshift(o);
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());

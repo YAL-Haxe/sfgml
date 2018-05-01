@@ -26,6 +26,7 @@ class SfGmlArrayDecl extends SfOptImpl {
 		if (noArrayDecl) {
 			var rType:SfClass = cast sfGenerator.realMap["Type"];
 			if (rType != null && rType.staticMap.exists("enumConstructor")) arrayDeclUsed = true;
+			if (SfGmlEnumCtr.code.length > 0) arrayDeclUsed = true;
 		}
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			switch (e.def) {

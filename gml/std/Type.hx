@@ -18,7 +18,7 @@ enum ValueType {
  * ...
  * @author YellowAfterlife
  */
-@:std @:native("haxe_type_tools")
+@:std @:native("haxe_type_tools") @:snakeCase
 @:coreApi class Type {
 	public static inline function getClass<T>(o:T):Class<T> {
 		return @:privateAccess js.Boot.getClass(o);
@@ -99,7 +99,6 @@ enum ValueType {
 		return false;
 	}
 	
-	@:native("enum_ctr")
 	public static function enumConstructor(e:EnumValue):String {
 		if (gml.MetaType.has(e)) {
 			var et:gml.MetaType.MetaEnum<EnumValue> = cast gml.MetaType.get(e);
