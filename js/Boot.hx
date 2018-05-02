@@ -110,6 +110,12 @@ class Boot {
 	@:keep public static function wset<T>(arr:Array<T>, index:Int, value:T):Void {
 		arr[index] = value;
 	}
+	
+	#if (sfgml_script_execute_wrap)
+	@:keep private static function script_execute():Dynamic {
+		return null;
+	}
+	#end
 }
 
 @:remove private class HaxeError extends js.Error {

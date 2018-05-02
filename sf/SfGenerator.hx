@@ -218,13 +218,13 @@ class SfGenerator extends SfGeneratorImpl {
 			if (hintFolds) printf(init, "//{ metatype\n");
 			var mtModule = SfGmlType.mtModule;
 			for (t in typeList) if (!t.isHidden && t.isUsed && !t.nativeGen) {
+				var isEnum = Std.is(t, SfEnum);
+				var e:SfEnum = isEnum ? cast t : null;
+				if (isEnum && e.isFake) continue;
+				//
 				printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
 				if (stdPack != null) printf(init, "%s_", stdPack);
-				if (Std.is(t, SfEnum)) {
-					printf(init, "haxe_enum_create");
-				} else {
-					printf(init, "haxe_class_create");
-				}
+				init.addString(isEnum ? "haxe_enum_create" : "haxe_class_create");
 				printf(init, '(%d,`"%(type_auto)"', t.index, t);
 				if (Std.is(t, SfEnum)) {
 					var e:SfEnum = cast t;
@@ -481,6 +481,7 @@ class SfGenerator extends SfGeneratorImpl {
 			new SfOptBinop(),
 			new SfGmlObjectDecl(),
 			new SfGmlEnumCtr(),
+			new SfGmlScriptExecuteWrap(),
 		]; pre.reverse(); for (o in pre) r.unshift(o);
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());
@@ -848,6 +849,12 @@ class SfGenerator extends SfGeneratorImpl {
 					default: i = 3;
 				}
 				if (i & 3 == 3) {
+					#if (sfgml_script_execute_wrap)
+					var cf = SfGmlScriptExecuteWrap.map[n];
+					if (cf != null) {
+						printf(r, "%(field_auto)(", cf);
+					} else 
+					#end
 					printf(r, "script_execute(");
 					printf(r, "%x", x);
 					sep = true;

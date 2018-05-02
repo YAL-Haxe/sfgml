@@ -60,8 +60,11 @@ class SfConfig extends SfConfigImpl {
 	/** If set, all scripts are wrapped in if (<expr>) { ... } else return @:defValue */
 	public var printIf:String = string("sfgml-print-if", null);
 	
-	/** bug #24929 */
+	/** https://bugs.yoyogames.com/view.php?id=24929 */
 	public var scriptLookup:String = string("sfgml-script-lookup", null);
+	
+	/** https://bugs.yoyogames.com/view.php?id=29203 */
+	public var scriptExecuteWrap:String = string("sfgml-script-execute-wrap", null);
 	
 	/** Whether to allow custom metadata setting */
 	public var customMeta:Bool = bool("sfgml-custom-meta");
