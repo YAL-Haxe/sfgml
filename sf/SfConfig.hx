@@ -18,6 +18,9 @@ class SfConfig extends SfConfigImpl {
 	/** File header information, if any */
 	public var header = string("sfgml-header");
 	
+	/** Whether to include timestamp+generation time in header */
+	public var timestamp = bool("sfgml-timestamp", true);
+	
 	/** trace() function name */
 	public var traceFunc = string("sfgml-trace", "trace");
 	

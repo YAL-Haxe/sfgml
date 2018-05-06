@@ -144,7 +144,7 @@ class SfYyGen {
 			});
 		}
 		//
-		if (!skipFuncs) (function() {
+		if (!skipFuncs && sfConfig.entrypoint != "") {
 			var ep = sfConfig.entrypoint;
 			var id = fMap.get(ep);
 			if (id == null) id = new SfYyGUID();
@@ -161,7 +161,7 @@ class SfYyGen {
 				argCount: 0,
 				args: [],
 			});
-		})();
+		}
 		SfGmxGen.iter(addFunc, addMacro);
 		//
 		timeStart("Encoding JSON");

@@ -270,11 +270,15 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		//if (cond != null) printf(init, "}\n");
 		// print header and save:
-		printf(mixed, "// Generated at %s (%dms)\n", Date.now().toString(),
-			Std.int((Sys.time() - startTime) * 1000));
+		if (sfConfig.timestamp) printf(mixed, "// Generated at %s (%dms)\n",
+			Date.now().toString(), Std.int((Sys.time() - startTime) * 1000));
 		mixed.addBuffer(init);
 		mixed.addBuffer(out);
-		sys.io.File.saveContent(path, mixed.toString());
+		var mixedStr = mixed.toString();
+		if (!sfConfig.timestamp && sfConfig.entrypoint == "" && mainExpr.isEmpty()) {
+			mixedStr = StringTools.ltrim(mixedStr);
+		}
+		sys.io.File.saveContent(path, mixedStr);
 	}
 	
 	override public function compile(apiTypes:Array<haxe.macro.Type>, apiMain:Null<TypedExpr>, outputPath:String) {

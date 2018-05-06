@@ -292,7 +292,7 @@ class SfGmxGen {
 			}
 			addText(funNode, lb0);
 		}
-		if (!skipFuncs) { // entrypoint
+		if (!skipFuncs && sfConfig.entrypoint != "") { // entrypoint
 			var epNode = addNode(extFuncs, "function");
 			addParam(epNode, "name", SfCore.sfConfig.entrypoint);
 			addParam(epNode, "externalName", SfCore.sfConfig.entrypoint);
