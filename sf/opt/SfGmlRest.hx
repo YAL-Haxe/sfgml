@@ -35,21 +35,10 @@ class SfGmlRest extends SfOptImpl {
 			e.iter(w, f);
 			switch (e.def) {
 				case SfCall(_.def => SfStaticField(c, f), par) if (c == sfRest): {
-					function offset(q:SfExpr, argc:Bool):SfExpr {
+					function offset(argc:Bool):Void {
 						var i = currentField.restOffset;
 						if (argc) i *= -1;
-						if (i != 0) {
-							var d = q.getData();
-							switch (q.def) {
-								case SfConst(TInt(k)): q = e.mod(SfConst(TInt(k + i)));
-								default: {
-									q = e.mod(SfBinop(i > 0 ? OpAdd : OpSub,
-										q, e.mod(SfConst(TInt(i > 0 ? i : -i)))));
-									if (argc && !e.isWrapped(w)) q = e.mod(SfParenthesis(q));
-								};
-							}
-							return q;
-						} else return q;
+						e.adjustByInt(w, i);
 					}
 					switch (f.name) {
 						case "create": {
@@ -77,15 +66,22 @@ class SfGmlRest extends SfOptImpl {
 							}
 						}; // create
 						case "get_length": {
-							e.def = offset(e.mod(SfDynamic("argument_count", [])), true).def;
+							inline function isCmp(o:Binop):Bool {
+								return switch (o) {
+									case OpEq | OpNotEq | OpGt | OpGte | OpLt | OpLte: true;
+									default: false;
+								}
+							}
+							e.def = SfDynamic("argument_count", []);
+							e.adjustByInt(w, -currentField.restOffset);
 						};
 						case "get": {
-							e.def = SfDynamic("argument[{0}]", [offset(par[1], false)]);
+							par[1].adjustByInt(null, currentField.restOffset);
+							e.def = SfDynamic("argument[{0}]", [par[1]]);
 						};
 						case "set": {
-							e.def = SfDynamic("argument[{0}] = {1}", [
-								offset(par[1], false), par[2]
-							]);
+							par[1].adjustByInt(null, currentField.restOffset);
+							e.def = SfDynamic("argument[{0}] = {1}", [par[1], par[2]]);
 						};
 					}
 				};
