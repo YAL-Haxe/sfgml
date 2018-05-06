@@ -3,7 +3,7 @@ package gml.io;
  * ...
  * @author YellowAfterlife
  */
-@:enum abstract BufferType(Int) from Int to Int {
+@:std @:enum abstract BufferType(Int) from Int to Int {
 	public static function sizeof(type:BufferType):Int {
 		return Buffer.sizeof(type);
 	}

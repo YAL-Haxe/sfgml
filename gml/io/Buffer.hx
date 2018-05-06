@@ -18,6 +18,10 @@ import gml.io.BufferType;
 	public var length(get, never):Int;
 	private inline function get_length():Int return get_size();
 	
+	/** As set in constructor */
+	public var kind(get, never):BufferKind;
+	@:native("get_type") private function get_kind():BufferKind;
+	
 	/** Current reading/writing position in the buffer. */
 	public var position(get, set):Int;
 	private inline function get_position():Int return tell();
@@ -88,6 +92,13 @@ import gml.io.BufferType;
 	//
 	inline function writeString(str:String):Void write(string, str);
 	inline function writeChars(chars:String):Void write(text, chars);
+	//
+	inline function writeBuffer(src:Buffer):Bool {
+		return BufferImpl.writeBuffer(this, src);
+	}
+	inline function writeBufferExt(src:Buffer, srcPos:Int, srcLen:Int):Bool {
+		return BufferImpl.writeBufferExt(this, src, srcPos, srcLen);
+	}
 	//}
 	
 	//{ Peek
@@ -135,6 +146,9 @@ import gml.io.BufferType;
 	inline function pokeChars(pos:Int, chars:String):Void poke(pos, text, chars);
 	//}
 	
+	public function compress(offset:Int, length:Int):Buffer;
+	public function decompress():Buffer;
+	
 	/// Synchronously loads a buffer from given file.
 	public static function load(path:String):Buffer;
 	
@@ -148,4 +162,39 @@ import gml.io.BufferType;
 	public function md5(offset:Int, size:Int):String;
 	
 	public function sha1(offset:Int, size:Int):String;
+}
+@:std private class BufferImpl {
+	public static function writeBuffer(dst:Buffer, src:Buffer):Bool {
+		var dstPos = dst.position;
+		var srcLen = src.length;
+		var dstNext = dstPos + srcLen;
+		var dstSize = dst.size;
+		if (dstNext > dstSize) {
+			if (dst.kind == BufferKind.Grow) {
+				do {
+					dstSize *= 2;
+				} while (dstNext > dstSize);
+				dst.resize(dstSize);
+			} else return false;
+		}
+		dst.copyFrom(dstPos, src, 0, srcLen);
+		dst.position = dstNext;
+		return true;
+	}
+	public static function writeBufferExt(dst:Buffer, src:Buffer, srcPos:Int, srcLen:Int):Bool {
+		var dstPos = dst.position;
+		var dstNext = dstPos + srcLen;
+		var dstSize = dst.size;
+		if (dstNext > dstSize) {
+			if (dst.kind == BufferKind.Grow) {
+				do {
+					dstSize *= 2;
+				} while (dstNext > dstSize);
+				dst.resize(dstSize);
+			} else return false;
+		}
+		dst.copyFrom(dstPos, src, srcPos, srcLen);
+		dst.position = dstNext;
+		return true;
+	}
 }
