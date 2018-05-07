@@ -95,6 +95,7 @@ class SfGenerator extends SfGeneratorImpl {
 	private function printTypeGrid(init:SfBuffer) {
 		if (sfConfig.hintFolds) printf(init, "//{ g_haxe_type_is\n");
 		var grid = "haxe_type_is";
+		if (sfConfig.stdPack != null) grid = sfConfig.stdPack + "_" + grid;
 		var n = SfType.indexes;
 		printf(init, "globalvar %s;`", grid);
 		printf(init, "%s`=`ds_grid_create(%d,`%d);\n", grid, n, n);
