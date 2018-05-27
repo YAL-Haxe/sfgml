@@ -211,7 +211,7 @@ class SfGenerator extends SfGeneratorImpl {
 						printf(init, ",`%s", proto[i]);
 					}
 				}
-				init.addString(next ? "];\n" : ");\n");
+				init.addString(hasArrayDecl ? "];\n" : ");\n");
 			}
 			if (hintFolds) printf(init, "//}\n");
 		}
@@ -632,11 +632,7 @@ class SfGenerator extends SfGeneratorImpl {
 					case SfArrayAccess(a, i): printf(r, "%x[@%x]", a, i);
 					default: r.addExpr(x, true);
 				}
-				if (wrap) {
-					if (_postFix) r.addString(z ? "++" : "--");
-				} else if (z) {
-					printf(r, "`+=`1");
-				} else printf(r, "`-=`1");
+				if (!wrap || _postFix) r.addString(z ? "++" : "--");
 			};
 			case SfUnop(_op, _postFix, _expr): {
 				if (wrap) {
