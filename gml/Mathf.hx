@@ -14,6 +14,7 @@ import haxe.extern.Rest;
 	static function lerp(vfrom:Float, vto:Float, f:Float):Float;
 	static function sign(val:Float):Int;
 	static function sqr<T:Float>(val:T):T;
+	static function abs<T:Float>(val:T):T;
 	//
 	static function random(max:Float):Float;
 	@:native("random_range") static function randomRange(min:Float, max:Float):Float;
