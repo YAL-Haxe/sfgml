@@ -23,13 +23,26 @@ class SfOptBinop extends SfOptImpl {
 	static function wrapBitOperations(e:SfExpr, w:SfExprList, f:SfExprIter) {
 		e.iter(w, f);
 		switch (e.def) {
-			case SfBinop(o = OpAnd | OpOr | OpXor | OpShl | OpShr | OpUShr, a, b): {
-				switch (w[0].def) {
-					case null: { };
-					case SfParenthesis(_): { };
-					default: {
-						e.setTo(SfParenthesis(e.mod(SfBinop(o, a, b))));
-					}
+			case SfBinop(o, a, b): {
+				var wrap = false;
+				switch (o) {
+					case OpAnd, OpOr, OpXor, OpShl, OpShr, OpUShr: {
+						switch (w[0].def) {
+							case null: { };
+							case SfParenthesis(_): { };
+							default: wrap = true;
+						}
+					};
+					case OpLt, OpLte, OpGt, OpGte, OpEq, OpNotEq: {
+						switch (w[0].def) {
+							case SfBinop(OpEq | OpNotEq, _, _): wrap = true;
+							default: { };
+						}
+					};
+					default: { };
+				}
+				if (wrap) {
+					e.setTo(SfParenthesis(e.mod(SfBinop(o, a, b))));
 				}
 			}
 			default:
