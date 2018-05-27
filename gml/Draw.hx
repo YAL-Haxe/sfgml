@@ -2,6 +2,7 @@ package gml;
 import gml.assets.*;
 import gml.ds.Color;
 import gml.gpu.PrimitiveKind;
+import gml.gpu.TextAlign;
 import gml.gpu.Texture;
 
 @:std @:native("draw") @:snakeCase
@@ -57,6 +58,20 @@ extern class Draw {
 	static function textTransformedColor(x:Float, y:Float, s:String, xscale:Float, yscale:Float, angle:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
 	static function textExtTransformed(x:Float, y:Float, s:String, s:String, sep:Float, xscale:Float, yscale:Float, angle:Float):Void;
 	static function textExtTransformedColor(x:Float, y:Float, s:String, s:String, sep:Float, xscale:Float, yscale:Float, angle:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
+	
+	//
+	static inline function setTextAlign(h:TextAlign, v:TextAlign):Void {
+		setHAlign(h);
+		setVAlign(v);
+	}
+	static function setHAlign(h:TextAlign):Void;
+	static function setVAlign(v:TextAlign):Void;
+	
+	//
+	@:expose("string_width") static function textWidth(s:String):Float;
+	@:expose("string_width_ext") static function textWidthExt(s:String, sep:Float, w:Float):Float;
+	@:expose("string_height") static function textHeight(s:String):Float;
+	@:expose("string_height_ext") static function textHeightExt(s:String, sep:Float, w:Float):Float;
 	
 	//
 	static function triangle(x1:Float, y1:Float, x2:Float, y2:Float, x3:Float, y3:Float, outline:Bool):Void;
