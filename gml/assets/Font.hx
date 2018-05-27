@@ -3,7 +3,7 @@ import gml.gpu.Texture;
 
 @:native("font") @:final @:std
 extern class Font extends Asset {
-	static inline var defValue:Sprite = cast -1;
+	static inline var defValue:Font = cast -1;
 	//
 	@:native("exists") static function isValid(q:Font):Bool;
 	//
