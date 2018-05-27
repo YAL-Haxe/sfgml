@@ -6,7 +6,7 @@ import gml.NativeArray;
  * ...
  * @author YellowAfterlife
  */
-@:native("haxe.boot")
+@:native("haxe.boot") @:std
 class Boot {
 	
 	/** Whether currently exported to JavaScript */
