@@ -1,11 +1,12 @@
-package;
+package __api;
 import sys.io.File;
 
 /**
  * ...
  * @author YellowAfterlife
  */
-class GmlGenAPI {
+@:noCompletion
+class __GmlGenAPI {
 	
 	static function each(r:EReg, s:String, f:EReg->Void) {
 		var i:Int = 0;
