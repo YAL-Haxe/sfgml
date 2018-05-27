@@ -1,19 +1,21 @@
 package gml.events;
 import gml.Lib.raw as raw;
-import gml.net.AnySocket;
+import gml.net.Socket;
 import gml.io.BufferReader;
+import gml.ds.HashTable;
+
 /**
  * ...
  * @author YellowAfterlife
  */
 @:final class NetworkEvent {
-	public static var map(get, never):Map<String, Dynamic>;
+	public static var map(get, never):HashTable<String, Dynamic>;
 	private static inline function get_map() return raw("async_load");
 	//
 	public static var type(get, never):Int;
 	private static inline function get_type() return map.get("type");
 	/// Sender socket in DATA event, receiver otherwise.
-	public static var target(get, never):AnySocket;
+	public static var target(get, never):Socket;
 	private static inline function get_target() return map.get("id");
 	///
 	public static var ip(get, never):String;
@@ -22,7 +24,7 @@ import gml.io.BufferReader;
 	public static var port(get, never):Int;
 	private static inline function get_port():Int return map.get("port");
 	/// In CONNECT/DISCONNECT event this holds the [dis]connecting socket.
-	public static var socket(get, never):AnySocket;
+	public static var socket(get, never):Socket;
 	private static inline function get_socket() return map.get("socket");
 	/// In NBCONNECT this indicates whether the connection succeeded.
 	public static var succeeded(get, never):Bool;
