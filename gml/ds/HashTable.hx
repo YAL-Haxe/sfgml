@@ -25,9 +25,13 @@ abstract HashTable<K, V>(HashTableImpl<K, V>) from HashTableImpl<K, V> to HashTa
 		this.set(key, value);
 		return value;
 	}
+	
+	public static inline function parse(json:String):HashTable<String, Dynamic> {
+		return raw("json_decode")(json);
+	}
 }
 
-@:native("ds_map") @:final
+@:native("ds_map") @:final @:snakeCase
 private extern class HashTableImpl<K, V> {
 	static inline var defValue:Any = cast -1;
 	//
@@ -47,7 +51,10 @@ private extern class HashTableImpl<K, V> {
 	function set(key:K, value:V):Void;
 	function exists(key:K):Bool;
 	@:native("delete") function remove(key:K):Void;
+	//
 	function add(key:K, value:V):Bool;
+	function addMap<K1, V1>(key:K, map:HashTable<K1, V1>):Void;
+	function addList<T>(key:K, map:ArrayList<T>):Void;
 	//
 	@:native("find_first") function findFirst():K;
 	@:native("find_next") function findNext(after:K):K;
@@ -66,9 +73,7 @@ private extern class HashTableImpl<K, V> {
 	inline function iterator():HashTableValueIterator<K, V> {
 		return new HashTableValueIterator(this);
 	}
-	inline function toString():String {
-		return raw("json_encode")(this);
-	}
+	@:expose("json_encode") function toString():String;
 }
 
 @:native("ds_map_key_iterator")
