@@ -45,7 +45,7 @@ extern class Object extends Asset {
 	}
 	
 	/** creates an instance of this object type at the given layer */
-	public inline function createAtLayer<T:Instance>(x:Float, y:Float, layer:String, ?c:Class<T>):T {
+	public inline function createAtLayer<T:Instance>(x:Float, y:Float, layer:gml.layers.LayerID, ?c:Class<T>):T {
 		return Lib.raw("instance_create_layer")(x, y, layer, this);
 	}
 	
