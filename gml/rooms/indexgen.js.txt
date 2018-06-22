@@ -1,0 +1,28 @@
+function indexgen(wrap, impl, defs) {
+var r1 = "", r2 = "";
+defs.replace(/(\w+):(\w+)/g, function(_, name, type) {
+r1+=`
+	
+	//
+	public var ${name}(get, set):${type};
+	private inline function get_${name}():${type} {
+		return ${impl}.${name}[this];
+	}
+	private inline function set_${name}(val:${type}):${type} {
+		${impl}.${name}[this] = val;
+		return val;
+	}`;
+r2 += `
+	public static var ${name}:Array<${type}>;`;
+});
+r1 = `abstract ${wrap}(Int) from Int to Int {${r1}
+}`;
+r2 = `@:std @:noRefAccess
+private extern class ${impl} {${r2}
+}`;
+return `${r1}
+${r2}`;
+}
+
+and then...
+indexgen("ViewIndex", "ViewImpl", `camera:Camera; target:ViewTarget...`);

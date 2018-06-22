@@ -6,6 +6,8 @@ import gml.Lib.raw;
  */
 @:native("room") @:final
 extern class Room extends Asset {
+	static inline var defValue:Room = cast -1;
+	
 	@:native("exists") static function isValid(q:Room):Bool;
 	
 	static inline function fromIndex(i:Int):Room return cast i;
