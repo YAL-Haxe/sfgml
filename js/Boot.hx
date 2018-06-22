@@ -99,6 +99,17 @@ class Boot {
 		return cast r;
 	}
 	
+	@:keep private static function mdecl<T:Dynamic>(pairs:SfRestMixed):T {
+		var r = new gml.ds.HashTable();
+		var i = 0;
+		var n = pairs.length;
+		while (i < n) {
+			r.set(pairs[i], pairs[i + 1]);
+			i += 2;
+		}
+		return cast r;
+	}
+	
 	/** Ternary function for GMS1. Better than a compile error, you know */
 	@:pure @:keep private static function tern<T>(c:Bool, a:T, b:T):T {
 		return c ? a : b;

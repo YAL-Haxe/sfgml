@@ -1,5 +1,6 @@
 package sf.opt;
 
+import haxe.macro.Expr.Binop;
 import sf.opt.SfOptImpl;
 import sf.type.SfExprDef.*;
 import sf.type.*;
@@ -37,20 +38,31 @@ class SfGmlArrayAccess extends SfOptImpl {
 		inline function mod(d:SfExprDef):SfExpr {
 			return e.mod(d);
 		}
+		//
+		var aop:Binop;
+		inline function setAop(op:Binop):Void {
+			aop = switch (op) {
+				case OpAssignOp(o): o;
+				default: null;
+			};
+		}
+		//
+		inline function checkSideEffects(e:SfExpr):Void {
+			if (!e.isSimple()) {
+				e.warning("[SfGmlArrayAccess] Due to expression duplication to workaround lack of accessor chaining, this may have side effects." + e.getName());
+			}
+		}
+		//
 		switch (e.def) {
 			case SfBinop(q = OpAssign | OpAssignOp(_),
 				x = _.def => SfArrayAccess(o, i),
 			v) if (nw(o)): { // a[i] = v
-				switch (q) {
-					case OpAssignOp(aop): {
-						e.setTo(SfCall(mod(SfInstField(o, wset)), [i,
-							mod(SfBinop(aop, x.clone(), v))
-						]));
-					};
-					default: {
-						e.setTo(SfCall(mod(SfInstField(o, wset)), [i, v]));
-					};
-				}
+				setAop(q);
+				if (aop != null) {
+					e.setTo(SfCall(mod(SfInstField(o, wset)), [i,
+						mod(SfBinop(aop, x.clone(), v))
+					]));
+				} else e.setTo(SfCall(mod(SfInstField(o, wset)), [i, v]));
 				wsetUsed = true;
 			};
 			case SfArrayAccess(o, i) | SfEnumAccess(o, _, i) if (nw(o)): { // a[i]
@@ -66,38 +78,51 @@ class SfGmlArrayAccess extends SfOptImpl {
 			case SfBinop(q = OpAssign | OpAssignOp(_),
 				x = _.def => SfDynamicField(o, s),
 			v) if (nw(o)): {
-				switch (o.getType()) {
+				switch (o.getTypeNz()) {
 					case TType(_.get() => dt, _): {
 						var at = sfGenerator.anonMap.baseGet(dt);
-						if (at != null && at.indexMap.exists(s)) {
-							var cfi:SfExpr = mod(SfConst(TInt(at.indexMap.get(s))));
-							switch (q) {
-								case OpAssignOp(aop): {
-									e.setTo(SfCall(mod(SfInstField(o, wset)), [cfi,
-										mod(SfBinop(aop, x.clone(), v))
+						if (at != null) {
+							setAop(q);
+							var cfi:SfExpr;
+							if (at.isDsMap) {
+								cfi = mod(SfConst(TString(s)));
+								if (aop != null) {
+									checkSideEffects(o);
+									e.setTo(SfCall(mod(SfDynamic("ds_map_set", [])), [
+										o, cfi, mod(SfBinop(aop, x.clone(), v))
 									]));
-								};
-								default: {
-									e.setTo(SfCall(mod(SfInstField(o, wset)), [cfi, v]));
-								};
+								} else e.setTo(SfCall(mod(SfDynamic("ds_map_set", [])), [
+									o, cfi, v
+								]));
+							} else if (at.indexMap.exists(s)) {
+								cfi = mod(SfConst(TInt(at.indexMap.get(s))));
+								if (aop != null) {
+									checkSideEffects(o);
+									e.setTo(SfCall(mod(SfInstField(o, wset)), [
+										cfi, mod(SfBinop(aop, x.clone(), v))
+									]));
+								} else e.setTo(SfCall(mod(SfInstField(o, wset)), [cfi, v]));
+								wsetUsed = true;
 							}
-							e.setTo(SfCall(mod(SfInstField(o, wget)),
-								[mod(SfConst(TInt(at.indexMap.get(s))))]
-							));
-							wgetUsed = true;
 						}
 					};
 					default:
 				}
 			};
 			case SfDynamicField(o, s) if (nw(o)): {
-				switch (o.getType()) {
+				switch (o.getTypeNz()) {
 					case TType(_.get() => dt, _): {
 						var at = sfGenerator.anonMap.baseGet(dt);
-						if (at != null && at.indexMap.exists(s)) {
-							e.setTo(SfCall(mod(SfInstField(o, wget)),
-								[mod(SfConst(TInt(at.indexMap.get(s))))]));
-							wgetUsed = true;
+						if (at != null) {
+							if (at.isDsMap) {
+								e.setTo(SfCall(mod(SfDynamic("ds_map_find_value", [])), [
+									o, mod(SfConst(TString(s)))
+								]));
+							} else if (at.indexMap.exists(s)) {
+								e.setTo(SfCall(mod(SfInstField(o, wget)),
+									[mod(SfConst(TInt(at.indexMap.get(s))))]));
+								wgetUsed = true;
+							}
 						}
 					};
 					default:
@@ -109,6 +134,7 @@ class SfGmlArrayAccess extends SfOptImpl {
 				var cfi:SfExpr = mod(SfConst(TInt(cf.index)));
 				switch (q) {
 					case OpAssignOp(aop): {
+						checkSideEffects(o);
 						e.setTo(SfCall(mod(SfInstField(o, wset)), [cfi,
 							mod(SfBinop(aop, x.clone(), v))
 						]));

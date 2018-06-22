@@ -39,6 +39,7 @@ class SfClass extends SfClassImpl {
 			};
 			default:
 		}
+		if (t.meta.has(":noRefWrite")) for (fd in fieldList) fd.noRefWrite = true;
 	}
 	
 	static function printFieldExpr(r:SfBuffer, f:SfClassField) {

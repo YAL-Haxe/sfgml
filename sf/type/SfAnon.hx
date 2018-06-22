@@ -12,6 +12,11 @@ import sf.SfCore.*;
 class SfAnon extends SfAnonImpl {
 	public var indexes:Int = 0;
 	public var indexMap:Map<String, Int> = new Map();
+	public var isDsMap:Bool;
+	public function new(t:DefType, at:AnonType) {
+		super(t, at);
+		isDsMap = meta.has(":dsMap");
+	}
 	override public function printTo(out:SfBuffer, init:SfBuffer):Void {
 		if (nativeGen && doc != null && !sfConfig.gmxMode) {
 			printf(init, "enum %(type_auto) {", this);

@@ -574,18 +574,23 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfDynamicField(q, f), v): {
 				z = true;
-				switch (q.getType()) {
+				switch (q.getTypeNz()) {
 					case TType(_.get() => dt, _): {
 						var at = anonMap.baseGet(dt);
 						if (at != null) {
 							s = f;
-							if (at.indexMap.exists(s)) {
+							if (at.isDsMap) {
+								printf(r, '%x[?"%s"]', q, s);
+								z = false;
+							} else if (at.indexMap.exists(s)) {
 								printf(r, "%x[@", q);
 								at.printAnonFieldTo(r, s, at.indexMap[s]);
 								printf(r, "]");
+								z = false;
+							}
+							if (!z) {
 								printSetOp(r, o, expr);
 								r.addExpr(v, true);
-								z = false;
 							}
 						}
 					};
@@ -601,11 +606,15 @@ class SfGenerator extends SfGeneratorImpl {
 					default:
 				}
 				if (z) {
-					expr.error("[SfGenerator:printExpr] Can't do dynamic field access on " + SfExprTools.dump(expr));
+					expr.error("[SfGenerator:printExpr] Can't do dynamic field write on " + SfExprTools.dump(expr) + " type " + q.getType());
 				}
 			};
 			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfArrayAccess(a, i), v): {
-				printf(r, "%x[@%x]", a, i);
+				switch (a.def) {
+					case SfInstField(_, f) | SfStaticField(_, f)
+					if (f.noRefWrite): printf(r, "%x[%x]", a, i);
+					default: printf(r, "%x[@%x]", a, i);
+				}
 				printSetOp(r, o, expr);
 				printf(r, "%x", v);
 			};
@@ -629,7 +638,13 @@ class SfGenerator extends SfGeneratorImpl {
 							printf(r, "%x[@%d%(hint)]", q, i, f.name);
 						} else expr.error("Field " + f.name + " has no index.");
 					}
-					case SfArrayAccess(a, i): printf(r, "%x[@%x]", a, i);
+					case SfArrayAccess(a, i): {
+						switch (a.def) {
+							case SfInstField(_, f) | SfStaticField(_, f)
+							if (f.noRefWrite): printf(r, "%x[%x]", a, i);
+							default: printf(r, "%x[@%x]", a, i);
+						}
+					};
 					default: r.addExpr(x, true);
 				}
 				if (!wrap || _postFix) r.addString(z ? "++" : "--");
@@ -701,12 +716,15 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfDynamicField(obj, _field): {
 				z = true;
-				switch (obj.getType()) {
+				switch (obj.getTypeNz()) {
 					case TType(_.get() => dt, _): {
 						var at = anonMap.baseGet(dt);
 						if (at != null) {
 							s = _field;
-							if (at.indexMap.exists(s)) {
+							if (at.isDsMap) {
+								printf(r, '%x[?"%s"]', obj, s);
+								z = false;
+							} else if (at.indexMap.exists(s)) {
 								printf(r, "%x[", obj);
 								at.printAnonFieldTo(r, s, at.indexMap[s]);
 								printf(r, "]");
@@ -725,7 +743,7 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 				if (z) {
 					Sys.println(obj.getName());
-					expr.error("[SfGenerator:printExpr] Can't read dynamic field " + _field + " from " + expr.dump());
+					expr.error("[SfGenerator:printExpr] Can't do dynamic field read " + _field + " from " + expr.dump());
 				}
 			};
 			case SfTypeExpr(t): {
