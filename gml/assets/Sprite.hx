@@ -1,8 +1,9 @@
 package gml.assets;
 import gml.ds.Color;
+import gml.gpu.Surface;
 import gml.gpu.Texture;
 
-@:native("sprite") @:final @:std
+@:native("sprite") @:final @:std @:snakeCase
 extern class Sprite extends Asset {
 	static inline var defValue:Sprite = cast -1;
 	//
@@ -17,6 +18,36 @@ extern class Sprite extends Asset {
 	public static inline function load(path:String, frames:Int, x:Float, y:Float):Sprite {
 		return loadRaw(path, frames, false, false, x, y);
 	}
+	
+	/*
+	@:native("create_from_surface") private static function fromSurfaceRaw(
+		sf:Surface, x:Float, y:Float, w:Float, h:Float, rb:Bool, smooth:Bool, ox:Float, oy:Float
+	):Sprite;
+	public static inline function fromSurfacePart(sf:Surface,
+		rx:Float, ry:Float, rw:Float, rh:Float, ox:Float, oy:Float
+	):Sprite {
+		return fromSurfaceRaw(sf, rx, ry, rw, rh, false, false, ox, oy);
+	}
+	public static inline function fromSurface(sf:Surface, ox:Float, oy:Float):Sprite {
+		return fromSurfaceRaw(sf, 0, 0, sf.width, sf.height, false, false, ox, oy);
+	}
+	
+	@:native("add_from_surface") private function addSurfaceRaw(
+		sf:Surface, rx:Float, ry:Float, rw:Float, rh:Float, rb:Bool, smooth:Bool
+	):Void;
+	public inline function addSurfacePart(sf:Surface, x:Float, y:Float, w:Float, h:Float):Void {
+		addSurfaceRaw(sf, x, y, w, h, false, false);
+	}
+	public inline function addSurface(sf:Surface):Void {
+		addSurfaceRaw(sf, 0, 0, sf.width, sf.height, false, false);
+	}
+	*/
+	
+	/** */
+	public function merge(spr:Sprite):Void;
+	
+	public function assign(copyFrom:Sprite):Void;
+	@:native("delete") public function destroy():Void;
 	//}
 	
 	//{ general
@@ -54,6 +85,11 @@ extern class Sprite extends Asset {
 	
 	var bboxBottom(get, never):Int;
 	@:native("get_bbox_bottom") private function get_bboxBottom():Int;
+	
+	@:native("collision_mask") public function setCollisionMask(sepMasks:Bool,
+		bboxMode:Int, bboxLeft:Float, bboxTop:Float, bboxRight:Float, bboxBottom:Float,
+		maskKind:Int, tolerance:Float
+	):Void;
 	//}
 	
 	//{ texture
