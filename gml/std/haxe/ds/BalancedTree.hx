@@ -241,8 +241,7 @@ class TreeNode<K,V> {
 	}
 	
 	// ~VD
-	#if (sfgml_next) @:extern inline #end
-	@:pure private static function get_height_impl<K, V>(node:TreeNode<K, V>):Int {
+	@:pure private static inline function get_height_impl<K, V>(node:TreeNode<K, V>):Int {
 		return node == null ? 0 : node._height;
 	}
 	@:extern public inline function get_height() {
