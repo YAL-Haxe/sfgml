@@ -1,4 +1,5 @@
 package sf;
+import haxe.io.Path;
 import haxe.macro.Compiler;
 import sf.SfConfigImpl.*;
 /**
@@ -83,36 +84,87 @@ class SfConfig extends SfConfigImpl {
 	/** Whether [...] array initializer is supported */
 	public var hasArrayDecl:Bool;
 	
+	/** Whether copy-on-write behaviour works correctly */
+	public var copyset:Bool;
+	
 	public function new() {
 		super();
 		instanceof = true;
 		update();
 	}
 	public function update() {
-		var newish:Bool;
-		if (!next) {
-			newish = compare(version, "1.4.1763") > 0;
-		} else newish = true;
-		hasArrayCreate = newish;
-		ternary = next || gmxMode && newish;
-		hasArrayDecl = compare(version, "2.2") >= 0;
+		var d = findData();
+		hasArrayCreate = d.array_create;
+		hasArrayDecl = d.array_decl;
+		//Sys.println(d);
+		ternary = d.ternary;
+		copyset = d.copyset;
+	}
+	static var findVersion_1:SfGmlVersion = null;
+	static function findVersion():SfGmlVersion {
+		var d = findVersion_1;
+		if (d != null) return d;
+		var v = value("sfgml_version");
+		var next = bool("sfgml_next", null);
+		var path = Compiler.getOutput();
+		if (Path.extension(path) == "_") path = Path.withoutExtension(path);
+		var ext:Bool;
+		switch (Path.extension(path).toLowerCase()) {
+			case "gmx": ext =  true; next = false;
+			case "yy":  ext =  true; next = true;
+			default:    ext = false;
+		}
+		if (next == null && v != null) next = compare(v, "2") >= 0;
+		return { version: v, next: next, extension: ext };
+	}
+	static function findData(?vd:SfGmlVersion):SfGmlFeatures {
+		if (vd == null) vd = findVersion();
+		var v = vd.version;
+		var next = vd.next;
+		inline function vc(o:String):Int {
+			return compare(v, o);
+		}
+		//
+		var gml2 = next || (vd.extension && vc("1.4.1763") > 0);
+		return {
+			version: v,
+			next: next,
+			extension: vd.extension,
+			array_create: gml2,
+			array_decl: gml2,
+			ternary: gml2,
+			copyset: vc("2.2") >= 0, // https://bugs.yoyogames.com/view.php?id=29731
+		};
 	}
 	public static function main() {
 		inline function def<T>(name:String, val:T):Void {
 			if (value(name) == null) Compiler.define(name, Std.string(val));
 		}
 		//
-		var v2 = bool("sfgml_next");
-		var v = value("sfgml_version");
-		inline function vc(o:String):Int {
-			return compare(v, o);
+		var vd = findVersion();
+		if (vd.version == null) {
+			vd.version = vd.next ? defVersion2 : defVersion1;
+			Compiler.define("sfgml_version", vd.version);
 		}
-		if (v == null) {
-			v = v2 ? defVersion2 : defVersion1;
-			def("sfgml_version", v);
-		}
-		// features
-		def("sfgml_array_create", v2 || vc("1.4.1763") > 0);
-		def("sfgml_array_decl", vc("2.2") >= 0); // https://bugs.yoyogames.com/view.php?id=29731
+		findVersion_1 = vd;
+		def("sfgml_next", vd.next);
+		def("sfgml_extension", vd.extension);
+		//
+		var d = findData(vd);
+		def("sfgml_array_create", d.array_create);
+		def("sfgml_array_decl", d.array_decl);
+		def("sfgml_ternary", d.ternary);
+		def("sfgml_copyset", d.copyset);
 	}
+}
+private typedef SfGmlVersion = {
+	next:Bool,
+	version:String,
+	extension:Bool,
+}
+private typedef SfGmlFeatures = { >SfGmlVersion,
+	array_create:Bool,
+	array_decl:Bool,
+	ternary:Bool,
+	copyset:Bool,
 }

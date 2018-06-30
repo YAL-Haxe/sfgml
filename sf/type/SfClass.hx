@@ -180,29 +180,49 @@ class SfClass extends SfClassImpl {
 					if (sfConfig.hasArrayCreate) {
 						printf(r, "`=`array_create(%d);\n", indexes);
 					} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
-					
 				} else {
-					printf(r, "var this`=`mq_%(type_auto);\n", this);
-					// add type id:
-					if (nativeGen) {
-						printf(r, "this[0%(hint)]`=`", "copyset");
-						if (indexes > 0) {
-							printf(r, "this[@0]");
-						} else printf(r, "undefined");
-					} else {
+					inline function setMeta():Void {
 						printf(r, "this[1,0%(hint)]`=`", "metatype");
 						if (module != sf.opt.SfGmlType.mtModule) {
 							printf(r, "mt_%(type_auto)", this);
 						} else r.addInt(index);
+					}
+					if (indexes == 0) { // empty
+						printf(r, "var this");
+						if (sfConfig.hasArrayDecl) {
+							printf(r, "`=`[];");
+						} else if (sfConfig.hasArrayCreate) {
+							printf(r, "`=`array_create(0)");
+						} else printf(r, ";`this[0]`=`undefined");
+					}
+					else if (sfConfig.copyset) { // normal
+						printf(r, "var this`=`mq_%(type_auto);\n", this);
+						if (nativeGen) {
+							printf(r, "this[0%(hint)]`=`this[0]", "copyset");
+						} else setMeta();
+					}
+					else { // workarounds
+						printf(r, "var this");
+						if (nativeGen) {
+							if (sfConfig.hasArrayCreate) {
+								printf(r, "`=`array_create(0)");
+							} else printf(r, "`=`[];\n");
+						} else {
+							printf(r, ";\n");
+							setMeta();
+						}
+						printf(r, ";\nvar __this`=`mq_%(type_auto);\n", this);
+						printf(r, "array_copy(this,`0,`__this,`0,`array_length_1d(__this))");
 					}
 					printf(r, ";\n");
 				}
 				
 				// add dynamic functions (todo: check inheritance):
 				for (f in instList) if (f.isDynFunc) {
+					if (f.expr == null && objName == null) continue;
 					if (objName != null) {
 						printf(r, "this.%s`=`", f.name);
-					} else printf(r, "this[%d]`=`", f.index);
+					} else printf(r, "this[@%d%(hint)]`=`", f.index, f.name);
 					if (f.expr != null) {
 						if (isStd) r.addString("g_");
 						r.addFieldPathAuto(f);

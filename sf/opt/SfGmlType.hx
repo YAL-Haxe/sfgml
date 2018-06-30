@@ -122,6 +122,7 @@ class SfGmlType extends SfOptImpl {
 		var mtSet = mtClass.fieldMap.get("set");
 		var mtSetUsed = false;
 		var mtCopySet = mtClass.fieldMap.get("copyset");
+		var canCopySet = sfConfig.copyset;
 		forEachExpr(function(e:SfExpr, w, f) {
 			e.iter(w, f);
 			switch (e.def) {
@@ -136,9 +137,16 @@ class SfGmlType extends SfOptImpl {
 							mtSetUsed = true;
 						} else e.def = SfBinop(OpAssign, e.mod(SfDynamic("{0}[@1,0]", [x])), m[1]);
 					} else if (f == mtCopySet) {
-						if (SfGmlArrayAccess.needsWrapping(x)) {
-							e.error("Can't expand MetaType.copyset here.");
-						} else e.def = SfBinop(OpAssign, e.mod(SfDynamic("{0}[1,0]", [x])), m[1]);
+						if (canCopySet) {
+							if (SfGmlArrayAccess.needsWrapping(x)) {
+								e.error("Can't expand MetaType.copyset here.");
+							} else {
+								e.def = SfBinop(OpAssign, e.mod(SfDynamic("{0}[1,0]", [x])), m[1]);
+							}
+						} else {
+							e.error("copyset is bugged at this time.");
+							//mtCopySet.isHidden = false;
+						}
 					}
 				}
 				default:

@@ -34,7 +34,7 @@ extern class NativeArray {
 	
 	/** Uses the copy-on-write behaviour to copy arrays or allocate new arrays. */
 	static inline function copyset<T>(q:Array<T>, index:Int, value:T):Void {
-		#if !macro
+		#if (!macro && js)
 		js.Syntax.code("{0}[{1}] = {2}", q, index, value);
 		#end
 	}

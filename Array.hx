@@ -139,12 +139,22 @@ private class ArrayImpl {
 		var len2 = arr2.length;
 		var out:Array<T>;
 		if (len1 > 0) {
+			#if (sfgml_copyset)
 			out = arr1;
 			NativeArray.copyset(out, 0, arr1[0]);
+			#else
+			out = [];
+			NativeArray.copyPart(out, 0, arr1, 0, len1);
+			#end
 			if (len2 > 0) NativeArray.copyPart(out, len1, arr2, 0, len2);
 		} else if (len2 > 0) {
+			#if (sfgml_copyset)
 			out = arr2;
 			NativeArray.copyset(out, 0, arr2[0]);
+			#else
+			out = [];
+			NativeArray.copyPart(out, 0, arr2, 0, len2);
+			#end
 		} else out = [];
 		return out;
 	}
@@ -196,9 +206,15 @@ private class ArrayImpl {
 	}
 	public static function copy<T>(arr:Array<T>):Array<T> {
 		var out:Array<T>;
-		if (arr.length > 0) {
+		var len = arr.length;
+		if (len > 0) {
+			#if (sfgml_copyset)
 			out = arr;
 			NativeArray.copyset(out, 0, arr[0]);
+			#else
+			out = [];
+			NativeArray.copyPart(out, 0, arr, 0, len);
+			#end
 		} else out = [];
 		return out;
 	}

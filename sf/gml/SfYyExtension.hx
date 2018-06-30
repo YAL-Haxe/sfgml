@@ -6,8 +6,11 @@ package sf.gml;
  */
 typedef SfYyExtension = {> SfYyExtNode,
 	var name:String;
+	var date:String;
+	var license:String;
 	var version:String;
 	var productID:String;
+	var packageID:String;
 	var files:Array<SfYyExtFile>;
 }
 
@@ -17,7 +20,10 @@ typedef SfYyExtFile = {> SfYyExtNode,
 	var init:String;
 	//var final:String;
 	var filename:String;
+	var origname:String;
 	var order:Array<SfYyGUID>;
+	var kind:Int;
+	var uncompress:Bool;
 }
 
 typedef SfYyExtMacro = {> SfYyExtNode,
