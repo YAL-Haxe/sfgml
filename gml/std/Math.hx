@@ -22,7 +22,7 @@ import SfTools.raw;
 	@:native("arctan2") static function atan2(y:Float, x:Float):Float;
 	//
 	static function exp(f:Float):Float;
-	static function log(f:Float):Float;
+	@:native("ln") static function log(f:Float):Float;
 	@:native("power") static function pow(f:Float, e:Float):Float;
 	static function sqrt(f:Float):Float;
 	//

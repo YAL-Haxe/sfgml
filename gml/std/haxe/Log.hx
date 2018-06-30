@@ -4,7 +4,7 @@ package haxe;
  * ...
  * @author YellowAfterlife
  */
-class Log {
+@:remove class Log {
 	
 	public static function formatOutput( v : Dynamic, infos : PosInfos ) : String {
 		var str = Std.string(v);

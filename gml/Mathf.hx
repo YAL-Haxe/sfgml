@@ -15,6 +15,9 @@ import haxe.extern.Rest;
 	static function sign(val:Float):Int;
 	static function sqr<T:Float>(val:T):T;
 	static function abs<T:Float>(val:T):T;
+	static function log10(f:Float):Float;
+	static function log2(f:Float):Float;
+	static function logn(base:Float, f:Float):Float;
 	//
 	static function random(max:Float):Float;
 	@:native("random_range") static function randomRange(min:Float, max:Float):Float;

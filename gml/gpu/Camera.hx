@@ -79,69 +79,71 @@ extern class Camera {
 	
 	public var viewX(get, set):Float;
 	private function get_viewX():Float;
-	public function setViewX(x:Float):Void;
 	private inline function set_viewX(x:Float):Float {
-		setViewX(x);
+		setViewPos(x, viewY);
 		return x;
 	}
 	
 	public var viewY(get, set):Float;
 	private function get_viewY():Float;
-	public function setViewY(y:Float):Void;
 	private inline function set_viewY(y:Float):Float {
-		setViewY(y);
+		setViewPos(viewX, y);
 		return y;
 	}
 	
+	public function setViewPos(x:Float, y:Float):Void;
+	//}
+	
+	//{
 	public var viewWidth(get, set):Float;
 	private function get_viewWidth():Float;
-	public function setViewWidth(w:Float):Void;
 	private inline function set_viewWidth(w:Float):Float {
-		setViewWidth(w);
+		setViewSize(w, viewHeight);
 		return w;
 	}
 	
 	public var viewHeight(get, set):Float;
 	private function get_viewHeight():Float;
-	public function setViewHeight(h:Float):Void;
 	private inline function set_viewHeight(h:Float):Float {
-		setViewHeight(h);
+		setViewSize(viewWidth, h);
 		return h;
 	}
+	
+	public function setViewSize(w:Float, h:Float):Void;
 	//}
 	
 	//{
 	public var viewSpeedX(get, set):Float;
 	private function get_viewSpeedX():Float;
-	public function setViewSpeedX(sx:Float):Void;
 	private inline function set_viewSpeedX(sx:Float):Float {
-		setViewSpeedX(sx);
+		setViewSpeed(sx, viewSpeedY);
 		return sx;
 	}
 	
 	public var viewSpeedY(get, set):Float;
 	private function get_viewSpeedY():Float;
-	public function setViewSpeedY(sy:Float):Void;
 	private inline function set_viewSpeedY(sy:Float):Float {
-		setViewSpeedY(sy);
+		setViewSpeed(viewSpeedX, sy);
 		return sy;
 	}
+	
+	public function setViewSpeed(sx:Float, sy:Float):Void;
 	//}
 	
 	//{
 	public var viewBorderX(get, set):Float;
 	private function get_viewBorderX():Float;
-	public function setViewBorderX(v:Float):Void;
 	private inline function set_viewBorderX(v:Float):Float {
-		setViewBorderX(v); return v;
+		setViewBorder(v, viewBorderY); return v;
 	}
 	
 	public var viewBorderY(get, set):Float;
 	private function get_viewBorderY():Float;
-	public function setViewBorderY(v:Float):Void;
 	private inline function set_viewBorderY(v:Float):Float {
-		setViewBorderY(v); return v;
+		setViewBorder(viewBorderX, v); return v;
 	}
+	
+	public function setViewBorder(bx:Float, by:Float):Void;
 	//}
 	
 	public var viewTarget(get, set):CameraTarget;
