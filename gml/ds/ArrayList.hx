@@ -62,7 +62,7 @@ extern class ArrayList<T> implements ArrayAccess<T> {
 		ArrayListImpl.copy(cast destination, cast this);
 	}
 	
-	#if (sfgml_version && sfgml_version <= 1763)
+	#if (sfgml_version && sfgml_version <= "1.4.1763")
 	@:native("find_index_safe")
 	private static function indexOfSafe<T>(q:ArrayListImpl<T>, v:T):Int {
 		for (i in 0 ... q.length) {

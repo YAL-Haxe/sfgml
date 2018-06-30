@@ -14,7 +14,7 @@ extern class Instance {
 	static inline var defValue:Instance = cast -4;
 	//
 	static function create(x:Float, y:Float, t:Object):Instance;
-	#if (sfgml_version && sfgml_version < 1763)
+	#if (sfgml_version && sfgml_version < "1.4.1763")
 	inline function destroy():Void raw("with ({0}) instance_destroy()", this);
 	#else
 	function destroy():Void;
@@ -62,6 +62,9 @@ extern class Instance {
 	var gravity_direction:Float;
 	//
 	var depth:Float;
+	#if sfgml_next
+	var layer:gml.layers.Layer;
+	#end
 	var visible:Bool;
 	var persistent:Bool;
 	var solid:Bool;

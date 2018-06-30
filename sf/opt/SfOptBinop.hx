@@ -153,7 +153,7 @@ class SfOptBinop extends SfOptImpl {
 		forEachExpr(expandAssignmentShifts);
 		forEachExpr(modifyExplicitStringCasts);
 		forEachExpr(insertExplicitStringCasts);
-		#if (sfgml_version && sfgml_version <= 1763)
+		#if (sfgml_version && sfgml_version <= "1.4.1763")
 		forEachExpr(wrapNullChecks);
 		#end
 		forEachExpr(simplifyComparisonsWithConstants);
