@@ -114,7 +114,7 @@ class SfGmlType extends SfOptImpl {
 	
 	function procMetaTypeStatics() {
 		var mtClass = sfGenerator.classMap.get(mtModule, "type");
-		if (sfConfig.next || !usesProto) {
+		if (sfConfig.hasArrayDecl || !usesProto) {
 			mtClass.staticMap.get("proto").isHidden = true;
 		}
 		var mtGet = mtClass.fieldMap.get("get");

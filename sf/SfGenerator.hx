@@ -23,10 +23,14 @@ using sf.type.SfExprTools;
  * @author YellowAfterlife
  */
 class SfGenerator extends SfGeneratorImpl {
+	
+	public static function main() {
+		SfConfig.main();
+	}
+	
 	var startTime:Float = Sys.time();
 	public function new() {
 		super();
-		//
 		Compiler.addClassPath(Context.resolvePath("gml/std"));
 	}
 	

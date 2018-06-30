@@ -17,7 +17,7 @@ extern class Instance {
 	#if (sfgml_version && sfgml_version < "1.4.1763")
 	inline function destroy():Void raw("with ({0}) instance_destroy()", this);
 	#else
-	function destroy():Void;
+	function destroy(?performDestroyEvent:Bool):Void;
 	#end
 	//
 	static function exists(inst:Instance):Bool;

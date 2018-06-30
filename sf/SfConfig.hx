@@ -1,4 +1,5 @@
 package sf;
+import haxe.macro.Compiler;
 import sf.SfConfigImpl.*;
 /**
  * ...
@@ -6,8 +7,12 @@ import sf.SfConfigImpl.*;
  */
 class SfConfig extends SfConfigImpl {
 	
+	// default target versions (if not specified):
+	static inline var defVersion1:String = "1.4.1804";
+	static inline var defVersion2:String = "2.1.4";
+	
 	/** */
-	public var version = int("sfgml-version", -1);
+	public var version = string("sfgml-version", null);
 	
 	/** Whether to maintain hints of empty types. */
 	public var hintEmptyTypes = bool("sf-hint-empty-types", false);
@@ -84,9 +89,30 @@ class SfConfig extends SfConfigImpl {
 		update();
 	}
 	public function update() {
-		var newish = next || (version < 0 || version > 1763);
+		var newish:Bool;
+		if (!next) {
+			newish = compare(version, "1.4.1763") > 0;
+		} else newish = true;
 		hasArrayCreate = newish;
 		ternary = next || gmxMode && newish;
-		hasArrayDecl = next || gmxMode && newish;
+		hasArrayDecl = compare(version, "2.2") >= 0;
+	}
+	public static function main() {
+		inline function def<T>(name:String, val:T):Void {
+			if (value(name) == null) Compiler.define(name, Std.string(val));
+		}
+		//
+		var v2 = bool("sfgml_next");
+		var v = value("sfgml_version");
+		inline function vc(o:String):Int {
+			return compare(v, o);
+		}
+		if (v == null) {
+			v = v2 ? defVersion2 : defVersion1;
+			def("sfgml_version", v);
+		}
+		// features
+		def("sfgml_array_create", v2 || vc("1.4.1763") > 0);
+		def("sfgml_array_decl", vc("2.2") >= 0); // https://bugs.yoyogames.com/view.php?id=29731
 	}
 }

@@ -59,10 +59,10 @@ class Boot {
 	@:keep private static function decl<T>(values:SfRest<T>):Array<T> {
 		var i:Int = values.length;
 		var r:Array<T>;
-		#if (sfgml_version && sfgml_version <= "1.4.1763")
-		r = null; MetaType.copyset(r, null);
-		#else
+		#if (sfgml_array_create)
 		r = NativeArray.create(i);
+		#else
+		r = null; MetaType.copyset(r, null);
 		#end
 		while (--i >= 0) NativeArray.copyset(r, i, values[i]);
 		return r;
@@ -83,11 +83,11 @@ class Boot {
 	@:keep private static function odecl<T:Dynamic>(meta:String, size:Int, pairs:Dynamic):T {
 		var r:Array<Dynamic>;
 		var i:Int;
-		#if (sfgml_version && sfgml_version <= "1.4.1763")
+		#if (sfgml_array_create)
+		r = NativeArray.create(size, null);
+		#else
 		r = null;
 		i = size; while (--i >= 0) r[i] = null;
-		#else
-		r = NativeArray.create(size, null);
 		#end
 		MetaType.copyset(r, meta);
 		var n:Int = gml.Lib.argc;
