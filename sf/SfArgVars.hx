@@ -45,17 +45,19 @@ class SfArgVars {
 			i = -1; while (++i < argc) {
 				v = args[i].v;
 				if (expr.countLocal(args[i].v) > 0) {
-					if (found++ > 0) r.addComma(); else r.addString("var ");
 					var vname = sfGenerator.getVarName(v.name);
 					var vdef = args[i].value;
-					printf(r, "%s%s", lp, vname);
+					if (vdef == null || !ternary) {
+						if (found++ > 0) r.addComma(); else r.addString("var ");
+						printf(r, "%s%s", lp, vname);
+					}
 					if (vdef == null) {
 						printf(r, "`=`argument[%d]", arid);
 					} else {
 						if (ropt == null) ropt = new SfBuffer();
 						if (ternary) {
-							printf(ropt, "%s%s`=`argument_count`>`%d`", lp, vname, arid);
-							printf(ropt, "?`argument[%d]:%(const);\n", arid, vdef);
+							printf(ropt, "var %s%s`=`argument_count`>`%d`", lp, vname, arid);
+							printf(ropt, "?`argument[%d]`:`%(const);\n", arid, vdef);
 						} else {
 							printf(ropt, "if`(argument_count`>`%d)", arid);
 							printf(ropt, "`%s%s`=`argument[%d];", lp, vname, arid);
