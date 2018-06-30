@@ -251,6 +251,10 @@ class SfGenerator extends SfGeneratorImpl {
 			}
 			if (hintFolds) printf(init, "//}\n");
 		}
+		#if (!sfgml_version || sfgml_version < "2.1.5")
+		new SfGmlScriptRefs().apply();
+		init.addString(SfGmlScriptRefs.init);
+		#end
 		// generate class inits:
 		for (c in classList) if (!SfExprTools.isEmpty(c.init)) {
 			var len = init.length;
@@ -679,7 +683,12 @@ class SfGenerator extends SfGeneratorImpl {
 					r.addString("g_");
 					r.addFieldPathAuto(f);
 				} else {
-					#if (sfgml_script_lookup)
+					#if (!sfgml_version || sfgml_version < "2.1.5")
+					if (!f.isVar) {
+						printf(r, 'f_');
+						r.addFieldPathAuto(f);
+					} else r.addFieldPathAuto(f);
+					#elseif (sfgml_script_lookup)
 					if (!f.isVar) {
 						printf(r, '%s("', sfConfig.scriptLookup);
 						r.addFieldPathAuto(f);
