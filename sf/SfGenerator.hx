@@ -729,7 +729,19 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfDynamicField(obj, _field): {
 				z = true;
-				switch (obj.getTypeNz()) {
+				switch (obj.def) {
+					case SfTypeExpr(t): {
+						if (Std.is(t, SfClass)) {
+							var fd = (cast t:SfClass).fieldMap[_field];
+							if (fd != null) {
+								r.addFieldPathAuto(fd);
+								z = false;
+							}
+						}
+					};
+					default:
+				}
+				if (z) switch (obj.getTypeNz()) {
 					case TType(_.get() => dt, _): {
 						var at = anonMap.baseGet(dt);
 						if (at != null) {
@@ -755,8 +767,7 @@ class SfGenerator extends SfGeneratorImpl {
 					default:
 				}
 				if (z) {
-					Sys.println(obj.getName());
-					expr.error("[SfGenerator:printExpr] Can't do dynamic field read " + _field + " from " + expr.dump());
+					expr.error("[SfGenerator:printExpr] Can't do dynamic field read for `" + _field + "` from `" + obj.dump() + "` (" + obj.getName() + ")");
 				}
 			};
 			case SfTypeExpr(t): {
