@@ -26,6 +26,9 @@ extern class ArrayList<T> implements ArrayAccess<T> {
 	function delete(index:Int):Void;
 	function indexOf(value:T):Int;
 	//
+	function shuffle():Void;
+	function sort(ascend:Bool):Void;
+	//
 	function copyFrom(src:ArrayList<T>):Void;
 	function copyTo(dst:ArrayList<T>):Void;
 	//
