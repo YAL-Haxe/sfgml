@@ -147,7 +147,7 @@ class SfConfig extends SfConfigImpl {
 			Compiler.define("sfgml_version", vd.version);
 		}
 		findVersion_1 = vd;
-		def("sfgml_next", vd.next);
+		if (vd.next) def("sfgml_next", true);
 		def("sfgml_extension", vd.extension);
 		//
 		var d = findData(vd);

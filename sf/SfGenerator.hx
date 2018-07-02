@@ -279,8 +279,8 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		//if (cond != null) printf(init, "}\n");
 		// print header and save:
-		if (sfConfig.timestamp) printf(mixed, "// Generated at %s (%dms)\n",
-			Date.now().toString(), Std.int((Sys.time() - startTime) * 1000));
+		if (sfConfig.timestamp) printf(mixed, "// Generated at %s (%dms) for v%s+\n",
+			Date.now().toString(), Std.int((Sys.time() - startTime) * 1000), sfConfig.version);
 		mixed.addBuffer(init);
 		mixed.addBuffer(out);
 		var mixedStr = mixed.toString();
