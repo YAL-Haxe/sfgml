@@ -79,8 +79,8 @@ extern class Array<T> implements ArrayAccess<T> {
 	public var array:Array<T>;
 	public var index:Int;
 }
-@:native("array_hx")
-private class ArrayImpl {
+@:native("array_hx") @:noCompletion
+class ArrayImpl {
 	//{
 	public static function push<T>(arr:Array<T>, val:T):Int {
 		var i:Int = arr.length;
@@ -103,6 +103,7 @@ private class ArrayImpl {
 		} else if (pos > len) {
 			pos = len;
 		}
+		// note: unsafe to use array_copy here because order is not specified.
 		while (len > pos) arr[len] = arr[len - 1];
 		arr[pos] = val;
 	}
