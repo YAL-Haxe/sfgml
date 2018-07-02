@@ -215,7 +215,7 @@ class SfGenerator extends SfGeneratorImpl {
 						printf(init, ",`%s", proto[i]);
 					}
 				}
-				init.addString(hasArrayDecl ? "];\n" : ");\n");
+				printf(init, "%c;\n", hasArrayDecl ? "]".code : ")".code);
 			}
 			if (hintFolds) printf(init, "//}\n");
 		}
