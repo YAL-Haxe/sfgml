@@ -6,6 +6,8 @@ import gml.Lib.raw;
  */
 @:native("ds_grid") @:final
 extern class Grid<T> {
+	public static inline var defValue:Dynamic = cast -1;
+	
 	public var width(get, never):Int;
 	public var height(get, never):Int;
 	public var cols(get, never):Int;
