@@ -53,7 +53,7 @@ class SfGmlEnumCtr extends SfOptImpl {
 									var sep = false;
 									for (ctr in sfEnum.ctrList) {
 										if (sep) printf(out, ",`"); else sep = true;
-										printf(out, '"%(field_auto)"', ctr);
+										printf(out, '"%s"', ctr.name);
 									}
 									out.addChar(hasArrayDecl ? "]".code : ")".code);
 									printf(out, ";\n");
