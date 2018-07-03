@@ -20,7 +20,9 @@ class SfEnumTools {
 		var qx = SfGmlEnumValue.fromEnumValue(q);
 		var vx = SfGmlEnumValue.fromEnumValue(v);
 		#if (debug)
-		gml.NativeArray.set2d(qx, 1, 1, gml.NativeArray.get2d(vx, 1, 1));
+		if (gml.NativeArray.cols2d(qx, 1) > 1) {
+			gml.NativeArray.set2d(qx, 1, 1, gml.NativeArray.get2d(vx, 1, 1));
+		}
 		#end
 		for (i in 0 ... vx.length) {
 			qx.set(i, vx.get(i));
