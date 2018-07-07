@@ -87,6 +87,9 @@ class SfConfig extends SfConfigImpl {
 	/** Whether copy-on-write behaviour works correctly */
 	public var copyset:Bool;
 	
+	/** https://bugs.yoyogames.com/view.php?id=29749 */
+	public var slowTernary:Bool = true;
+	
 	public function new() {
 		super();
 		instanceof = true;

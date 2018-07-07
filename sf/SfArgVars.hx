@@ -41,7 +41,7 @@ class SfArgVars {
 				}
 				arid += 1;
 			}
-			var ternary = sfConfig.ternary;
+			var ternary = sfConfig.ternary && !sfConfig.slowTernary;
 			i = -1; while (++i < argc) {
 				v = args[i].v;
 				if (expr.countLocal(args[i].v) > 0) {
