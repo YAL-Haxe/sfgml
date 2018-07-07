@@ -17,14 +17,14 @@ extern class ArrayList<T> implements ArrayAccess<T> {
 	function clear():Void;
 	var length(default, null):Int;
 	//
-	function get(index:Int):T;
+	@:pure function get(index:Int):T;
 	function set(index:Int, val:T):Void;
 	//
 	function add(values:Rest<T>):Void;
 	function insert(index:Int, value:T):Void;
 	function remove(value:T):Void;
 	function delete(index:Int):Void;
-	function indexOf(value:T):Int;
+	@:pure function indexOf(value:T):Int;
 	//
 	function shuffle():Void;
 	function sort(ascend:Bool):Void;
@@ -100,8 +100,8 @@ extern class ArrayList<T> implements ArrayAccess<T> {
 @:native("ds_list") @:final
 private extern class ArrayListImpl<T> {
 	public var length(get, never):Int;
-	@:native("size") private function get_length():Int;
-	function size():Int;
+	@:pure @:native("size") private function get_length():Int;
+	@:pure function size():Int;
 	//
 	function new();
 	function destroy():Void;
@@ -109,13 +109,13 @@ private extern class ArrayListImpl<T> {
 	//
 	static function copy<T>(to:ArrayListImpl<T>, from:ArrayListImpl<T>):Void;
 	// Returns whether the list is empty.
-	@:native("empty") function isEmpty():Bool;
+	@:pure @:native("empty") function isEmpty():Bool;
 	//
 	function add(values:haxe.extern.Rest<T>):Void { }
 	//
-	@:native("find_value") function get(index:Int):T;
+	@:pure @:native("find_value") function get(index:Int):T;
 	//
-	@:native("find_index") function indexOf(value:T):Int;
+	@:pure @:native("find_index") function indexOf(value:T):Int;
 	//
 	function set(index:Int, value:T):Void;
 	/**

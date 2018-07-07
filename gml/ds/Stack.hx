@@ -10,8 +10,8 @@ extern class Stack<T> {
 	function destroy():Void;
 	function clear():Void;
 	//
-	@:native("empty") function isEmpty():Bool;
-	function size():Int;
+	@:pure @:native("empty") function isEmpty():Bool;
+	@:pure function size():Int;
 	//
 	@:native("copy") function copyFrom(source:Stack<T>):Void;
 	inline function copyTo(destination:Stack<T>):Void {
@@ -23,7 +23,7 @@ extern class Stack<T> {
 	/// Removes an element from stack
 	function pop():T;
 	/// Returns the top element without removing it from stack
-	@:native("top") function peekTop():T;
+	@:pure @:native("top") function peekTop():T;
 	//
 	function write():String;
 	function read(source:String):Void;

@@ -40,7 +40,7 @@ extern class Grid<T> {
 	public function sort(column:Int, ascending:Bool):Void;
 	public function shuffle():Void;
 	//
-	public function get(x:Int, y:Int):T;
+	@:pure public function get(x:Int, y:Int):T;
 	public function set(x:Int, y:Int, value:T):Void;
 	public function add(x:Int, y:Int, value:T):Void;
 	@:native("multiply") public function mul(x:Int, y:Int, value:T):Void;

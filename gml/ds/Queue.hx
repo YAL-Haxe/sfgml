@@ -11,14 +11,14 @@ extern class Queue<T> {
 	function destroy():Void;
 	
 	function clear():Void;
-	@:native("empty") function isEmpty():Bool;
-	function size():Int;
+	@:pure @:native("empty") function isEmpty():Bool;
+	@:pure function size():Int;
 	
 	function dequeue():Null<T>;
 	function enqueue(values:Rest<T>):Void;
 	
-	function head():Null<T>;
-	function tail():Null<T>;
+	@:pure function head():Null<T>;
+	@:pure function tail():Null<T>;
 	
 	@:native("copy") function copyFrom(source:Queue<T>):Void;
 	

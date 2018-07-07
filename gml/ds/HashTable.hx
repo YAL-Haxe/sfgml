@@ -39,17 +39,17 @@ private extern class HashTableImpl<K, V> {
 	function destroy():Void;
 	//
 	function clear():Void;
-	@:native("empty") function isEmpty():Bool;
-	function size():Int;
+	@:pure @:native("empty") function isEmpty():Bool;
+	@:pure function size():Int;
 	//
 	private static function copy<K, V>(to:HashTableImpl<K, V>, from:HashTableImpl<K, V>):Void;
 	inline function copyFrom(from:HashTableImpl<K, V>):Void {
 		copy(this, from);
 	}
 	//
-	@:native("find_value") function get(key:K):Null<V>;
+	@:pure @:native("find_value") function get(key:K):Null<V>;
 	function set(key:K, value:V):Void;
-	function exists(key:K):Bool;
+	@:pure function exists(key:K):Bool;
 	@:native("delete") function remove(key:K):Void;
 	//
 	function add(key:K, value:V):Bool;

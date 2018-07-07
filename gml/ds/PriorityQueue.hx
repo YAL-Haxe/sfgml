@@ -26,8 +26,8 @@ extern class PriorityQueue<T> {
 	@:native("delete_min") function deleteMin():T;
 	@:native("delete_max") function deleteMax():T;
 	//
-	@:native("find_min") function findMin():T;
-	@:native("find_max") function findMax():T;
+	@:pure @:native("find_min") function findMin():T;
+	@:pure @:native("find_max") function findMax():T;
 	//
 	function write():String;
 	function read(source:String):Void;
