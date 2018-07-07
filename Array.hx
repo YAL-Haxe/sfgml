@@ -104,7 +104,10 @@ class ArrayImpl {
 			pos = len;
 		}
 		// note: unsafe to use array_copy here because order is not specified.
-		while (len > pos) arr[len] = arr[len - 1];
+		while (len > pos) {
+			arr[len] = arr[len - 1];
+			len -= 1;
+		}
 		arr[pos] = val;
 	}
 	//}

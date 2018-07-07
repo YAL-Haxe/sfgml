@@ -15,6 +15,7 @@ extern class NativeArray {
 	//@:noUsing static function create<T>(size:Int, ?value:T):Array<T>;
 	@:noUsing static inline function create<T>(size:Int, value:T = cast 0):Array<T> {
 		// calling with 1 argument won't work b/c https://bugs.yoyogames.com/view.php?id=29362
+		// can't call with null as value specifically..?
 		return raw("array_create")(size, value);
 	}
 	
