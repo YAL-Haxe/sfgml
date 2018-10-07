@@ -54,7 +54,16 @@ class SfGmlLocalFunc extends SfOptImpl {
 							} else namePrefix = "";
 							if (f.name != null) {
 								namePrefix += f.name;
-							} else namePrefix += "lf";
+							} else {
+								if (w.length > 0) switch (w[0].def) {
+									case SfBinop(OpAssign,
+										_.def => SfInstField(_, fd),
+									v) if (v == e): {
+										namePrefix += fd.name;
+									};
+									default: namePrefix += "lf";
+								} else namePrefix += "lf";
+							}
 							var name:String;
 							if (!currentClass.fieldMap.exists(namePrefix)) {
 								name = namePrefix;
