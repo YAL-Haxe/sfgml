@@ -67,10 +67,10 @@ private extern class HashTableImpl<K, V> {
 	function read(string:String):Void;
 	function write():String;
 	
-	inline function keys():HashTableKeyIterator<K, V> {
+	inline function keys():Iterator<K> {
 		return new HashTableKeyIterator(this);
 	}
-	inline function iterator():HashTableValueIterator<K, V> {
+	inline function iterator():Iterator<V> {
 		return new HashTableValueIterator(this);
 	}
 	@:expose("json_encode") function toString():String;

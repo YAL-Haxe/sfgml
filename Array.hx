@@ -79,7 +79,7 @@ extern class Array<T> implements ArrayAccess<T> {
 	public var array:Array<T>;
 	public var index:Int;
 }
-@:native("array_hx") @:noCompletion
+@:std @:native("array_hx") @:noCompletion
 class ArrayImpl {
 	//{
 	public static function push<T>(arr:Array<T>, val:T):Int {

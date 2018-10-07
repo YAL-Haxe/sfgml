@@ -19,6 +19,7 @@ package gml.io;
 	var f64:BufferType = 9;
 	var bool:BufferType = 10;
 	var string:BufferType = 11;
+	/** is actually s64 */
 	var u64:BufferType = 12;
 	var text:BufferType = 13;
 }

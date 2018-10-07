@@ -1,4 +1,4 @@
-package;
+package gml.ds;
 import haxe.extern.Rest;
 
 /**

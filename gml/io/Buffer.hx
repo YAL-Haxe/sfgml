@@ -162,6 +162,10 @@ import gml.io.BufferType;
 	public function md5(offset:Int, size:Int):String;
 	
 	public function sha1(offset:Int, size:Int):String;
+	
+	@:native("base64_decode") public static function fromBase64(b64:String):Buffer;
+	
+	@:native("base64_encode") public function toBase64():String;
 }
 @:std private class BufferImpl {
 	public static function writeBuffer(dst:Buffer, src:Buffer):Bool {
