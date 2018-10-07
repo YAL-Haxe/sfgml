@@ -699,7 +699,7 @@ class SfGenerator extends SfGeneratorImpl {
 					r.addFieldPathAuto(f);
 				} else {
 					#if (!sfgml_version || sfgml_version < "2.1.5")
-					if (!f.isVar) {
+					if (!f.isVar && !(c.isHidden || c.isExtern)) {
 						printf(r, 'f_');
 						r.addFieldPathAuto(f);
 					} else r.addFieldPathAuto(f);

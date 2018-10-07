@@ -133,10 +133,10 @@ class SfConfig extends SfConfigImpl {
 			version: v,
 			next: next,
 			extension: vd.extension,
-			array_create: gml2,
-			array_decl: gml2,
-			ternary: gml2,
-			copyset: vc("2.2") >= 0, // https://bugs.yoyogames.com/view.php?id=29731
+			array_create: bool("sfgml_array_create", gml2),
+			array_decl: bool("sfgml_array_decl", gml2),
+			ternary: bool("sfgml_ternary", gml2),
+			copyset: false, // https://bugs.yoyogames.com/view.php?id=29731
 		};
 	}
 	public static function main() {
