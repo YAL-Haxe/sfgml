@@ -94,6 +94,14 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 			}
 		}
+		for (a in anonList) if (check(a)) {
+			apply(a);
+			for (f in a.fields) {
+				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
+					f.name = toSnakeCase(f.name);
+				}
+			}
+		}
 	}
 	
 	private function printTypeGrid(init:SfBuffer) {
@@ -588,6 +596,8 @@ class SfGenerator extends SfGeneratorImpl {
 						if (at != null) {
 							s = f;
 							if (at.isDsMap) {
+								var fd = at.fieldMap[s];
+								if (fd != null) s = fd.name;
 								printf(r, '%x[?"%s"]', q, s);
 								z = false;
 							} else if (at.indexMap.exists(s)) {
@@ -747,6 +757,8 @@ class SfGenerator extends SfGeneratorImpl {
 						if (at != null) {
 							s = _field;
 							if (at.isDsMap) {
+								var fd = at.fieldMap[s];
+								if (fd != null) s = fd.name;
 								printf(r, '%x[?"%s"]', obj, s);
 								z = false;
 							} else if (at.indexMap.exists(s)) {
