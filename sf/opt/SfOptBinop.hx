@@ -25,7 +25,7 @@ class SfOptBinop extends SfOptImpl {
 		switch (e.def) {
 			case SfBinop(o, a, b): {
 				var wrap = false;
-				switch (o) {
+				if (w.length > 0) switch (o) {
 					case OpAnd, OpOr, OpXor, OpShl, OpShr, OpUShr: {
 						switch (w[0].def) {
 							case null: { };
