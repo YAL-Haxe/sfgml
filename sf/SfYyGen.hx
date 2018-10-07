@@ -5,6 +5,7 @@ import haxe.macro.Context;
 import sf.type.SfClass;
 import sf.type.SfClassField;
 import sf.type.SfField;
+import sys.FileSystem;
 import sys.io.File;
 import sf.SfCore.sfConfig;
 import sf.SfCore.sfGenerator;
@@ -36,7 +37,9 @@ class SfYyGen {
 		#end
 	}
 	public static function run(path:String) {
-		var json:String = File.getContent(path);
+		var path_in = path;
+		if (!FileSystem.exists(path) && FileSystem.exists(path + ".base")) path_in += ".base";
+		var json:String = File.getContent(path_in);
 		// GMS2 uses non-spec int64s in extensions JSON
 		json = ~/("copyToTargets":\s*)(\d{12,32})/g.replace(json, '$1"$2"');
 		//

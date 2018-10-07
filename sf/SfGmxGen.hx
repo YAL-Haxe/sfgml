@@ -6,6 +6,7 @@ import sf.type.SfClass;
 import sf.type.SfClassField;
 import sf.type.SfEnum;
 import sf.type.SfField;
+import sys.FileSystem;
 import sys.io.File;
 import sf.SfCore.*;
 using sf.type.SfExprTools;
@@ -172,7 +173,9 @@ class SfGmxGen {
 		function xmlRead(xml:Xml):String {
 			return xml.firstChild().toString();
 		}
-		var text:String = File.getContent(xmlPath);
+		var path_in = xmlPath;
+		if (!FileSystem.exists(path_in) && FileSystem.exists(path_in + ".base")) path_in += ".base";
+		var text:String = File.getContent(path_in);
 		//{
 		var xmlRoot:Xml = haxe.xml.Parser.parse(text);
 		var extNode:Xml = xmlFind(xmlRoot, "extension");
