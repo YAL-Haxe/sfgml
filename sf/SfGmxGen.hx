@@ -57,12 +57,12 @@ class SfGmxGen {
 							}
 						};
 						default: {
-							if (doc == null) continue;
+							if (doc == null && !sfcd) continue;
 							"g_" + path;
 						};
 					}; // mcrValue = switch(sff.kind)
 					if (mcrValue != null) {
-						if (doc != null && doc != "") {
+						if (doc != null && doc != "" || sfcd) {
 							var sfb = new SfBuffer();
 							printf(sfb, "(");
 							sfb.addBaseTypeName(sff.type);
