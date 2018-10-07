@@ -520,6 +520,7 @@ class SfGenerator extends SfGeneratorImpl {
 		r.push(new SfGmlBigSwitch());
 		r.push(new SfGmlRepeat());
 		r.push(new SfGmlArrayAccess());
+		r.push(new SfGmlCFor());
 		return r;
 	}
 	
@@ -1029,7 +1030,12 @@ class SfGenerator extends SfGeneratorImpl {
 				if (!_normal) printf(r, " until`(%x)", _cond.invert());
 			};
 			case SfCFor(q, c, p, x): {
-				printf(r, "for`(%(block);`%x;`%(block))`", q, c.unpack(), p);
+				printf(r, "for`(");
+				switch (q.def) {
+					case SfBlock([]): r.addString(";");
+					default: printf(r, "%(block);", q);
+				}
+				printf(r, "`%x;`%(block))`", c.unpack(), p);
 				addBlock(x);
 			};
 			case SfSwitch(_expr, _cases, _, _default): {
