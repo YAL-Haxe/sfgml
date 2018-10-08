@@ -7,7 +7,7 @@ import gml.ds.Color;
  * @author YellowAfterlife
  */
 @:native("layer_sprite") @:snakeCase
-extern class SpriteElement {
+extern class SpriteElement extends LayerElement {
 	public static inline var defValue:SpriteElement = cast -1;
 	public static function isValid(q:SpriteElement):Bool;
 	

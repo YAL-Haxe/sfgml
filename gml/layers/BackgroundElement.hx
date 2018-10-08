@@ -7,7 +7,7 @@ import gml.ds.Color;
  * @author YellowAfterlife
  */
 @:native("layer_background")
-extern class BackgroundElement {
+extern class BackgroundElement extends LayerElement {
 	//
 	public function new(layer:Layer, sprite:Sprite):Void;
 	public function destroy():Void;

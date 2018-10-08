@@ -6,7 +6,7 @@ import gml.assets.Tileset;
  * @author YellowAfterlife
  */
 @:native("tilemap") @:snakeCase
-extern class Tilemap {
+extern class Tilemap extends LayerElement {
 	//
 	@:expose("layer_tilemap_create") public function new(
 		layer:LayerID, x:Float, y:Float, ts:Tileset, cols:Int, rows:Int

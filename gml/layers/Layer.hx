@@ -13,11 +13,17 @@ extern class Layer {
 	@:native("get_id") public static function find(name:String):Layer;
 	@:native("get_id_at_depth") public static function findAt(depth:Float):Array<Layer>;
 	//
+	public static function setTargetRoom(room:Room):Void;
+	public static function resetTargetRoom():Void;
+	//
 	public function new(depth:Float, ?name:String):Void;
 	public function destroy():Void;
 	//
 	public var name(get, never):String;
 	private function get_name():String;
+	
+	//
+	@:native("get_all_elements") public function getElements():Array<LayerElement>;
 	
 	//
 	public var depth(get, set):Float;
