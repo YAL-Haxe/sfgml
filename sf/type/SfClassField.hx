@@ -6,8 +6,8 @@ package sf.type;
  */
 class SfClassField extends SfClassFieldImpl {
 	public var index:Int = -1;
-	public function getArgDoc():String {
-		if (doc != null) {
+	public function getArgDoc(?force:Bool):String {
+		if (doc != null || force) {
 			var sfb = new SfBuffer();
 			SfArgVars.doc(sfb, this, 4);
 			return sfb.toString();

@@ -72,7 +72,9 @@ class SfGmxGen {
 						addMacro(path, mcrValue, doc);
 					}
 				}; // FVar
-				case FMethod(_): addFunc(sff.getPathAuto(), sff.getArgDoc(), sff);
+				case FMethod(_): {
+					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd), sff);
+				};
 			} // for (field in statics)
 			//
 			var ctr = sfc.constructor;
