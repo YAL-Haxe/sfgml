@@ -94,7 +94,7 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 			}
 		}
-		for (a in anonList) if (check(a)) {
+		for (a in anonList) if (a.meta.has(":snakeCase")) {
 			apply(a);
 			for (f in a.fields) {
 				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
