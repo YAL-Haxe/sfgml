@@ -64,16 +64,17 @@ class SfGmxGen {
 					if (mcrValue != null) {
 						if (doc != null && doc != "" || sfcd) {
 							var sfb = new SfBuffer();
-							printf(sfb, "(");
+							sfb.addChar("(".code);
 							sfb.addBaseTypeName(sff.type);
-							printf(sfb, ") %s", doc);
+							sfb.addChar(")".code);
+							if (doc != null && doc != "") printf(sfb, "%s", doc);
 							doc = sfb.toString();
 						}
 						addMacro(path, mcrValue, doc);
 					}
 				}; // FVar
 				case FMethod(_): {
-					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd), sff);
+					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd && !sff.isAutogen), sff);
 				};
 			} // for (field in statics)
 			//
@@ -269,7 +270,12 @@ class SfGmxGen {
 			var argc:Int = sff.args != null ? sff.args.length : 0;
 			if (argc > 0) {
 				var last = sff.args[argc - 1];
-				switch (last.v.type) {
+				var ttype = last.v.type;
+				while (true) switch (ttype) {
+					case TType(_.get() => { type: t}, _): ttype = t;
+					default: break;
+				}
+				switch (ttype) {
 					case TAbstract(_.get() => { name: "SfRest" }, _): argc = -1;
 					default: if (last.value != null) argc = -1;
 				}

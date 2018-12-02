@@ -35,85 +35,93 @@ class SfGmlLocalFunc extends SfOptImpl {
 			}
 		}; return check(expr, null, check);
 	}
+	function proc(expr:SfExpr, stack:Array<SfExpr>, _:SfExprIter) {
+		if (currentClass == null) return;
+		var locals:Map<String, Bool> = null;
+		var lfIndex:Int = 0;
+		var prev = null;
+		function seek(e:SfExpr, w:Array<SfExpr>, f:SfExprIter) {
+			switch (e.def) {
+				case SfFunction(f): {
+					// index main function locals if we might,
+					if (locals == null) locals = getLocalsMap(expr);
+					if (!usesLocals(f.expr, locals)) {
+						// decide on the outlined function name:
+						var namePrefix:String;
+						if (currentField != null) {
+							namePrefix = currentField.name + "_";
+						} else namePrefix = "";
+						if (f.name != null) {
+							namePrefix += f.name;
+						} else {
+							if (w.length > 0) switch (w[0].def) {
+								case SfBinop(OpAssign,
+									_.def => SfInstField(_, fd),
+								v) if (v == e): {
+									namePrefix += fd.name;
+								};
+								default: namePrefix += "lf";
+							} else namePrefix += "lf";
+						}
+						var name:String;
+						if (!currentClass.fieldMap.exists(namePrefix)) {
+							name = namePrefix;
+						} else do {
+							name = namePrefix + (++lfIndex);
+						} while (currentClass.fieldMap.exists(name));
+						//
+						var cf:haxe.macro.Type.ClassField = {
+							name: name,
+							type: e.getType(),
+							isPublic: false,
+							params: [],
+							meta: {
+								get: function() return [],
+								extract: function(_) return [],
+								add: function(_, _, _) { },
+								remove: function(_) { },
+								has: function(_) return false,
+							},
+							kind: FMethod(MethNormal),
+							expr: function() return null,
+							pos: f.expr.getPos(),
+							doc: null,
+							overloads: null,
+							#if !(haxe <= "4.0.0-preview.4")
+							isFinal: true,
+							isExtern: false,
+							#end
+						};
+						//
+						var sfd = new SfClassField(currentClass, cf, false);
+						sfd.isAutogen = true;
+						for (i in 0 ... f.args.length) {
+							sfd.args[i] = f.args[i];
+						}
+						sfd.expr = f.expr;
+						proc(sfd.expr, [], proc);
+						currentClass.addFieldBefore(sfd, currentField);
+						//
+						var sfv = f.sfvar;
+						if (sfv != null) {
+							expr.replaceLocal(sfv, sfd.toExpr());
+							e.def = SfBlock([]);
+							/*switch (w[0].def) {
+								case SfBlock(m): {
+									if (!m.remove(e)) e.def = SfBlock([]);
+								};
+								default: e.def = SfBlock([]);
+							}*/
+						} else e.def = sfd.toExpr().def;
+					}
+				};
+				default: prev = e; e.iter(w, f);
+			}
+		};
+		seek(expr, stack, seek);
+	}
 	override public function apply() {
 		super.apply();
-		forEachExpr(function(expr:SfExpr, stack:Array<SfExpr>, _:SfExprIter) {
-			if (currentClass == null) return;
-			var locals:Map<String, Bool> = null;
-			var lfIndex:Int = 0;
-			var prev = null;
-			function seek(e:SfExpr, w:Array<SfExpr>, f:SfExprIter) {
-				switch (e.def) {
-					case SfFunction(f): {
-						if (locals == null) locals = getLocalsMap(expr);
-						if (!usesLocals(f.expr, locals)) {
-							// decide on the outlined function name:
-							var namePrefix:String;
-							if (currentField != null) {
-								namePrefix = currentField.name + "_";
-							} else namePrefix = "";
-							if (f.name != null) {
-								namePrefix += f.name;
-							} else {
-								if (w.length > 0) switch (w[0].def) {
-									case SfBinop(OpAssign,
-										_.def => SfInstField(_, fd),
-									v) if (v == e): {
-										namePrefix += fd.name;
-									};
-									default: namePrefix += "lf";
-								} else namePrefix += "lf";
-							}
-							var name:String;
-							if (!currentClass.fieldMap.exists(namePrefix)) {
-								name = namePrefix;
-							} else do {
-								name = namePrefix + (++lfIndex);
-							} while (currentClass.fieldMap.exists(name));
-							//
-							var cf:haxe.macro.Type.ClassField = {
-								name: name,
-								type: e.getType(),
-								isPublic: false,
-								params: [],
-								meta: {
-									get: function() return [],
-									extract: function(_) return [],
-									add: function(_, _, _) { },
-									remove: function(_) { },
-									has: function(_) return false,
-								},
-								kind: FMethod(MethNormal),
-								expr: function() return null,
-								pos: f.expr.getPos(),
-								doc: null,
-								overloads: null,
-							};
-							//
-							var sf = new SfClassField(currentClass, cf, false);
-							for (i in 0 ... f.args.length) {
-								sf.args[i] = f.args[i];
-							}
-							sf.expr = f.expr;
-							currentClass.addFieldBefore(sf, currentField);
-							//
-							var sfv = f.sfvar;
-							if (sfv != null) {
-								expr.replaceLocal(sfv, sf.toExpr());
-								e.def = SfBlock([]);
-								/*switch (w[0].def) {
-									case SfBlock(m): {
-										if (!m.remove(e)) e.def = SfBlock([]);
-									};
-									default: e.def = SfBlock([]);
-								}*/
-							} else e.def = sf.toExpr().def;
-						}
-					};
-					default: prev = e; e.iter(w, f);
-				}
-			};
-			seek(expr, stack, seek);
-		}, []);
+		forEachExpr(proc, []);
 	}
 }
