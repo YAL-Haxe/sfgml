@@ -58,10 +58,10 @@ class SfGmlEnumCtr extends SfOptImpl {
 									out.addChar(hasArrayDecl ? "]".code : ")".code);
 									printf(out, ";\n");
 								}
-								e.setTo(SfArrayAccess(
-									e.mod(SfDynamic(namesPath, [])),
-									e.mod(SfEnumAccess(v, sfEnum, e.mod(SfConst(TInt(0)))))
-								));
+								if (!sfEnum.isFake) {
+									v = e.mod(SfEnumAccess(v, sfEnum, e.mod(SfConst(TInt(0)))));
+								}
+								e.setTo(SfArrayAccess(e.mod(SfDynamic(namesPath, [])), v));
 							}
 						};
 						default:
