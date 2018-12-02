@@ -22,7 +22,12 @@ class SfGmlRest extends SfOptImpl {
 			if (args == null) return;
 			var argc = args.length;
 			if (argc > 0) switch (args[argc - 1].v.type) {
-				case TAbstract(_.get() => t, _) if (t.name == "SfRest"): {
+				case TAbstract(_.get() => { name: "SfRest" }, _): {
+					currentField.restOffset = argc - (currentField.isInst ? 0 : 1);
+				};
+				case TAbstract(_.get() => { name: "Null" }, [
+					TAbstract(_.get() => { name: "SfRest" }, _)
+				]): {
 					currentField.restOffset = argc - (currentField.isInst ? 0 : 1);
 				};
 				default:
