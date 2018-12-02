@@ -89,7 +89,11 @@ class Boot {
 		r = null;
 		i = size; while (--i >= 0) r[i] = null;
 		#end
+		#if (sfgml_copyset)
 		MetaType.copyset(r, meta);
+		#else
+		MetaType.set(r, meta);
+		#end
 		var n:Int = gml.Lib.argc;
 		i = 2;
 		while (i < n) {

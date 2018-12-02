@@ -18,9 +18,14 @@ abstract VertexFormat(VertexFormatImpl) from VertexFormatImpl to VertexFormatImp
 		}
 		this = VertexFormatImpl.end();
 	}
+	public static inline function end():VertexFormat {
+		return VertexFormatImpl.end();
+	}
 }
 @:native("vertex_format") @:std @:snakeCase
 private extern class VertexFormatImpl {
+	public static inline var defValue:VertexFormat = cast -1;
+	
 	@:native("delete") function destroy():Void;
 	static function begin():Void;
 	static function end():VertexFormatImpl;

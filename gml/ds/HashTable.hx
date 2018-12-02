@@ -6,7 +6,7 @@ import SfTools.raw;
  * Internally those probably wrap std::map or something.
  * @author YellowAfterlife
  */
-@:forward @:forwardStatics
+@:forward @:forwardStatics @:docName("ds_map")
 abstract HashTable<K, V>(HashTableImpl<K, V>) from HashTableImpl<K, V> to HashTableImpl<K, V> {
 	public static inline var defValue:Dynamic = cast -1;
 	
@@ -67,10 +67,10 @@ private extern class HashTableImpl<K, V> {
 	function read(string:String):Void;
 	function write():String;
 	
-	inline function keys():Iterator<K> {
+	inline function keys():HashTableKeyIterator<K,V> {
 		return new HashTableKeyIterator(this);
 	}
-	inline function iterator():Iterator<V> {
+	inline function iterator():HashTableValueIterator<K,V> {
 		return new HashTableValueIterator(this);
 	}
 	@:expose("json_encode") function toString():String;

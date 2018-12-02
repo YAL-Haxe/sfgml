@@ -5,6 +5,11 @@ package gml.input;
  * @author YellowAfterlife
  */
 @:native("window") extern class Window {
+	static var x(get, never):Int;
+	private static function get_x():Int;
+	//
+	static var y(get, never):Int;
+	private static function get_y():Int;
 	//
 	static var width(get, never):Int;
 	private static function get_width():Int;

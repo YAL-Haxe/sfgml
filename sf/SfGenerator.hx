@@ -845,10 +845,12 @@ class SfGenerator extends SfGeneratorImpl {
 					case SfInstField(_inst, _field): {
 						k = _field.index;
 						if (k >= 0) {
-							if (!_inst.isSimple()) {
-								_inst.warning("This call may have side effects.");
-							}
-							printf(r, "script_execute(%x,`%x", x, _inst);
+							if (_field.callNeedsThis) {
+								if (!_inst.isSimple()) {
+									_inst.warning("This call may have side effects.");
+								}
+								printf(r, "script_execute(%x,`%x", x, _inst);
+							} else printf(r, "script_execute(%x", x);
 							sep = true;
 							i = 0;
 						} else {

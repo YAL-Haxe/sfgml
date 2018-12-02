@@ -5,12 +5,14 @@ import gml.io.Buffer;
  * ...
  * @author YellowAfterlife
  */
-@:forward(destroy)
 abstract TcpWrapSocket(Socket) {
-	public static var defValue:TcpWrapSocket = cast -1;
+	public static inline var defValue:TcpWrapSocket = cast -1;
 	//
 	public inline function new() {
 		this = Socket.createClient(SocketType.TCP);
+	}
+	public inline function destroy():Void {
+		this.destroy();
 	}
 	public static inline function createAt(port:Int):TcpWrapSocket {
 		return cast Socket.createClientAt(SocketType.TCP, port);

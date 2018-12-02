@@ -1,5 +1,6 @@
 package gml.io;
 import gml.io.BufferType;
+import haxe.Int64;
 
 /**
  * GameMaker buffers are much like Flash API buffers,
@@ -65,6 +66,7 @@ import gml.io.BufferType;
 	inline function readIntSigned():Int return read(s32);
 	inline function readIntUnsigned():Int return read(u32);
 	inline function readInt():Int return read(s32);
+	inline function readInt64():Int return read(u64);
 	//
 	inline function readFloat():Float return read(f32);
 	inline function readDouble():Float return read(f64);
@@ -86,6 +88,7 @@ import gml.io.BufferType;
 	inline function writeIntSigned(int:Int):Void write(s32, int);
 	inline function writeIntUnsigned(uint:Int):Void write(u32, uint);
 	inline function writeInt(int:Int):Void write(s32, int);
+	inline function writeInt64(long:Dynamic):Void write(u64, long);
 	//
 	inline function writeFloat(float:Float):Void write(f32, float);
 	inline function writeDouble(double:Float):Void write(f64, double);

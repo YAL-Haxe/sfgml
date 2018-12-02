@@ -9,6 +9,8 @@ import gml.io.Buffer;
 @:native("vertex") @:std @:snakeCase
 extern class VertexBuffer {
 	
+	public static inline var defValue:VertexBuffer = cast - 1;
+	
 	/** (in bytes) */
 	var size(get, never):Int;
 	@:native("get_buffer_size") private function get_size():Int;
@@ -19,7 +21,7 @@ extern class VertexBuffer {
 	
 	//
 	@:native("create_buffer") function new():Void;
-	@:native("create_buffer_ext") static function createExt(size:Int):VertexBuffer;
+	@:native("create_buffer_ext") static function alloc(size:Int):VertexBuffer;
 	@:native("create_buffer_from_buffer") static function fromBuffer(buf:Buffer, fmt:VertexFormat):Void;
 	@:native("create_buffer_from_buffer_ext") static function fromBufferExt(buf:Buffer, fmt:VertexFormat, offset:Int, vertNumber:Int):Void;
 	@:native("delete_buffer") function destroy():Void;
@@ -37,6 +39,7 @@ extern class VertexBuffer {
 	function color(col:Color, alpha:Float):Void;
 	@:native("position") function pos2d(x:Float, y:Float):Void;
 	@:native("position_3d") function pos3d(x:Float, y:Float, z:Float):Void;
+	function normal(x:Float, y:Float, z:Float):Void;
 	function argb(val:Int):Void;
 	function texcoord(u:Float, v:Float):Void;
 	function float1(f:Float):Void;

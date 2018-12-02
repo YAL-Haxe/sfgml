@@ -17,7 +17,7 @@ package haxe;
 	}
 	
 	public static function trace( v : Dynamic, ?infos : PosInfos ) : Void {
-		gml.Lib.trace(formatOutput(v, infos));
+		SfTools.raw("show_debug_message")(formatOutput(v, infos));
 	}
 
 }

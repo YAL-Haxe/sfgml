@@ -53,4 +53,6 @@ extern class NativeArray {
 		arr:Array<T>, idx:Int, src:Array<T>, srcIdx:Int, len:Int
 	):Void;
 	
+	static function equals<T>(a:Array<T>, b:Array<T>):Bool;
+	
 }

@@ -12,7 +12,7 @@ import gml.ds.HashTable;
 	public static var map(get, never):HashTable<String, Dynamic>;
 	private static inline function get_map() return raw("async_load");
 	//
-	public static var type(get, never):Int;
+	public static var type(get, never):NetworkEventType;
 	private static inline function get_type() return map.get("type");
 	/// Sender socket in DATA event, receiver otherwise.
 	public static var target(get, never):Socket;
@@ -37,12 +37,11 @@ import gml.ds.HashTable;
 	private static inline function get_size():Int return map.get("size");
 }
 
-@:std @:publicFields
-@:native("network_type") extern class NetworkEventType {
-	@:native("connect") static var CONNECT:Int;
-	@:native("disconnect") static var DISCONNECT:Int;
-	@:native("data") static var DATA:Int;
-	@:native("non_blocking_connect") static var NBCONNECT:Int;
+enum abstract NetworkEventType(Int) from Int to Int {
+	var CONNECT = 1;
+	var DISCONNECT = 2;
+	var DATA = 3;
+	var NBCONNECT = 4;
 }
 /*abstract NetworkEventType(Int) {
 	public static inline var CONNECT:NetworkEventType = cast 1;
