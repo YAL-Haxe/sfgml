@@ -117,6 +117,10 @@ class BalancedTree<K,V> implements haxe.Constraints.IMap<K,V> {
 		iteratorLoop(root, ret);
 		return ret.iterator();
 	}
+	
+	public inline function keyValueIterator():KeyValueIterator<K, V> {
+		throw "not implemented";
+	}
 
 	/**
 		Iterates over the keys of `this` BalancedTree.

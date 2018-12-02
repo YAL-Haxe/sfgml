@@ -30,6 +30,9 @@ class IntMap<T> extends BasicMap<Int, T> implements haxe.Constraints.IMap<Int,T>
 	public inline function iterator():Iterator<T> {
 		return rawValues().iterator();
 	}
+	public inline function keyValueIterator():KeyValueIterator<Int, T> {
+		throw "not implemented";
+	}
 	public function copy():IntMap<T> {
 		var next:IntMap<T> = new IntMap<T>();
 		rawCopy(next);

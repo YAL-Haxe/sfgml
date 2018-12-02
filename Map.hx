@@ -10,7 +10,7 @@ typedef Map<K, V> = haxe.ds.Map<K, V>;
 import haxe.ds.*;
 
 @:multiType(@:followWithAbstracts K)
-abstract Map<K,V>(IMap<K,V>) {
+abstract Map<K,V>(haxe.Constraints.IMap<K,V>) {
 	public function new();
 
 	public inline function set(key:K, value:V) this.set(key, value);
@@ -80,5 +80,4 @@ abstract Map<K, V>(HashTable<K, V>) from HashTable<K, V> to HashTable<K, V> {
 #end
 
 @:dox(hide)
-@:deprecated
 typedef IMap<K, V> = haxe.Constraints.IMap<K, V>;

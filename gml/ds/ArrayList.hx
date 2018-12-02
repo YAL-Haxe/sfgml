@@ -111,7 +111,7 @@ private extern class ArrayListImpl<T> {
 	// Returns whether the list is empty.
 	@:pure @:native("empty") function isEmpty():Bool;
 	//
-	function add(values:haxe.extern.Rest<T>):Void { }
+	function add(values:haxe.extern.Rest<T>):Void;
 	//
 	@:pure @:native("find_value") function get(index:Int):T;
 	//

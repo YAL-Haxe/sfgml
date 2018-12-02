@@ -30,6 +30,9 @@ class StringMap<T> extends BasicMap<String, T> implements haxe.Constraints.IMap<
 	public inline function iterator():Iterator<T> {
 		return rawValues().iterator();
 	}
+	public inline function keyValueIterator():KeyValueIterator<String, T> {
+		throw "not implemented";
+	}
 	public function copy():StringMap<T> {
 		var next:StringMap<T> = new StringMap<T>();
 		rawCopy(next);
