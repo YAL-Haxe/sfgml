@@ -650,7 +650,7 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfUnop(o = OpIncrement | OpDecrement, _postFix, x): { // ++\--
 				z = (o == OpIncrement);
-				if (!_postFix && wrap) r.addString(z ? "++" : "--");
+				if (!_postFix || wrap == false) r.addString(z ? "++" : "--");
 				switch (x.def) {
 					case SfInstField(q, f): {
 						if ((i = f.index) >= 0) {
@@ -666,7 +666,7 @@ class SfGenerator extends SfGeneratorImpl {
 					};
 					default: r.addExpr(x, true);
 				}
-				if (!wrap || _postFix) r.addString(z ? "++" : "--");
+				if (wrap != false && _postFix) r.addString(z ? "++" : "--");
 			};
 			case SfUnop(_op, _postFix, _expr): {
 				if (wrap) {
@@ -963,6 +963,10 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfVarDecl(v, z, x): { // var v = x
 				printf(r, "var %s%s", sfConfig.localPrefix, v.name);
+				if (sfConfig.hintRawTypes) {
+					s = sf.gml.SfYYC.getRawType(v.type);
+					if (s != null) printf(r, "/*:%s*/", s);
+				}
 				if (z) printf(r, "`=`%x", x);
 			};
 			case SfBlock(_exprs): { // { ...exprs }
