@@ -108,7 +108,7 @@ class GmlGenAssets {
 			for (pair in pairs) {
 				var name:String = pair.name;
 				var len = name.length;
-				if (len > 256) { len = 256; name = name.substring(0, len); }
+				if (len > 255) { len = 255; name = name.substring(0, len); }
 				output.writeByte(len);
 				output.writeString(name);
 				output.writeByte(pair.type);
