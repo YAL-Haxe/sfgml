@@ -177,6 +177,7 @@ class SfYyGen {
 		//
 		//println("Postfixing flags...");
 		json = ~/("copyToTargets":\s*)"([^"]+)"/g.replace(json, '$1$2');
+		json = StringTools.replace(json, "\n", "\r\n");
 		//
 		timeStart("Saving");
 		File.saveContent(path, json);
