@@ -7,7 +7,7 @@ import haxe.Int32;
  * Conveniently, Int type in GM is already 64-bit.
  * @author YellowAfterlife
  */
-@:native("int64")
+@:hintType("int64") @:native("int64")
 abstract Int64(__Int64) {
 	public inline function copy():Int64 return this;
 	

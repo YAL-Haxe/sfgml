@@ -540,6 +540,12 @@ class SfGenerator extends SfGeneratorImpl {
 			r.addLine( -1);
 			r.addBlockClose();
 		}
+		inline function printVarType(v:SfVar):Void {
+			if (sfConfig.hintVarTypes) {
+				var s = SfGmlTypeHint.get(v.type);
+				if (s != null) printf(r, "/*:%s*/", s);
+			}
+		}
 		inline function error(e:SfExpr, s:String) {
 			return e.error(s);
 		}
@@ -963,10 +969,7 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfVarDecl(v, z, x): { // var v = x
 				printf(r, "var %s%s", sfConfig.localPrefix, v.name);
-				if (sfConfig.hintRawTypes) {
-					s = sf.gml.SfYYC.getRawType(v.type);
-					if (s != null) printf(r, "/*:%s*/", s);
-				}
+				printVarType(v);
 				if (z) printf(r, "`=`%x", x);
 			};
 			case SfBlock(_exprs): { // { ...exprs }
@@ -998,9 +1001,11 @@ class SfGenerator extends SfGeneratorImpl {
 								case SfVarDecl(v, false, _): {
 									// Join value-less variable declarations
 									printf(r, "var %s%s", sfConfig.localPrefix, v.name);
+									printVarType(v);
 									while (i < n) switch (_exprs[i].def) {
 										case SfVarDecl(v1, false, _): {
 											printf(r, ",`%s%s", sfConfig.localPrefix, v1.name);
+											printVarType(v1);
 											i += 1;
 											continue;
 										};

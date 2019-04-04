@@ -43,13 +43,19 @@ class SfArgVars {
 			}
 			var ternary = sfConfig.ternary && !sfConfig.slowTernary;
 			i = -1; while (++i < argc) {
-				v = args[i].v;
-				if (expr.countLocal(args[i].v) > 0) {
+				var arg = args[i];
+				v = arg.v;
+				if (expr.countLocal(v) > 0) {
 					var vname = sfGenerator.getVarName(v.name);
-					var vdef = args[i].value;
+					var vdef = arg.value;
 					if (vdef == null || !ternary) {
 						if (found++ > 0) r.addComma(); else r.addString("var ");
 						printf(r, "%s%s", lp, vname);
+						if (sfConfig.hintVarTypes) {
+							var t = sf.opt.SfGmlTypeHint.get(v.type);
+							//printf(r, '/*%s*/', Std.string(v.type));
+							if (t != null) printf(r, "/*:%s*/", t);
+						}
 					}
 					if (vdef == null) {
 						printf(r, "`=`argument[%d]", arid);

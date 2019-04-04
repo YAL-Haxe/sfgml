@@ -78,6 +78,9 @@ class SfConfig extends SfConfigImpl {
 	/** Whether to allow custom metadata setting */
 	public var customMeta:Bool = bool("sfgml-custom-meta");
 	
+	/** Whether to include :type comments for primitives */
+	public var hintVarTypes:Bool = bool("sfgml-hint-var-types");
+	
 	/** Whether array_create() is suppported */
 	public var hasArrayCreate:Bool;
 	
