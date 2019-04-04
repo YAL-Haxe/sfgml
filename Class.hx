@@ -3,7 +3,7 @@ package;
 @:coreType @:runtimeValue abstract Class<T> { }
 #else
 import gml.MetaType;
-@:forward @:runtimeValue @:remove
+@:keep @:forward @:runtimeValue @:remove
 abstract Class<T>(MetaClass<T>)
 	from MetaClass<T> to MetaClass<T>
 	to MetaType<T> {
