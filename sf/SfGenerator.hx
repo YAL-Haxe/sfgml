@@ -321,7 +321,8 @@ class SfGenerator extends SfGeneratorImpl {
 	}
 	
 	private static var identRx:EReg = ~/[A-Za-z_]/g;
-	override public function printConst(r:SfBuffer, value:TConstant, pos:Position) {
+	override public function printConst(r:SfBuffer, value:TConstant, expr:SfExpr) {
+		var pos = expr != null ? expr.getPos() : null;
 		switch (value) {
 			case TInt(i): {
 				#if (sf_hint_const)
@@ -556,7 +557,7 @@ class SfGenerator extends SfGeneratorImpl {
 		var sep:Bool, z:Bool;
 		xt = expr;
 		switch (expr.def) {
-			case SfConst(c): printConst(r, c, expr.getPos());
+			case SfConst(c): printConst(r, c, expr);
 			case SfLocal(v): {
 				printf(r, "%s%s", sfConfig.localPrefix, v.name);
 			};
