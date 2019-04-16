@@ -168,7 +168,7 @@ class SfGmxGen {
 				if (!allDoc && !fd.meta.has("doc")) continue;
 				var b1 = new SfBuffer(); b1.addFieldPathAuto(fd);
 				var b2 = new SfBuffer(); b2.addExpr(fd.expr, false);
-				addMacro(b1.toString(), b2.toString(), fd.doc);
+				addMacro(b1.toString(), b2.toString(), fd.doc != null ? fd.doc : (allDoc ? "" : null));
 			}
 		}
 		for (t in sfGenerator.typeList) {
