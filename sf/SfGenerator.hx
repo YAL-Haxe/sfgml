@@ -1028,7 +1028,16 @@ class SfGenerator extends SfGeneratorImpl {
 				if (wrap) {
 					if (sfConfig.ternary) {
 						if (z) {
-							printf(r, "%x`?`%x`:`", c, a);
+							switch (c.unpack().def) {
+								case SfIf(_, _, _, _): printf(r, "(%x)", c);
+								default: printf(r, "%x", c);
+							}
+							printf(r, "`?`");
+							switch (a.unpack().def) {
+								case SfIf(_, _, _, _): printf(r, "(%x)", a);
+								default: printf(r, "%x", a);
+							}
+							printf(r, "`:`");
 							switch (b.unpack().def) {
 								case SfIf(_, _, _, _): printf(r, "(%x)", b);
 								default: printf(r, "%x", b);
