@@ -5,6 +5,7 @@ import sf.type.SfBuffer;
 import sf.type.SfClass;
 import sf.type.SfClassField;
 import sf.type.SfEnum;
+import sf.type.*;
 import sf.type.SfField;
 import sys.FileSystem;
 import sys.io.File;
@@ -159,11 +160,24 @@ class SfGmxGen {
 				}
 			}
 		} // addEnum
+		function addAbstract(sfa:SfAbstract) {
+			if (sfa.isHidden) return;
+			var allDoc = sfa.meta.has(":doc");
+			if (sfa.meta.has(":enum") && sfa.impl != null) for (fd in sfa.impl.staticList) {
+				if (!fd.meta.has(":enum")) continue;
+				if (!allDoc && !fd.meta.has("doc")) continue;
+				var b1 = new SfBuffer(); b1.addFieldPathAuto(fd);
+				var b2 = new SfBuffer(); b2.addExpr(fd.expr, false);
+				addMacro(b1.toString(), b2.toString(), fd.doc);
+			}
+		}
 		for (t in sfGenerator.typeList) {
 			if (Std.is(t, SfClass)) {
 				addClass(cast t);
 			} else if (Std.is(t, SfEnum)) {
 				addEnum(cast t);
+			} else if (Std.is(t, SfAbstract)) {
+				addAbstract(cast t);
 			}
 		}
 	}
