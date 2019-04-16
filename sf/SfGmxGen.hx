@@ -17,12 +17,20 @@ using sf.type.SfExprTools;
  */
 class SfGmxGen {
 	public static function iter(
-		addFunc:String->String->SfField->Void,
+		addFunc_:String->String->SfField->Void,
 		addMacro:String->String->String->Void
 	) {
 		var gd:Bool = SfCore.sfConfig.gmxDoc;
 		var skipFuncs = sfConfig.codePath != null;
 		//
+		var addFunc_map = new Map<String, SfField>();
+		inline function addFunc(name:String, doc:String, fd:SfField):Void {
+			if (addFunc_map.exists(name)) {
+				Context.warning('Function redefinition for $name', fd.typeField.pos);
+				Context.warning('First definition of $name was here', addFunc_map[name].typeField.pos);
+			} else addFunc_map.set(name, fd);
+			addFunc_(name, doc, fd);
+		}
 		function addClass(sfc:SfClass) {
 			if (sfc.isHidden) return;
 			var sfcd = sfc.doc != null;
