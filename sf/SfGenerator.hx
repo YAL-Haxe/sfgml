@@ -78,7 +78,7 @@ class SfGenerator extends SfGeneratorImpl {
 				q.name = toSnakeCase(q.name);
 			}
 		}
-		for (c in classList) if (check(c)) {
+		for (c in classList) if (check(c) || req && c.meta.has(":enum")) {
 			apply(c);
 			for (f in c.fieldList) {
 				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
@@ -493,6 +493,9 @@ class SfGenerator extends SfGeneratorImpl {
 					break;
 				} else q = q.superClass;
 			}
+		}
+		for (a in abstractList) {
+			if (a.meta.has(":std") && a.impl != null) a.impl.isStd = true;
 		}
 	}
 	override function getPreproc():Array<SfOptImpl> {
