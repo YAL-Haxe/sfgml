@@ -51,8 +51,9 @@ extern class Lib {
 	}
 	
 	/** Points to "global" scope, just in case you want to do something with it. */
-	static var global:Dynamic;
+	static var global:GlobalScope;
 }
+@:object("global") private extern class GlobalScope implements Dynamic { }
 
 @:extern private abstract Arguments(Array<Dynamic>) {
 	@:extern @:arrayAccess inline function get(index:Int):Dynamic {
