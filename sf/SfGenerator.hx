@@ -1028,7 +1028,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (wrap) {
 					if (sfConfig.ternary) {
 						if (z) {
-							printf(r, "(%x`?`%x`:`%x)", c, a, b);
+							printf(r, "(%x`?`%x`:`%x)", c.unpack(), a, b);
 						} else error(expr, "Inline single-branch if..?");
 					} else error(expr, "Can't print an inline if-block.");
 				} else printIf(r, c, a, b, true);
