@@ -1028,20 +1028,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (wrap) {
 					if (sfConfig.ternary) {
 						if (z) {
-							switch (c.unpack().def) {
-								case SfIf(_, _, _, _): printf(r, "(%x)", c);
-								default: printf(r, "%x", c);
-							}
-							printf(r, "`?`");
-							switch (a.unpack().def) {
-								case SfIf(_, _, _, _): printf(r, "(%x)", a);
-								default: printf(r, "%x", a);
-							}
-							printf(r, "`:`");
-							switch (b.unpack().def) {
-								case SfIf(_, _, _, _): printf(r, "(%x)", b);
-								default: printf(r, "%x", b);
-							}
+							printf(r, "(%x`?`%x`:`%x)", c, a, b);
 						} else error(expr, "Inline single-branch if..?");
 					} else error(expr, "Can't print an inline if-block.");
 				} else printIf(r, c, a, b, true);
