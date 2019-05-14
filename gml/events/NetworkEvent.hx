@@ -37,11 +37,12 @@ import gml.ds.HashTable;
 	private static inline function get_size():Int return map.get("size");
 }
 
-enum abstract NetworkEventType(Int) from Int to Int {
-	var CONNECT = 1;
-	var DISCONNECT = 2;
-	var DATA = 3;
-	var NBCONNECT = 4;
+@:native("network_type")
+@:std extern enum abstract NetworkEventType(Int) from Int to Int {
+	var CONNECT;
+	var DISCONNECT;
+	var DATA;
+	var NBCONNECT;
 }
 /*abstract NetworkEventType(Int) {
 	public static inline var CONNECT:NetworkEventType = cast 1;
