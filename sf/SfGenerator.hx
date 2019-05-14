@@ -790,7 +790,7 @@ class SfGenerator extends SfGeneratorImpl {
 					default:
 				}
 				if (z) {
-					expr.error("[SfGenerator:printExpr] Can't do dynamic field read for `" + _field + "` from `" + obj.dump() + "` (" + obj.getName() + ")");
+					expr.error("[SfGenerator:printExpr] Can't do dynamic field read for `" + _field + "` from `" + obj.dump() + "` (" + obj.getName() + "," + obj.getTypeNz() + ")");
 				}
 			};
 			case SfTypeExpr(t): {
