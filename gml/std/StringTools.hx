@@ -1,15 +1,66 @@
 package;
+import gml.NativeArray;
 import gml.NativeString;
 import gml.Lib.raw;
 import gml.Lib.div;
+import gml.io.Buffer;
+import haxe.ds.Vector;
 /**
  * ...
  * @author YellowAfterlife
  */
 @:native("string_hx") @:final @:std
 class StringTools {
+	private static var urlEncode_in:Buffer = Buffer.defValue;
+	private static var urlEncode_out:Buffer = Buffer.defValue;
+	private static var urlEncode_esc:Array<Bool> = null;
+	private static var urlEncode_hex:Array<Int> = null;
+	private static function urlEncode_init() {
+		//
+		var arr = NativeArray.create(256, false);
+		for (i in 0 ... 32) arr[i] = true;
+		for (i in 126 ... 256) arr[i] = true;
+		for (i in [
+			"$".code, "&".code, "+".code, ",".code, "/".code, ":".code, ";".code, "=".code, "?".code,
+			"@".code, " ".code, '"'.code, "<".code, ">".code, "#".code, "%".code, "{".code, "}".code,
+			"|".code, "\\".code, "^".code, "~".code, "[".code, "]".code, "`".code
+		]) arr[i] = true;
+		urlEncode_esc = arr;
+		//
+		var hex = NativeArray.create(256, 0);
+		for (i in 0 ... 256) {
+			var h = i >> 4, v = 0;
+			if (h < 10) v += "0".code + h; else v += "A".code - 10 + h;
+			h = i & 15;
+			if (h < 10) v += ("0".code + h) * 256; else v += ("A".code - 10 + h) * 256;
+			hex[i] = v;
+		}
+		urlEncode_hex = hex;
+		//
+		urlEncode_out = new Buffer(1024, Grow, 1);
+		return new Buffer(1024, Grow, 1);
+	}
 	public static function urlEncode(s:String):String {
-		return null;
+		var inb = urlEncode_in;
+		if (inb == Buffer.defValue) inb = urlEncode_init();
+		var outb = urlEncode_out;
+		var esc = urlEncode_esc;
+		var hex = urlEncode_hex;
+		inb.rewind();
+		inb.writeChars(s);
+		var n = inb.position;
+		inb.rewind();
+		outb.rewind();
+		for (_ in 0 ... n) {
+			var b = inb.readByte();
+			if (esc[b]) {
+				outb.writeByte("%".code);
+				outb.writeShort(hex[b]);
+			} else outb.writeByte(b);
+		}
+		outb.writeByte(0);
+		outb.rewind();
+		return outb.readString();
 	}
 	public static function urlDecode(s:String):String {
 		return null;
