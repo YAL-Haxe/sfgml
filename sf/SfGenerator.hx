@@ -231,13 +231,18 @@ class SfGenerator extends SfGeneratorImpl {
 			if (hintFolds) printf(init, "//{ metatype\n");
 			var mtModule = SfGmlType.mtModule;
 			for (t in typeList) if (!t.isHidden && t.isUsed && !t.nativeGen) {
-				var isEnum = Std.is(t, SfEnum);
-				var e:SfEnum = isEnum ? cast t : null;
-				if (isEnum && e.isFake) continue;
+				var e:SfEnum = null;
+				if (Std.is(t, SfEnum)) {
+					e = cast t;
+					if (e.isFake) continue;
+				} else if (Std.is(t, SfClass)) {
+					var c:SfClass = cast t;
+					if (c.constructor == null && c.instList.length == 0) continue;
+				} else continue;
 				//
 				printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
 				if (stdPack != null) printf(init, "%s_", stdPack);
-				init.addString(isEnum ? "haxe_enum_create" : "haxe_class_create");
+				init.addString(e != null ? "haxe_enum_create" : "haxe_class_create");
 				printf(init, '(%d,`"%(type_auto)"', t.index, t);
 				if (Std.is(t, SfEnum)) {
 					var e:SfEnum = cast t;

@@ -1,7 +1,7 @@
 package sf.opt;
 
 import haxe.ds.Map;
-import sf.type.SfClass;
+import sf.type.*;
 import sf.type.SfExpr;
 import sf.SfCore.*;
 import sf.type.SfExprTools.SfExprIter;
@@ -59,7 +59,17 @@ class SfOptIndexes extends SfOptImpl {
 	override public function apply() {
 		var addNames = sfConfig.fieldNames;
 		var i:Int = 0;
-		for (t in sfGenerator.typeList) t.index = i++;
+		for (t in sfGenerator.typeList) {
+			if (t.isHidden || t.nativeGen) continue;
+			if (Std.is(t, SfEnum)) {
+				if ((cast t:SfEnum).isFake) continue;
+			} else if (Std.is(t, SfClass)) {
+				var c:SfClass = cast t;
+				if (c.constructor == null && c.instList.length == 0) continue;
+			} else continue;
+			//Sys.println(i + "\t" + t.name);
+			t.index = i++;
+		}
 		sf.type.SfType.indexes = i;
 		for (c in sfGenerator.classList) getIndexes(c, addNames);
 		for (q in sfGenerator.anonList) {
