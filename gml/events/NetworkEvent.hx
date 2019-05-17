@@ -42,7 +42,7 @@ import gml.ds.HashTable;
 	var CONNECT;
 	var DISCONNECT;
 	var DATA;
-	var NBCONNECT;
+	@:native("non_blocking_connect")var NBCONNECT;
 }
 /*abstract NetworkEventType(Int) {
 	public static inline var CONNECT:NetworkEventType = cast 1;
