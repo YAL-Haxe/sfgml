@@ -87,23 +87,30 @@ class SfArgVars {
 	 */
 	public static function doc(r:SfBuffer, f:SfClassField, flags:Int = 3) {
 		var jsdoc:SfBuffer = null;
+		var ext = sfConfig.gmxMode;
 		var next = sfConfig.next;
 		if (flags & 3 == 3) {
 			if (sfConfig.noCodeDoc) return;
-			if (next) {
+			if (next && !ext) {
 				jsdoc = new SfBuffer();
 				jsdoc.indent = r.indent;
 			}
 		}
 		if (flags & 1 != 0) {
-			r.addString("/// ");
-			if (next) r.addString("@function ");
+			if (ext) {
+				// we don't actually want "real" JSDoc in extensions because
+				// you can't see it and GMS2 may convert it on import
+				r.addString("// ");
+			} else {
+				r.addString("/// ");
+				if (next) r.addString("@function ");
+			}
 		}
 		var doc = flags & 4 != 0 ? f.doc : null;
 		if (doc != null) {
 			if (doc != "") {
 				doc = StringTools.trim(doc);
-				if (next && jsdoc != null) printf(jsdoc, "/// @description %s\n", doc);
+				if (jsdoc != null) printf(jsdoc, "/// @description %s\n", doc);
 			} else doc = null;
 		}
 		var argTypes = sfConfig.argTypes;
@@ -243,8 +250,8 @@ class SfArgVars {
 			};
 		}
 		// print @:doc:
-		if (doc != null) printf(r, " : %s", StringTools.trim(doc));
 		if (flags & 2 != 0) r.addLine();
 		if (jsdoc != null && jsdoc.length > 0) r.addString(jsdoc.toString());
+		if ((ext || jsdoc == null) && doc != null) printf(r, "// %s", doc);
 	}
 }
