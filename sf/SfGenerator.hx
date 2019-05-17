@@ -34,76 +34,6 @@ class SfGenerator extends SfGeneratorImpl {
 		Compiler.addClassPath(Context.resolvePath("gml/std"));
 	}
 	
-	/**
-	 * Converts a string from camelCase to snake_case.
-	 */
-	public function toSnakeCase(s:String):String {
-		var n = s.length;
-		// early exit if the string is already in snake_case:
-		var i = -1;
-		while (++i < n) {
-			var c = StringTools.fastCodeAt(s, i); // or s.charCodeAt(i)
-			if (c >= "A".code && c <= "Z".code) break;
-		}
-		if (i >= n) return s;
-		// otherwise form it via a string buffer:
-		var r = new StringBuf();
-		var p = 0;
-		for (i in 0 ... n) {
-			var c = StringTools.fastCodeAt(s, i);
-			if (c >= "A".code && c <= "Z".code) {
-				if (p >= "a".code && p <= "z".code
-				 || p >= "0".code && p <= "9".code) { // "eC" -> "e_c"
-					r.addChar("_".code);
-				}
-				r.addChar(c + ("a".code - "A".code));
-			} else r.addChar(c);
-			p = c;
-		}
-		return r.toString();
-	}
-	
-	/**
-	 * Renames all non-@:native fields/types from camelCase to snake_case.
-	 */
-	private function procSnakeCase() {
-		var req = sfConfig.snakeCase;
-		inline function check(q:SfType):Bool {
-			return q.meta.has(":snakeCase") || req && !(q.isHidden || q.meta.has(":std"));
-		}
-		inline function apply(q:SfType):Void {
-			if (!q.meta.has(":native") && !q.meta.has(":expose")) {
-				var qp = q.pack;
-				for (i in 0 ... qp.length) qp[i] = toSnakeCase(qp[i]);
-				q.name = toSnakeCase(q.name);
-			}
-		}
-		for (c in classList) if (check(c) || req && c.meta.has(":enum")) {
-			apply(c);
-			for (f in c.fieldList) {
-				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
-					c.renameField(f, toSnakeCase(f.name));
-				}
-			}
-		}
-		for (e in enumList) if (check(e)) {
-			apply(e);
-			for (f in e.ctrList) {
-				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
-					f.name = toSnakeCase(f.name);
-				}
-			}
-		}
-		for (a in anonList) if (a.meta.has(":snakeCase")) {
-			apply(a);
-			for (f in a.fields) {
-				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
-					f.name = toSnakeCase(f.name);
-				}
-			}
-		}
-	}
-	
 	private function printTypeGrid(init:SfBuffer) {
 		if (sfConfig.hintFolds) printf(init, "//{ g_haxe_type_is\n");
 		var grid = "haxe_type_is";
@@ -151,7 +81,7 @@ class SfGenerator extends SfGeneratorImpl {
 		//
 		var next = sfConfig.next;
 		var hasArrayDecl = sfConfig.hasArrayDecl;
-		procSnakeCase();
+		(new SfGmlSnakeCase()).apply();
 		//
 		var mixed:SfBuffer = new SfBuffer();
 		var out:SfBuffer = new SfBuffer();

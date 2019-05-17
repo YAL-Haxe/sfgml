@@ -20,12 +20,12 @@ class SfGmlEnumCtr extends SfOptImpl {
 		code = "";
 		var clType:SfClass = cast sfGenerator.realMap["Type"];
 		if (clType == null) return;
-		var fdEnumConstructor = clType.fieldMap["enumConstructor"];
+		var fdEnumConstructor = clType.realMap["enumConstructor"];
 		if (fdEnumConstructor == null) return;
 		var found = new SfTypeMap<String>();
 		var out = new SfBuffer();
 		var hasArrayDecl = sfConfig.hasArrayDecl;
-		var fdArrayDecl = sfGenerator.typeBoot.staticMap["decl"];
+		var fdArrayDecl = sfGenerator.typeBoot.realMap["decl"];
 		forEachExpr(function(e:SfExpr, w:SfExprList, f:SfExprIter) {
 			e.iter(w, f);
 			switch (e.def) {
@@ -38,6 +38,9 @@ class SfGmlEnumCtr extends SfOptImpl {
 							if (sfEnum != null && sfEnum.nativeGen) {
 								var namesPath = found.sfGet(sfEnum);
 								if (namesPath == null) {
+									// bit of a hack: this runs before SfGmlSnakeCase,
+									// so we'll need to process the enum earlier on.
+									SfGmlSnakeCase.procEnum(sfEnum);
 									namesPath = {
 										var b = new SfBuffer();
 										printf(b, "g_%(type_auto)_names", sfEnum);
