@@ -55,9 +55,12 @@ class SfBuffer extends SfBufferImpl {
 				n = args.length;
 				addString("function[");
 				i = 0; while (i < n) {
-					addChar(" ".code);
-					addString(args[i].name);
-					addChar(":".code);
+					if (i > 0) addString("; ");
+					var s = args[i].name;
+					if (s != null && s != "") {
+						addString(args[i].name);
+						addChar(":".code);
+					}
 					addBaseTypeName(args[i].t);
 					i += 1;
 				}
