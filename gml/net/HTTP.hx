@@ -5,7 +5,8 @@ import gml.ds.HashTable;
  * ...
  * @author YellowAfterlife
  */
-@:native("http") extern class HTTP {
+@:native("http") @:snakeCase
+extern class HTTP {
 	static inline var defValue:HTTP = cast -1;
 	static function get(url:String):HTTP;
 	@:native("get_file") static function getFile(url:String, localPath:String):HTTP;
