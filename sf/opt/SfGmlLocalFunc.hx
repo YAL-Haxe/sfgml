@@ -99,6 +99,10 @@ class SfGmlLocalFunc extends SfOptImpl {
 							sfd.args[i] = f.args[i];
 						}
 						sfd.expr = f.expr;
+						// poke in the field map item before we recurse so that
+						// field names do not overlap but inner functions are defined
+						// before the outer functions
+						currentClass.fieldMap.set(name, sfd);
 						proc(sfd.expr, [], proc);
 						currentClass.addFieldBefore(sfd, currentField);
 						//
