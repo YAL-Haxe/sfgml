@@ -16,6 +16,12 @@ class SfAnon extends SfAnonImpl {
 	public function new(t:DefType, at:AnonType) {
 		super(t, at);
 		isDsMap = meta.has(":dsMap");
+		// https://github.com/HaxeFoundation/haxe/issues/4472
+		for (fd in fields) {
+			if (fd.meta.has(":native")) {
+				fd.name = metaGetText(fd.meta, ":native");
+			}
+		}
 	}
 	override public function printTo(out:SfBuffer, init:SfBuffer):Void {
 		if (nativeGen && doc != null && !sfConfig.gmxMode) {
