@@ -64,7 +64,9 @@ class SfEnum extends SfEnumImpl {
 			//
 			if (!nativeGen) {
 				if (debug) printf(out, 'this[1,1]`=`"%s";\n', ctr.name);
-				printf(out, "this[1,0]`=`mt_%(type_auto);\n", this);
+				if (sf.opt.SfGmlType.usesType) {
+					printf(out, "this[1,0]`=`mt_%(type_auto);\n", this);
+				}
 			}
 			//
 			i = argc;
