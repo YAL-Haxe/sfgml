@@ -2,6 +2,7 @@ package sf.type;
 import haxe.macro.Type;
 import sf.SfCore.*;
 import SfTools.cfor;
+import sf.type.SfTypeMap;
 
 /**
  * @author YellowAfterlife
@@ -23,15 +24,52 @@ class SfBuffer extends SfBufferImpl {
 	public inline function addFieldPathAuto(f:SfField) {
 		addFieldPath(f, "_".code, "_".code);
 	}
-	public function addBaseTypeName(t:Type) {
-		var pack:Array<String>, par:Array<Type>, i:Int, n:Int;
-		inline function f(t:BaseType, ?p:Array<Type>) {
-			if (t.meta.has(":docName")) {
-				switch (t.meta.extract(":docName")) {
-					case [{ params: [{ expr: EConst(CString(s)) }] }]: addString(s);
-					default: addString(t.name);
+	private static var docNameFieldsCache:SfTypeMap<String> = new SfTypeMap();
+	private static function docNameFields(dt:DefType):String {
+		switch (dt.type) {
+			case TAnonymous(_.get() => at): {
+				var b = new StringBuf();
+				var sep = false;
+				if (dt.meta.has(":dsMap")) {
+					b.add("map{");
+					for (fd in at.fields) {
+						if (sep) b.add("; "); else sep = true;
+						if (fd.meta.has(":optional")) b.add("?");
+						b.add(fd.name);
+					}
+					b.add("}");
+				} else {
+					b.add("[");
+					for (fd in at.fields) {
+						if (sep) b.add("; "); else sep = true;
+						if (fd.meta.has(":optional")) b.add("?");
+						b.add(fd.name);
+					}
+					b.add("]");
 				}
-			} else addString(t.name);
+				return b.toString();
+			};
+			default: return dt.name;
+		}
+	}
+	public function addBaseTypeName(ot:Type) {
+		var pack:Array<String>, par:Array<Type>, i:Int, n:Int, s:String;
+		inline function f(t:BaseType, ?p:Array<Type>, ?dt:DefType) {
+			s = t.name;
+			if (t.meta.has(":docNameFields") && dt != null) {
+				s = docNameFieldsCache.baseGet(t);
+				if (s == null) {
+					s = docNameFields(dt);
+					docNameFieldsCache.baseSet(t, s);
+				}
+			}
+			else if (t.meta.has(":docName")) {
+				switch (t.meta.extract(":docName")) {
+					case [{ params: [{ expr: EConst(CString(s1)) }] }]: s = s1;
+					default:
+				}
+			}
+			addString(s);
 			par = p;
 			if (par != null) {
 				n = par.length;
@@ -47,10 +85,10 @@ class SfBuffer extends SfBufferImpl {
 				}
 			}
 		}
-		switch (t) {
+		switch (ot) {
 			case TEnum(_.get() => et, p): f(et, p);
 			case TInst(_.get() => ct, p): f(ct, p);
-			case TType(_.get() => dt, p): f(dt, p);
+			case TType(_.get() => dt, p): f(dt, p, dt);
 			case TFun(args, ret): {
 				n = args.length;
 				addString("function[");
