@@ -256,7 +256,7 @@ abstract Bytes(Buffer) {
 	}
 	
 	public inline function fill(pos:Int, len:Int, value:Int):Void {
-		this.fill(pos, BufferType.BYTE_UNSIGNED, value, len);
+		this.fill(pos, BufferType.u8, value, len);
 	}
 	
 	public function sub(pos:Int, len:Int):Bytes {
