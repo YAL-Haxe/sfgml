@@ -54,10 +54,24 @@ class SfGmlSnakeCase extends SfOptImpl {
 		}
 	}
 	public static function procClass(c:SfClass) {
-		if (checkType(c)
-			// weird, but - we need it for (extern) enum abstract implementation classes
-			|| sfConfig.snakeCase && c.meta.has(":enum")
-		) {
+		var apply = checkType(c);
+		if (!apply && c.meta.has(":enum")) do {
+			// Abstracts are named like com.pkg.Some,
+			// and their implementation classes are named like com.pkg._Some.Some_Impl_
+			// but most of metadata doesn't transfer to impl-class,
+			// so we need to parse the realPath and resolve the abstract
+			var path = c.realPath;
+			if (!StringTools.endsWith(path, "_Impl_")) break;
+			var dot = path.lastIndexOf(".");
+			if (dot < 0) break;
+			var dot2 = path.lastIndexOf(".", dot - 1);
+			path = path.substring(0, dot2 + 1) + path.substring(dot2 + 2, dot);
+			//
+			var sfa = sfGenerator.realMap[path];
+			if (sfa == null) break;
+			apply = checkType(sfa);
+		} while (false);
+		if (apply) {
 			applyToType(c);
 			for (f in c.fieldList) {
 				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
