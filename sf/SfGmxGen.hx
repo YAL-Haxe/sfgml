@@ -165,7 +165,7 @@ class SfGmxGen {
 			var allDoc = sfa.meta.has(":doc");
 			if (sfa.meta.has(":enum") && sfa.impl != null) for (fd in sfa.impl.staticList) {
 				if (!fd.meta.has(":enum")) continue;
-				if (!allDoc && !fd.meta.has("doc")) continue;
+				if (!allDoc && !fd.meta.has(":doc") || fd.meta.has(":noDoc")) continue;
 				var b1 = new SfBuffer(); b1.addFieldPathAuto(fd);
 				var b2 = new SfBuffer(); b2.addExpr(fd.expr, false);
 				addMacro(b1.toString(), b2.toString(), fd.doc != null ? fd.doc : (allDoc ? "" : null));
