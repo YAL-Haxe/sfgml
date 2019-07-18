@@ -59,7 +59,20 @@ class SfOptIndexes extends SfOptImpl {
 	override public function apply() {
 		var addNames = sfConfig.fieldNames;
 		var i:Int = 0;
+		// auto-allocate indexes for select core types:
+		inline function autoMark(t:SfType):Void {
+			if (t != null) t.index = i++;
+		}
+		autoMark(sfGenerator.typeVoid);
+		autoMark(sfGenerator.typeDynamic);
+		autoMark(sfGenerator.typeFloat);
+		autoMark(sfGenerator.typeInt);
+		autoMark(sfGenerator.typeBool);
+		autoMark(sfGenerator.typeString);
+		autoMark(sfGenerator.typeArray);
+		//
 		for (t in sfGenerator.typeList) {
+			if (t.index >= 0) continue;
 			if (t.isHidden || t.nativeGen) continue;
 			if (Std.is(t, SfEnum)) {
 				if ((cast t:SfEnum).isFake) continue;

@@ -42,33 +42,46 @@ class Std {
 	
 }
 
-@:keep @:native("is")
+@:std @:keep
 private class StdImpl {
-	@:keep @:native("type")
+	public static function isNumber(value:Dynamic):Bool {
+		return gml.NativeType.isReal(value)
+			|| gml.NativeType.isInt64(value)
+			|| gml.NativeType.isInt32(value)
+			|| gml.NativeType.isBool(value);
+	}
+	public static function isInt(value:Dynamic):Bool {
+		if (gml.NativeType.isReal(value)) {
+			return (value | 0) == value;
+		}
+		return gml.NativeType.isInt64(value)
+			|| gml.NativeType.isInt32(value)
+			|| gml.NativeType.isBool(value);
+	}
 	public static function is<T>(value:Dynamic, type:Class<T>):Bool {
 		if (type == null) return false;
 		if (Std.is(type, Array)) switch (type) {
-			case Float: return Std.is(value, Float);
-			case Int: return Std.is(value, Float) && Std.int(value) == value;
+			case Float: return inline isNumber(value);
+			case Int: return inline isInt(value);
 			case String: return Std.is(value, String);
 			default: {
 				var vt;
 				if (MetaType.has(value)) {
 					vt = MetaType.get(value);
-				} else if (Std.is(value, Float)) {
+				} else if (inline isNumber(value)) {
 					vt = null;
 					for (q in gml.NativeScope.with(value, gml.Instance)) {
 						vt = q.getField("__class__");
 					}
 					if (vt == null) return false;
 				} else return false;
-				var vti:Int = Std.is(vt, Float) ? cast vt : vt.index;
+				var vti:Int = inline isNumber(vt) ? cast vt : vt.index;
 				var tt:MetaType<T> = cast type;
 				return MetaType.is.get(vti, tt.index);
 			}
 		}
-		else if (Std.is(type, Float)) {
-			if (Std.is(value, Float)) {
+		else if (inline isNumber(type)) {
+		if (inline isNumber(value)) {
 				for (q in gml.NativeScope.with(value, gml.Instance)) {
 					return (q.object_index == cast type)
 					|| q.object_index.isChildOf(cast type);
