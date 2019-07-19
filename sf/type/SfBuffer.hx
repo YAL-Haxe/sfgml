@@ -1,7 +1,6 @@
 package sf.type;
 import haxe.macro.Type;
 import sf.SfCore.*;
-import SfTools.cfor;
 import sf.type.SfTypeMap;
 
 /**

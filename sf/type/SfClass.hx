@@ -5,7 +5,6 @@ import sf.SfCore.*;
 import sf.type.SfBuffer;
 import sf.type.SfClass;
 import sf.type.SfExprDef.*;
-import SfTools.cfor;
 using sf.type.SfExprTools;
 
 /**
@@ -244,11 +243,17 @@ class SfClass extends SfClassImpl {
 					if (areq != argc) {
 						printf(r, "switch`(argument_count)`{");
 						r.indent += 1;
-						cfor(var arc = areq, arc <= argc, arc++, {
-							printf(r, "\ncase %d:`%s(this%z);`break;", arc, ctr_path, {
-								cfor(ai = 0, ai < arc, ai++, printf(r, ",`argument[%d]", ai));
-							});
-						});
+						var arc = areq;
+						while (arc <= argc) {
+							printf(r, "\ncase %d:`%s(this", arc, ctr_path);
+							ai = 0;
+							while (ai < arc) {
+								printf(r, ",`argument[%d]", ai);
+								ai++;
+							}
+							printf(r, ");`break;");
+							arc++;
+						}
 						printf(r, '\ndefault:`show_error("Expected %d..%d arguments.",`true);', areq, argc);
 						r.addLine( -1);
 						printf(r, "}\n");
