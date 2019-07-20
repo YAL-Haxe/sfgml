@@ -26,12 +26,12 @@ class SfGmxGen {
 		var skipFuncs = sfConfig.codePath != null;
 		//
 		var addMacro_map = new Map<String, SfField>();
-		inline function addMacro(name:String, val:String, doc:String, fd:SfField):Void {
+		inline function addMacro(name:String, val:String, show:Bool, doc:String, fd:SfField):Void {
 			if (addMacro_map.exists(name)) {
 				Context.warning('Macro redefinition for $name', fd.typeField.pos);
 				Context.warning('First definition of $name was here', addMacro_map[name].typeField.pos);
 			} else addMacro_map.set(name, fd);
-			addMacro_(name, val, doc);
+			addMacro_(name, val, show ? doc : null);
 		}
 		//
 		var addFunc_map = new Map<String, SfField>();
@@ -48,7 +48,7 @@ class SfGmxGen {
 			//
 			for (sff in sfc.staticList) if (!sff.isHidden) switch (sff.kind) {
 				case FVar(_, _): {
-					if (!sff.checkDocState(sfcd)) continue;
+					var show = sff.checkDocState(sfcd);
 					var path = sff.getPathAuto();
 					var doc = sff.doc;
 					var mcrValue:String;
@@ -79,7 +79,7 @@ class SfGmxGen {
 						default: mcrValue = "g_" + path;
 					}; // mcrValue = switch(sff.kind)
 					if (mcrValue != null) {
-						if (doc != null && doc != "" || sfcd > 0) {
+						if (show) {
 							var sfb = new SfBuffer();
 							sfb.addChar("(".code);
 							sfb.addBaseTypeName(sff.type);
@@ -87,7 +87,7 @@ class SfGmxGen {
 							if (doc != null && doc != "") printf(sfb, "%s", doc);
 							doc = sfb.toString();
 						}
-						addMacro(path, mcrValue, doc, sff);
+						addMacro(path, mcrValue, show, doc, sff);
 					}
 				}; // FVar
 				case FMethod(_): {
@@ -117,16 +117,14 @@ class SfGmxGen {
 			//
 			for (sff in sfc.instList) if (!sff.isHidden) switch (sff.kind) {
 				case FVar(_get, _set): {
-					if (!sff.checkDocState(sfcd)) continue;
 					if (sff.index < 0) continue;
+					var show = sff.checkDocState(sfcd);
+					if (!show) continue;
 					var doc = sff.doc;
 					switch (sff.kind) {
 						case FVar(AccNormal, AccNormal | AccNo | AccNever): {
-							addMacro(sff.getPathAuto(), Std.string(sff.index),
-								doc != null ? (
-									_set != AccNormal ? "(read-only) " : "(index) "
-								) + doc : ""
-							, sff);
+							addMacro(sff.getPathAuto(), Std.string(sff.index), show,
+								(_set != AccNormal ? "(read-only) " : "(index) ") + doc, sff);
 						};
 						default: {
 							if (sff.docState > 0) Context.warning(
@@ -144,9 +142,11 @@ class SfGmxGen {
 		function addEnum(sfe:SfEnum) {
 			var edoc = sfe.docState;
 			if (sfe.isHidden && edoc <= 0) return;
+			var nativeGen = sfe.nativeGen;
 			for (sfec in sfe.ctrList) if (!sfec.isHidden) {
 				var sfcd = sfec.docState;
 				var show = sfec.checkDocState(edoc);
+				var mcr = show || nativeGen;
 				var sfb = new SfBuffer();
 				sfb.addFieldPathAuto(sfec);
 				var path = sfb.toString();
@@ -169,10 +169,10 @@ class SfGmxGen {
 					addFunc(path, comp, sfec);
 				} else {
 					if (sfe.isFake) {
-						if (show) addMacro(path, "" + sfec.index, doc, sfec);
+						if (mcr) addMacro(path, "" + sfec.index, show, doc, sfec);
 					} else {
 						addFunc(path + "_new", null, sfec);
-						if (show) addMacro(path, "g_" + path, doc, sfec);
+						if (mcr) addMacro(path, "g_" + path, show, doc, sfec);
 					}
 				}
 			}
@@ -188,7 +188,7 @@ class SfGmxGen {
 				if (!sff.checkDocState(sfad)) continue;
 				var b1 = new SfBuffer(); b1.addFieldPathAuto(sff);
 				var b2 = new SfBuffer(); b2.addExpr(sff.expr, false);
-				addMacro(b1.toString(), b2.toString(), sff.doc, sff);
+				addMacro(b1.toString(), b2.toString(), true, sff.doc, sff);
 			}
 		}
 		for (t in sfGenerator.typeList) {
