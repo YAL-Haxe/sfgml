@@ -24,7 +24,7 @@ class SfAnon extends SfAnonImpl {
 		}
 	}
 	override public function printTo(out:SfBuffer, init:SfBuffer):Void {
-		if (nativeGen && doc != null && !sfConfig.gmxMode) {
+		if (nativeGen && docState > 0 && !sfConfig.gmxMode) {
 			printf(init, "enum %(type_auto) {", this);
 			var sep = false;
 			for (f in fields) {
@@ -35,7 +35,7 @@ class SfAnon extends SfAnonImpl {
 		}
 	}
 	public inline function printAnonFieldTo(out:SfBuffer, name:String, index:Int):Void {
-		if (nativeGen && doc != null) {
+		if (nativeGen && docState > 0) {
 			out.addTypePathAuto(this);
 			out.addChar(sfConfig.gmxMode ? "_".code : ".".code);
 			out.addString(name);

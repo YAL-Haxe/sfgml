@@ -1,4 +1,5 @@
 package sf;
+import haxe.ds.Map;
 import haxe.io.Path;
 import haxe.macro.Context;
 import sf.type.SfBuffer;
@@ -19,10 +20,19 @@ using sf.type.SfExprTools;
 class SfGmxGen {
 	public static function iter(
 		addFunc_:String->String->SfField->Void,
-		addMacro:String->String->String->Void
+		addMacro_:String->String->String->Void
 	) {
 		var gd:Bool = SfCore.sfConfig.gmxDoc;
 		var skipFuncs = sfConfig.codePath != null;
+		//
+		var addMacro_map = new Map<String, SfField>();
+		inline function addMacro(name:String, val:String, doc:String, fd:SfField):Void {
+			if (addMacro_map.exists(name)) {
+				Context.warning('Macro redefinition for $name', fd.typeField.pos);
+				Context.warning('First definition of $name was here', addMacro_map[name].typeField.pos);
+			} else addMacro_map.set(name, fd);
+			addMacro_(name, val, doc);
+		}
 		//
 		var addFunc_map = new Map<String, SfField>();
 		inline function addFunc(name:String, doc:String, fd:SfField):Void {
@@ -34,18 +44,19 @@ class SfGmxGen {
 		}
 		function addClass(sfc:SfClass) {
 			if (sfc.isHidden) return;
-			var sfcd = sfc.doc != null;
+			var sfcd = sfc.docState;
 			//
 			for (sff in sfc.staticList) if (!sff.isHidden) switch (sff.kind) {
 				case FVar(_, _): {
+					if (!sff.checkDocState(sfcd)) continue;
 					var path = sff.getPathAuto();
 					var doc = sff.doc;
-					var mcrValue = switch (sff.kind) {
-						case FVar(AccInline, AccNo | AccNever): {
-							sprintf("%x", sff.expr);
+					var mcrValue:String;
+					switch (sff.kind) {
+						case FVar(AccInline, AccNo | AccNever): { // inline var v = 4 -> 4
+							mcrValue = sprintf("%x", sff.expr);
 						};
-						case FVar(AccCall, AccNo | AccNever): {
-							if (doc == null) continue;
+						case FVar(AccCall, AccNo | AccNever): { // v(get, never) -> getter
 							var sfxName = "get_" + sff.name;
 							var sfx = sfc.staticMap[sfxName];
 							if (sfx != null) {
@@ -53,25 +64,22 @@ class SfGmxGen {
 								var sfxExpr = sfx.expr.unpack();
 								switch ([sfx.kind, sfxExpr.def]) {
 									case [FMethod(MethInline), SfReturn(true, v)]: {
+										// if method is inline and single-line, we'll use that as the macro value
 										printf(sfb, "(%x)", v);
 									};
 									default: printf(sfb, "%(field_auto)()", sfx);
 								}
-								sfb.toString();
+								mcrValue = sfb.toString();
 							} else {
-								if (doc != null) {
-									Context.warning("Can't find " + sfxName, sff.classField.pos);
-								}
-								null;
+								if (sff.docState > 0) Context.warning("Can't find " + sfxName
+									+ " to make a macro for " + sff.name, sff.classField.pos);
+								mcrValue = null;
 							}
 						};
-						default: {
-							if (doc == null && !sfcd) continue;
-							"g_" + path;
-						};
+						default: mcrValue = "g_" + path;
 					}; // mcrValue = switch(sff.kind)
 					if (mcrValue != null) {
-						if (doc != null && doc != "" || sfcd) {
+						if (doc != null && doc != "" || sfcd > 0) {
 							var sfb = new SfBuffer();
 							sfb.addChar("(".code);
 							sfb.addBaseTypeName(sff.type);
@@ -79,19 +87,19 @@ class SfGmxGen {
 							if (doc != null && doc != "") printf(sfb, "%s", doc);
 							doc = sfb.toString();
 						}
-						addMacro(path, mcrValue, doc);
+						addMacro(path, mcrValue, doc, sff);
 					}
 				}; // FVar
 				case FMethod(_): {
-					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd && !sff.isAutogen), sff);
+					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd), sff);
 				};
 			} // for (field in statics)
 			//
 			var ctr = sfc.constructor;
 			if (ctr != null) {
-				var ctrName = ctr.name;
-				var ctrInst = ctr.isInst;
-				// new:
+				var _ctr_name = ctr.name;
+				var _ctr_isInst = ctr.isInst;
+				// new [if we have child classes that'll call it via super()]:
 				if (sfc.children.length > 0) {
 					ctr.name = "new";
 					ctr.isInst = true;
@@ -101,48 +109,54 @@ class SfGmxGen {
 				ctr.name = ctr.metaGetText(ctr.meta, ":native");
 				if (ctr.name == null) ctr.name = "create";
 				ctr.isInst = false;
-				var doc = if (ctr.doc != null) {
-					var sfb = new SfBuffer();
-					SfArgVars.doc(sfb, ctr, 0);
-					sfb.toString();
-				} else null;
-				addFunc(ctr.getPathAuto(), doc, ctr);
-				//
-				ctr.name = ctrName;
-				ctr.isInst = ctrInst;
+				addFunc(ctr.getPathAuto(), ctr.getArgDoc(sfcd), ctr);
+				// restore state:
+				ctr.name = _ctr_name;
+				ctr.isInst = _ctr_isInst;
 			} // ctr != null
 			//
 			for (sff in sfc.instList) if (!sff.isHidden) switch (sff.kind) {
-				case FVar(_, _): {
+				case FVar(_get, _set): {
+					if (!sff.checkDocState(sfcd)) continue;
+					if (sff.index < 0) continue;
 					var doc = sff.doc;
-					if ((doc != null || sfcd) && sff.index >= 0) switch (sff.kind) {
-						case FVar(AccNormal, AccNormal): {
+					switch (sff.kind) {
+						case FVar(AccNormal, AccNormal | AccNo | AccNever): {
 							addMacro(sff.getPathAuto(), Std.string(sff.index),
-								doc != null ? "(index) " + doc : ""
-							);
+								doc != null ? (
+									_set != AccNormal ? "(read-only) " : "(index) "
+								) + doc : ""
+							, sff);
 						};
-						default:
+						default: {
+							if (sff.docState > 0) Context.warning(
+								'Can\'t expose an instance variable with ($_get, $_set)',
+								sff.classField.pos);
+						};
 					}
 				};
-				case FMethod(_): addFunc(sff.getPathAuto(), sff.getArgDoc(), sff);
+				case FMethod(_): {
+					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd), sff);
+				};
 			}
 			//
 		} // addClass
 		function addEnum(sfe:SfEnum) {
-			if (sfe.isHidden && sfe.doc == null) return;
-			var edoc = sfe.doc;
-			for (sfc in sfe.ctrList) if (!sfc.isHidden) {
+			var edoc = sfe.docState;
+			if (sfe.isHidden && edoc <= 0) return;
+			for (sfec in sfe.ctrList) if (!sfec.isHidden) {
+				var sfcd = sfec.docState;
+				var show = sfec.checkDocState(edoc);
 				var sfb = new SfBuffer();
-				sfb.addFieldPathAuto(sfc);
+				sfb.addFieldPathAuto(sfec);
 				var path = sfb.toString();
-				var doc = sfc.doc;
-				if (doc == null && edoc != null) doc = "";
-				if (!gd) doc = null;
-				if (sfe.noRef || sfc.args.length > 0) {
-					var fb = new SfBuffer();
-					if (doc != null) {
+				var doc = sfec.doc;
+				if (sfe.noRef || sfec.args.length > 0) {
+					var comp:String = null;
+					if (show) {
+						var fb = new SfBuffer();
 						printf(fb, "%s(", path);
-						var args = sfc.args;
+						var args = sfec.args;
 						for (i in 0 ... args.length) {
 							if (i > 0) printf(fb, ", ");
 							printf(fb, "%s:", args[i].v.name);
@@ -150,25 +164,31 @@ class SfGmxGen {
 						}
 						printf(fb, ")");
 						if (doc != "") printf(fb, " : %s", doc);
+						comp = fb.toString();
 					}
-					addFunc(path, fb.toString(), sfc);
-				} else if (sfe.isFake) {
-					addMacro(path, "" + sfc.index, doc);
+					addFunc(path, comp, sfec);
 				} else {
-					addFunc(path + "_new", null, sfc);
-					addMacro(path, "g_" + path, doc);
+					if (sfe.isFake) {
+						if (show) addMacro(path, "" + sfec.index, doc, sfec);
+					} else {
+						addFunc(path + "_new", null, sfec);
+						if (show) addMacro(path, "g_" + path, doc, sfec);
+					}
 				}
 			}
 		} // addEnum
 		function addAbstract(sfa:SfAbstract) {
 			if (sfa.isHidden) return;
-			var allDoc = sfa.meta.has(":doc");
-			if (sfa.meta.has(":enum") && sfa.impl != null) for (fd in sfa.impl.staticList) {
-				if (!fd.meta.has(":enum")) continue;
-				if (!allDoc && !fd.meta.has(":doc") || fd.meta.has(":noDoc")) continue;
-				var b1 = new SfBuffer(); b1.addFieldPathAuto(fd);
-				var b2 = new SfBuffer(); b2.addExpr(fd.expr, false);
-				addMacro(b1.toString(), b2.toString(), fd.doc != null ? fd.doc : (allDoc ? "" : null));
+			var sfad = sfa.docState;
+			
+			// enum abstract?
+			if (sfa.meta.has(":enum") && sfa.impl != null
+			) for (sff in sfa.impl.staticList) {
+				if (!sff.meta.has(":enum")) continue;
+				if (!sff.checkDocState(sfad)) continue;
+				var b1 = new SfBuffer(); b1.addFieldPathAuto(sff);
+				var b2 = new SfBuffer(); b2.addExpr(sff.expr, false);
+				addMacro(b1.toString(), b2.toString(), sff.doc, sff);
 			}
 		}
 		for (t in sfGenerator.typeList) {
