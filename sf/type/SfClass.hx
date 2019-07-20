@@ -78,7 +78,7 @@ class SfClass extends SfClassImpl {
 			r = new SfBuffer();
 			init = new SfBuffer();
 			// hint-enum:
-			if (doc != null && !sfConfig.gmxMode) {
+			if (docState > 0 && !sfConfig.gmxMode) {
 				var fb = new SfBuffer();
 				var fn = 0;
 				for (f in instList) if (f.index >= 0) {

@@ -30,7 +30,7 @@ class SfEnum extends SfEnumImpl {
 		var canRef = !this.noRef;
 		var hasAC = sfConfig.hasArrayCreate;
 		var pureArray = sfConfig.hasArrayDecl && nativeGen;
-		var noScripts = pureArray && doc == null;
+		var noScripts = pureArray && docState <= 0;
 		for (ctr in ctrList) {
 			var args:Array<SfArgument> = ctr.args;
 			var argc:Int = args.length;

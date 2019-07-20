@@ -15,8 +15,8 @@ class SfClassField extends SfClassFieldImpl {
 			default:
 		}
 	}
-	public function getArgDoc(?force:Bool):String {
-		if (doc != null || force) {
+	public function getArgDoc(parState:Int):String {
+		if (checkDocState(parState)) {
 			var sfb = new SfBuffer();
 			SfArgVars.doc(sfb, this, 4);
 			return sfb.toString();
