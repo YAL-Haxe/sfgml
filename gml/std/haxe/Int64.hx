@@ -1,6 +1,5 @@
 package haxe;
 import gml.Lib;
-import gml.RawAPI;
 import haxe.Int32;
 
 /**
@@ -51,15 +50,15 @@ abstract Int64(__Int64) {
 	}
 	
 	public inline function toString():String {
-		return RawAPI.string(this);
+		return SfTools.raw("string")(this);
 	}
 	
 	public static inline function parseString(s:String):Int64 {
-		return RawAPI.int64(s);
+		return SfTools.raw("int64")(s);
 	}
 	
 	public static inline function fromFloat(f:Float):Int64 {
-		return RawAPI.int64(f);
+		return SfTools.raw("int64")(f);
 	}
 	
 	// todo: divMod
