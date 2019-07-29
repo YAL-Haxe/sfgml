@@ -20,7 +20,7 @@ class String {
 	}
 	@:native("pos_ext")
 	public function indexOf(sub:String, startPos:Int = 0):Int {
-		var out = NativeString.pos(sub, NativeString.delete(this, 1, startPos));
+		var out = NativeString.pos(sub, startPos > 0 ? NativeString.delete(this, 1, startPos) : this);
 		return out > 0 ? out + startPos - 1 : -1;
 	}
 	@:native("pos_last")

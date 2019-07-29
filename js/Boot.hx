@@ -133,13 +133,13 @@ class Boot {
 	#end
 }
 
-@:remove private class HaxeError extends js.Error {
+@:remove private class HaxeError extends js.lib.Error {
 	var val:Dynamic;
 	@:pure public function new(val:Dynamic) {
 		super();
 	}
-	public static function wrap(val:Dynamic):js.Error {
-		return if (js.Syntax.instanceof(val, js.Error)) val else new HaxeError(val);
+	public static function wrap(val:Dynamic):js.lib.Error {
+		return if (js.Syntax.instanceof(val, js.lib.Error)) val else new HaxeError(val);
 	}
 	public static function create(v:Dynamic) {
 		return v;
