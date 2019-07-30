@@ -4,7 +4,7 @@ package gml;
  * ...
  * @author YellowAfterlife
  */
-@:native("") @:snakeCase
+@:std @:native("") @:snakeCase
 extern class NativeType {
 	static function isArray(v:Dynamic):Bool;
 	static function isBool(v:Dynamic):Bool;
@@ -16,17 +16,43 @@ extern class NativeType {
 	static function isUndefined(v:Dynamic):Bool;
 	static function isVec3(v:Dynamic):Bool;
 	static function isVec4(v:Dynamic):Bool;
-	/* Returns whether the value is any of numeric types */
+	
+	/** >= 2.2.3 */
+	@:expose("is_nan") static function isNaN(v:Dynamic):Bool;
+	
+	/** >= 2.2.3 */
+	static function isInfinity(v:Dynamic):Bool;
+	
+	/** Returns whether the value is any of numeric types */
 	static inline function isNumber(v:Dynamic):Bool {
 		return NativeTypeHelper.isNumber(v);
 	}
+	
+	/** Returns whether the value is numeric and has no fractions */
+	static inline function isIntNumber(v:Dynamic):Bool {
+		return NativeTypeHelper.isIntNumber(v);
+	}
+	
 	@:expose("typeof") static function typeof(v:Dynamic):String;
+	
+	@:expose("string") static function toString(v:Dynamic):String;
+	@:expose("real") static function toReal(v:Dynamic):Float;
+	@:expose("bool") static function toBool(v:Dynamic):Bool;
+	@:expose("int64") static function toInt64(v:Dynamic):haxe.Int64;
 }
-@:std @:native("is_helper") private class NativeTypeHelper {
+@:noCompletion @:std class NativeTypeHelper {
 	public static function isNumber(v:Dynamic) {
 		return NativeType.isReal(v)
 			|| NativeType.isBool(v)
 			|| NativeType.isInt32(v)
 			|| NativeType.isInt64(v);
+	}
+	public static function isIntNumber(value:Dynamic):Bool {
+		if (NativeType.isReal(value)) {
+			return (value | 0) == value;
+		}
+		return NativeType.isInt64(value)
+			|| NativeType.isInt32(value)
+			|| NativeType.isBool(value);
 	}
 }
