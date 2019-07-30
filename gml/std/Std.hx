@@ -20,12 +20,13 @@ class Std {
 		return untyped (float | 0);
 	}
 	
-	
-	public static function string(value:Dynamic):String {
+	@:keep public static function string(value:Dynamic):String {
+		if (NativeType.isString(value)) return value;
 		if (NativeType.isReal(value)) {
 			var s = NativeString.format(value, 0, 16);
 			var n:Int, i:Int;
 			if (gml.sys.System.isBrowser) {
+				// it is obviously tempting to just ""+s but this could change in future.
 				n = s.length;
 				i = n;
 				while (i > 0) {
