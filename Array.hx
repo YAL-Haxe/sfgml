@@ -38,6 +38,8 @@ extern class Array<T> implements ArrayAccess<T> {
 	inline function map<S>(fn:T->S):Array<S> return ArrayImpl.map(this, fn);
 	inline function filter(fn:T->Bool):Array<T> return ArrayImpl.filter(this, fn);
 	
+	inline function resize(len:Int):Void ArrayImpl.resize(this, len);
+	
 	//{
 	/** Array.pop cannot be implemented because GML arrays cannot be contracted */
 	@:extern public inline function pop():Null<T> {
@@ -81,6 +83,12 @@ extern class Array<T> implements ArrayAccess<T> {
 }
 @:std @:native("array_hx") @:noCompletion
 class ArrayImpl {
+	public static function resize<T>(arr:Array<T>, len:Int):Void {
+		var olen = arr.length;
+		if (len < olen) throw "GML arrays cannot be shrunk";
+		if (len > olen) arr[len - 1] = cast 0;
+	}
+	
 	//{
 	public static function push<T>(arr:Array<T>, val:T):Int {
 		var i:Int = arr.length;
@@ -281,6 +289,7 @@ class ArrayImpl {
 	//}
 }
 #else
+// exact copy of std Array.hx
 extern class Array<T> {
 
 	/**
@@ -540,5 +549,19 @@ extern class Array<T> {
 		If `f` is null, the result is unspecified.
 	**/
 	function filter( f : T -> Bool ) : Array<T>;
+
+	/**
+		Set the length of the Array.
+
+		If `len` is shorter than the array's current size, the last
+		`length - len` elements will be removed. If `len` is longer, the Array
+		will be extended, with new elements set to a target-specific default
+		value:
+
+		- always null on dynamic targets
+		- 0, 0.0 or false for Int, Float and Bool respectively on static targets
+		- null for other types on static targets
+	**/
+	function resize( len : Int ) : Void;
 }
 #end
