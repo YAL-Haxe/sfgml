@@ -19,8 +19,9 @@ class SfYyGen {
 	private static function error(text:String, path:String) {
 		#if macro
 		Context.error(text, Context.makePosition({ file: path, min: 0, max: 0 }));
-		#end
+		#else
 		throw text;
+		#end
 	}
 	private static function print(text:String) {
 		#if sys
