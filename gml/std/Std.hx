@@ -21,6 +21,7 @@ class Std {
 	}
 	
 	@:keep public static function string(value:Dynamic):String {
+		if (value == null) return "null";
 		if (NativeType.isString(value)) return value;
 		if (NativeType.isReal(value)) {
 			var s = NativeString.format(value, 0, 16);
