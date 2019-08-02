@@ -13,7 +13,16 @@ import haxe.extern.EitherType;
 extern class Instance {
 	static inline var defValue:Instance = cast -4;
 	//
+	#if (sfgml_next)
+	@:expose("instance_create_depth")
+	static function createAtDepth(x:Float, y:Float, depth:Float, t:Object):Instance;
+	
+	@:expose("instance_create_layer")
+	static function createAtLayer(x:Float, y:Float, layer:gml.layers.LayerID, t:Object):Instance;
+	#else
 	static function create(x:Float, y:Float, t:Object):Instance;
+	#end
+	
 	#if (sfgml_version && sfgml_version < "1.4.1763")
 	inline function destroy():Void raw("with ({0}) instance_destroy()", this);
 	#else
