@@ -35,8 +35,7 @@ enum ValueType {
 	}
 	
 	public static inline function getClassName(c:Class<Dynamic>):String {
-		throw "Type.getClassName is not supported.";
-		return null;
+		return (cast c:MetaType<Dynamic>).name;
 	}
 	
 	public static inline function getEnumName(e:Enum<Dynamic>):String {
@@ -100,8 +99,8 @@ enum ValueType {
 	}
 	
 	public static function enumConstructor(e:EnumValue):String {
-		if (gml.MetaType.has(e)) {
-			var et:gml.MetaType.MetaEnum<EnumValue> = cast gml.MetaType.get(e);
+		if (MetaType.has(e)) {
+			var et:MetaEnum<EnumValue> = cast MetaType.get(e);
 			var cs = et.constructors;
 			var i = enumIndex(e);
 			if (cs != null && i >= 0 && i < cs.length) {
