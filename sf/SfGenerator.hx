@@ -494,7 +494,13 @@ class SfGenerator extends SfGeneratorImpl {
 		var x:SfExpr;
 		var sep:Bool, z:Bool;
 		xt = expr;
-		switch (expr.def) {
+		if (expr == null) {
+			printf(r, "!null expr!");
+			Context.warning("There's a null expr, shouldn't happen (check output for `!null expr!`)"
+			+ haxe.CallStack.toString(haxe.CallStack.callStack()),
+				haxe.macro.PositionTools.make({min:0, max:0, file:sfGenerator.outputPath}));
+		}
+		else switch (expr.def) {
 			case SfConst(c): printConst(r, c, expr);
 			case SfLocal(v): {
 				printf(r, "%s%s", sfConfig.localPrefix, v.name);
