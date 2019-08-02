@@ -36,10 +36,10 @@ extern class Instance {
 		return o;
 	}
 	//
-	inline function hasField(fd:String):Bool return raw("variable_instance_exists")(this, fd);
-	inline function getField(fd:String):Any return raw("variable_instance_get")(this, fd);
-	inline function setField(fd:String, v:Any):Void raw("variable_instance_set")(this, fd, v);
-	inline function getFieldNames():Array<String> return raw("variable_instance_get_names")(this);
+	@:expose("variable_instance_exists") function hasField(fd:String):Bool;
+	@:expose("variable_instance_get") function getField(fd:String):Dynamic;
+	@:expose("variable_instance_set") function setField(fd:String, val:Dynamic):Void;
+	@:expose("variable_instance_get_names") function getFieldNames():Array<String>;
 	//
 	var x:Float;
 	var xprevious:Float;
