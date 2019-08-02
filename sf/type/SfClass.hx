@@ -217,16 +217,29 @@ class SfClass extends SfClassImpl {
 				}
 				
 				// add dynamic functions (todo: check inheritance):
-				for (f in instList) if (f.isDynFunc) {
-					if (f.expr == null && objName == null) continue;
-					if (objName != null) {
-						printf(r, "this.%s`=`", f.name);
-					} else printf(r, "this[@%d%(hint)]`=`", f.index, f.name);
-					if (f.expr != null) {
-						if (isStd) r.addString("g_");
-						r.addFieldPathAuto(f);
-					} else printf(r, "undefined");
-					printf(r, ";\n");
+				var dynFound = new Map();
+				var iterClass = this;
+				while (iterClass != null) {
+					for (iterField in iterClass.instList) {
+						if (!iterField.isDynFunc) continue;
+						if (iterField.expr == null && objName == null) continue;
+						var iterName = iterField.name;
+						if (dynFound.exists(iterName)) continue;
+						dynFound.set(iterName, true);
+						//
+						if (objName != null) {
+							printf(r, "this.%s`=`", iterField.name);
+						} else {
+							printf(r, "this[@%d%(hint)]`=`", iterField.index, iterField.name);
+						}
+						//	
+						if (iterField.expr != null) {
+							if (!isStd) r.addString("f_");
+							r.addFieldPathAuto(iterField);
+						} else printf(r, "undefined");
+						printf(r, ";\n");
+					}
+					iterClass = iterClass.superClass;
 				}
 				
 				if (children.length <= 0) {

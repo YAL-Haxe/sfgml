@@ -18,6 +18,19 @@ class SfGmlScriptRefs extends SfOptImpl {
 	override public function apply() {
 		var buf = new SfBuffer();
 		var map = new Map();
+		inline function proc(f:SfClassField):Void {
+			if (map.exists(f)) return;
+			map.set(f, true);
+			printf(buf, 'globalvar f_');
+			buf.addFieldPathAuto(f);
+			printf(buf, ';`f_');
+			buf.addFieldPathAuto(f);
+			printf(buf, '`=`asset_get_index("', f);
+			buf.addFieldPathAuto(f);
+			printf(buf, '");\n', f);
+		}
+		
+		// generate f_ for function references:
 		forEachExpr(function(e:SfExpr, w:SfExprList, f:SfExprIter) {
 			do switch (e.def) {
 				case SfStaticField(c, f): {
@@ -27,20 +40,22 @@ class SfGmlScriptRefs extends SfOptImpl {
 						case SfCall(x, _) if (x == e): continue;
 						default:
 					};
-					if (map.exists(f)) continue;
-					map.set(f, true);
-					printf(buf, 'globalvar f_');
-					buf.addFieldPathAuto(f);
-					printf(buf, ';`f_');
-					buf.addFieldPathAuto(f);
-					printf(buf, '`=`asset_get_index("', f);
-					buf.addFieldPathAuto(f);
-					printf(buf, '");\n', f);
+					proc(f);
 				};
 				default:
 			} while (false);
 			e.iter(w, f);
 		}, []);
+		
+		// and dynamic functions that'll be used in constructors:
+		for (sfc in sfGenerator.classList) {
+			if (sfc.isExtern || sfc.isHidden) continue;
+			for (sfd in sfc.instList) {
+				if (sfd.isHidden) continue;
+				if (sfd.isDynFunc) proc(sfd);
+			}
+		}
+		
 		init = buf.toString();
 	}
 }
