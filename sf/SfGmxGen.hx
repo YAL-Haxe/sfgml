@@ -182,10 +182,11 @@ class SfGmxGen {
 			var sfad = sfa.docState;
 			
 			// enum abstract?
-			if (sfa.meta.has(":enum") && sfa.impl != null
+			if (sfa.meta.has(":enum") && sfa.impl != null && !sfa.impl.isHidden
 			) for (sff in sfa.impl.staticList) {
 				if (!sff.meta.has(":enum")) continue;
 				if (!sff.checkDocState(sfad)) continue;
+				if (sff.expr == null) continue;
 				var b1 = new SfBuffer(); b1.addFieldPathAuto(sff);
 				var b2 = new SfBuffer(); b2.addExpr(sff.expr, false);
 				addMacro(b1.toString(), b2.toString(), true, sff.doc, sff);
