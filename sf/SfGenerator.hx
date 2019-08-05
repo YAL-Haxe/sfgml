@@ -703,32 +703,39 @@ class SfGenerator extends SfGeneratorImpl {
 					};
 					default:
 				}
-				if (z) switch (obj.getTypeNz()) {
-					case TType(_.get() => dt, _): {
-						var at = anonMap.baseGet(dt);
-						if (at != null) {
-							s = _field;
-							if (at.isDsMap) {
-								var fd = at.fieldMap[s];
-								if (fd != null) s = fd.name;
-								printf(r, '%x[?"%s"]', obj, s);
-								z = false;
-							} else if (at.indexMap.exists(s)) {
-								printf(r, "%x[", obj);
-								at.printAnonFieldTo(r, s, at.indexMap[s]);
-								printf(r, "]");
+				if (z) {
+					var t = obj.getTypeNz();
+					switch (t) {
+						case TAbstract(_.get() => at, _): t = at.type;
+						default:
+					}
+					switch (t) {
+						case TType(_.get() => dt, _): {
+							var at = anonMap.baseGet(dt);
+							if (at != null) {
+								s = _field;
+								if (at.isDsMap) {
+									var fd = at.fieldMap[s];
+									if (fd != null) s = fd.name;
+									printf(r, '%x[?"%s"]', obj, s);
+									z = false;
+								} else if (at.indexMap.exists(s)) {
+									printf(r, "%x[", obj);
+									at.printAnonFieldTo(r, s, at.indexMap[s]);
+									printf(r, "]");
+									z = false;
+								}
+							}
+						};
+						case TInst(_.get() => ct, _): {
+							var ct = classMap.baseGet(ct);
+							if (ct != null && ct.objName != null) {
+								printf(r, "%x.%s", obj, _field);
 								z = false;
 							}
-						}
-					};
-					case TInst(_.get() => ct, _): {
-						var ct = classMap.baseGet(ct);
-						if (ct != null && ct.objName != null) {
-							printf(r, "%x.%s", obj, _field);
-							z = false;
-						}
-					};
-					default:
+						};
+						default:
+					}
 				}
 				if (z) {
 					expr.error("[SfGenerator:printExpr] Can't do dynamic field read for `" + _field + "` from `" + obj.dump() + "` (" + obj.getName() + "," + obj.getTypeNz() + ")");
