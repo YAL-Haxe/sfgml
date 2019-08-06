@@ -22,7 +22,7 @@ class SfGmxGen {
 		addFunc_:String->String->SfField->Void,
 		addMacro_:String->String->String->Void
 	) {
-		var gd:Bool = SfCore.sfConfig.gmxDoc;
+		var gd:Bool = sfConfig.gmxDoc;
 		var skipFuncs = sfConfig.codePath != null;
 		//
 		var addMacro_map = new Map<String, SfField>();
@@ -35,11 +35,24 @@ class SfGmxGen {
 		}
 		//
 		var addFunc_map = new Map<String, SfField>();
-		inline function addFunc(name:String, doc:String, fd:SfField):Void {
-			if (addFunc_map.exists(name)) {
+		var addFunc_lq = new Map<String, String>();
+		function addFunc(name:String, doc:String, fd:SfField):Void {
+			var lq = name.toLowerCase();
+			if (addFunc_map.exists(lq)) {
 				Context.warning('Function redefinition for $name', fd.typeField.pos);
-				Context.warning('First definition of $name was here', addFunc_map[name].typeField.pos);
-			} else addFunc_map.set(name, fd);
+				var dupName = addFunc_lq[lq];
+				var dupPos = addFunc_map[lq].typeField.pos;
+				Context.warning('First definition of $dupName was here', dupPos);
+				if (dupName != name) {
+					Context.warning('This is technically OK (`$dupName`<>`$name`), '
+					+ 'but your extension will not compiled under YYC on Windows '
+					+ 'because file system is case-insensitive and thus they are the same name',
+					dupPos);
+				}
+			} else {
+				addFunc_map.set(lq, fd);
+				addFunc_lq.set(lq, name);
+			}
 			addFunc_(name, doc, fd);
 		}
 		function addClass(sfc:SfClass) {
