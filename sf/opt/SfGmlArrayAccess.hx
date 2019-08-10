@@ -27,10 +27,10 @@ class SfGmlArrayAccess extends SfOptImpl {
 		}
 	}
 	
-	static var wget:SfClassField;
-	static var wgetUsed:Bool;
-	static var wset:SfClassField;
-	static var wsetUsed:Bool;
+	public static var wget:SfClassField;
+	public static var wgetUsed:Bool;
+	public static var wset:SfClassField;
+	public static var wsetUsed:Bool;
 	static function check(e:SfExpr, w, f) {
 		inline function nw(e:SfExpr):Bool {
 			return needsWrapping(e);

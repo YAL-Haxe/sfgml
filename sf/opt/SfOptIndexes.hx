@@ -21,7 +21,10 @@ class SfOptIndexes extends SfOptImpl {
 		if (c.indexes < 0) {
 			var i:Int = 0;
 			var superClass = c.superClass;
-			if (superClass != null) i = getIndexes(superClass, addNames);
+			if (superClass != null) {
+				i = getIndexes(superClass, addNames);
+				c.fieldsByIndex = superClass.fieldsByIndex.copy();
+			}
 			// if parent is an object, we're an object too, so quit:
 			if (i < 0) return -1;
 			// otherwise assign indexes to all variable/dynfunc fields:
@@ -37,6 +40,7 @@ class SfOptIndexes extends SfOptImpl {
 				}
 				if (cc != null) {
 					fd.index = superField.index;
+					c.fieldsByIndex[fd.index] = fd;
 					continue;
 				}
 				// don't index properties:
@@ -49,6 +53,7 @@ class SfOptIndexes extends SfOptImpl {
 				//
 				if (addNames) i += 1;
 				fd.index = i;
+				c.fieldsByIndex[i] = fd;
 				i += 1;
 			}
 			// and cache the index count for children:

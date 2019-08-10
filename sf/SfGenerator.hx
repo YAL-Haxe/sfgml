@@ -764,6 +764,31 @@ class SfGenerator extends SfGeneratorImpl {
 				n = _args.length;
 				sep = false;
 				i = 2; // 1: expr, 2: par, -1: nothing
+				
+				// if we are calling a field that's being wget, we need to resolve that
+				// this is asking for a refactor of some sort
+				var selfExpr:SfExpr = null;
+				switch (x.def) {
+					case SfCall(
+						_.def => SfInstField(self, field),
+						[_.def => SfConst(TInt(i))]
+					) if (field == SfGmlArrayAccess.wget && i >= 0): {
+						switch (self.followType()) {
+							case TInst(_.get() => c, _): {
+								var sfc = classMap.baseGet(c);
+								if (sfc != null) {
+									var sfd = sfc.fieldsByIndex[i];
+									if (sfd != null && sfd.callNeedsThis) {
+										selfExpr = self;
+									}
+								}
+							};
+							default:
+						}
+					};
+					default:
+				}
+				//
 				switch (x.def) {
 					case SfDynamic(code, []): {
 						r.addString(code);
@@ -873,6 +898,12 @@ class SfGenerator extends SfGeneratorImpl {
 					#end
 					printf(r, "script_execute(");
 					printf(r, "%x", x);
+					if (selfExpr != null) {
+						if (!selfExpr.isSimple()) {
+							selfExpr.warning("This call may have side effects.");
+						}
+						printf(r, ", %x", selfExpr);
+					}
 					sep = true;
 				} else if (i & 2 != 0) r.addParOpen();
 				//

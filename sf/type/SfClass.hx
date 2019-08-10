@@ -4,6 +4,7 @@ import haxe.macro.Type.ClassType;
 import sf.SfCore.*;
 import sf.type.SfBuffer;
 import sf.type.SfClass;
+import sf.type.SfClassField;
 import sf.type.SfExprDef.*;
 using sf.type.SfExprTools;
 
@@ -15,6 +16,8 @@ class SfClass extends SfClassImpl {
 	
 	/** Total number of indexes given to this class' fields */
 	public var indexes:Int = -1;
+	
+	public var fieldsByIndex:Array<SfClassField> = [];
 	
 	/** Classes marked `@:std` get unprefixed variable access. */
 	public var isStd:Bool;
@@ -39,6 +42,11 @@ class SfClass extends SfClassImpl {
 			default:
 		}
 		if (t.meta.has(":noRefWrite")) for (fd in fieldList) fd.noRefWrite = true;
+	}
+	
+	override public function removeField(field:SfClassField):Void {
+		super.removeField(field);
+		if (field != null && field.index >= 0) fieldsByIndex[field.index] = null;
 	}
 	
 	static function printFieldExpr(r:SfBuffer, f:SfClassField) {
