@@ -21,6 +21,6 @@ package gml.net;
 	/** PSN-specific UDP */
 	var PSNUDP = 4;
 	
-	/** WebSocket (GMS 2.2+) */
+	/** WebSocket (GMS 2.2+?) */
 	var WS = 5;
 }

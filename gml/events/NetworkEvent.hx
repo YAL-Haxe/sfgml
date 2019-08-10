@@ -2,12 +2,53 @@ package gml.events;
 import gml.Lib.raw as raw;
 import gml.net.Socket;
 import gml.io.BufferReader;
+import gml.io.Buffer;
 import gml.ds.HashTable;
 
 /**
  * ...
  * @author YellowAfterlife
  */
+#if !sfgml_async_legacy
+@:std @:dsMap
+typedef NetworkEvent = {
+	var type:NetworkEventType;
+	
+	/** Sender socket in Data event, receiver otherwise */
+	var id:Socket;
+	
+	/** IP address of associated socket  */
+	var ip:String;
+	
+	/** Port of associated socket */
+	var port:Int;
+	
+	/** In Connect/Disconnect this holds the [dis]connecting socket */
+	?var socket:Socket;
+	
+	/** In NonBlockingConnect this indicates whether connection succeeded */
+	?var succeeded:Bool;
+	
+	/** In Data this holds the received bytes */
+	?var buffer:Buffer;
+	
+	/** In Data this holds the number of received bytes */
+	?var size:Int;
+}
+
+@:std @:native("network_type")
+extern enum abstract NetworkEventType(Int) {
+	var Connect;
+	var Disconnect;
+	var Data;
+	
+	/**
+	 * Triggered client-side if connection is non-blocking
+	 * @see gml.net.Socket.config
+	 */
+	var NonBlockingConnect;
+}
+#else
 @:final class NetworkEvent {
 	public static var map(get, never):HashTable<String, Dynamic>;
 	private static inline function get_map() return raw("async_load");
@@ -37,16 +78,11 @@ import gml.ds.HashTable;
 	private static inline function get_size():Int return map.get("size");
 }
 
-@:native("network_type")
-@:std extern enum abstract NetworkEventType(Int) from Int to Int {
-	var CONNECT;
-	var DISCONNECT;
-	var DATA;
+@:std @:native("network_type")
+extern enum abstract NetworkEventType(Int) from Int to Int {
+	@:native("connect") var CONNECT;
+	@:native("disconnect") var DISCONNECT;
+	@:native("data") var DATA;
 	@:native("non_blocking_connect")var NBCONNECT;
 }
-/*abstract NetworkEventType(Int) {
-	public static inline var CONNECT:NetworkEventType = cast 1;
-	public static inline var DISCONNECT:NetworkEventType = cast 2;
-	public static inline var DATA:NetworkEventType = cast 3;
-	public static inline var NBCONNECT:NetworkEventType = cast 4;
-}*/
+#end
