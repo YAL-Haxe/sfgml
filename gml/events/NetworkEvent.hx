@@ -24,16 +24,16 @@ typedef NetworkEvent = {
 	var port:Int;
 	
 	/** In Connect/Disconnect this holds the [dis]connecting socket */
-	?var socket:Socket;
+	var ?socket:Socket;
 	
 	/** In NonBlockingConnect this indicates whether connection succeeded */
-	?var succeeded:Bool;
+	var ?succeeded:Bool;
 	
 	/** In Data this holds the received bytes */
-	?var buffer:Buffer;
+	var ?buffer:Buffer;
 	
 	/** In Data this holds the number of received bytes */
-	?var size:Int;
+	var ?size:Int;
 }
 
 @:std @:native("network_type")
