@@ -87,6 +87,29 @@ class Std {
 
 @:std @:keep
 private class StdImpl {
+	
+	/**
+	 * This function is used for Std.is(_, Float).
+	 * sf.opt.SfGmlInstanceOf decides whether to use it (or strip it from output).
+	 */
+	static function isNumber(v:Dynamic) {
+		return NativeType.isReal(v)
+			|| NativeType.isBool(v)
+			|| NativeType.isInt32(v)
+			|| NativeType.isInt64(v);
+	}
+	
+	/** Same as above, but for Std.is(_, Int) */
+	static function isIntNumber(value:Dynamic):Bool {
+		if (NativeType.isReal(value)) {
+			return (value | 0) == value;
+		}
+		return NativeType.isInt64(value)
+			|| NativeType.isInt32(value)
+			|| NativeType.isBool(value);
+	}
+	
+	/** Same as above, but for Std.is(_, _) */
 	public static function is<T>(value:Dynamic, type:Class<T>):Bool {
 		inline function isNumber(v:Dynamic) {
 			return inline NativeTypeHelper.isNumber(v);

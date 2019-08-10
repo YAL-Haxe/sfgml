@@ -28,7 +28,7 @@ class SfGmlInstanceOf extends SfOptImpl {
 		var _StdImpl_is_usedBy:SfExpr = null;
 		var _StdImpl_isNumber = _StdImpl != null ? _StdImpl.realMap["isNumber"] : null;
 		var _StdImpl_isNumber_usedBy:SfExpr = null;
-		var _StdImpl_isInt = _StdImpl != null ? _StdImpl.realMap["isInt"] : null;
+		var _StdImpl_isInt = _StdImpl != null ? _StdImpl.realMap["isIntNumber"] : null;
 		var _StdImpl_isInt_usedBy:SfExpr = null;
 		
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
