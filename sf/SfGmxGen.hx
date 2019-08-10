@@ -113,7 +113,7 @@ class SfGmxGen {
 				var _ctr_name = ctr.name;
 				var _ctr_isInst = ctr.isInst;
 				// new [if we have child classes that'll call it via super()]:
-				if (sfc.children.length > 0) {
+				if (sfc.children.length > 0 || sfc.meta.has(":gml.keep.new")) {
 					ctr.name = "new";
 					ctr.isInst = true;
 					addFunc(ctr.getPathAuto(), null, ctr);

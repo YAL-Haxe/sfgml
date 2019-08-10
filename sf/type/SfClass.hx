@@ -76,6 +76,149 @@ class SfClass extends SfClassImpl {
 		sfGenerator.currentField = null;
 	}
 	
+	private function printConstructor(r:SfBuffer, ctr:SfClassField):Void {
+		var ctr_isInst = ctr.isInst;
+		var ctr_name = ctr.name;
+		var ctr_path = {
+			var b = new SfBuffer();
+			b.addFieldPathAuto(ctr);
+			b.toString();
+		};
+		
+		// _new, if this has children:
+		var sepNew = children.length > 0 || meta.has(":gml.keep.new");
+		if (sepNew) {
+			ctr.isInst = true; ctr.name = "new";
+			printf(r, "\n#define %s\n", ctr_path);
+			SfArgVars.doc(r, ctr);
+			SfArgVars.print(r, ctr);
+			printFieldExpr(r, ctr);
+		}
+		
+		//
+		var ctr_native = ctr.metaGetText(ctr.meta, ":native");
+		ctr.isInst = false; ctr.name = (ctr_native != null ? ctr_native : "create");
+		printf(r, "\n#define %(field_auto)\n", ctr);
+		SfArgVars.doc(r, ctr);
+		if (objName != null) {
+			if (sfConfig.next) {
+				printf(r, "var this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
+			} else {
+				printf(r, "var this`=`instance_create(0,`0,`%s);\n", objName);
+			}
+			if (!nativeGen) printf(r, "this.__class__`=`mt_%(type_auto);\n", this);
+		}
+		else if (nativeGen && !sfConfig.fieldNames) {
+			printf(r, "var this");
+			if (sfConfig.hasArrayCreate) {
+				printf(r, "`=`array_create(%d);\n", indexes);
+			} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
+		}
+		else {
+			inline function setMeta():Void {
+				printf(r, "this[1,0%(hint)]`=`", "metatype");
+				if (module != sf.opt.SfGmlType.mtModule) {
+					printf(r, "mt_%(type_auto)", this);
+				} else r.addInt(index);
+			}
+			if (indexes == 0) { // empty
+				printf(r, "var this");
+				if (sfConfig.hasArrayDecl) {
+					printf(r, "`=`[];");
+				} else if (sfConfig.hasArrayCreate) {
+					printf(r, "`=`array_create(0)");
+				} else printf(r, ";`this[0]`=`undefined");
+			}
+			else if (sfConfig.copyset) { // normal
+				printf(r, "var this`=`mq_%(type_auto);\n", this);
+				if (nativeGen) {
+					printf(r, "this[0%(hint)]`=`this[0]", "copyset");
+				} else setMeta();
+			}
+			else { // workarounds
+				printf(r, "var this");
+				if (nativeGen) {
+					if (sfConfig.hasArrayCreate) {
+						printf(r, "`=`array_create(0)");
+					} else printf(r, "`=`[];\n");
+				} else {
+					printf(r, ";\n");
+					setMeta();
+				}
+				printf(r, ";\nvar __this`=`mq_%(type_auto);\n", this);
+				printf(r, "array_copy(this,`0,`__this,`0,`array_length_1d(__this))");
+			}
+			printf(r, ";\n");
+		}
+		
+		// add dynamic functions:
+		var dynFound = new Map();
+		var iterClass = this;
+		while (iterClass != null) {
+			for (iterField in iterClass.instList) {
+				if (!iterField.isDynFunc) continue;
+				if (iterField.expr == null && objName == null) continue;
+				var iterName = iterField.name;
+				if (dynFound.exists(iterName)) continue;
+				dynFound.set(iterName, true);
+				//
+				if (objName != null) {
+					printf(r, "this.%s`=`", iterField.name);
+				} else {
+					printf(r, "this[@%d%(hint)]`=`", iterField.index, iterField.name);
+				}
+				//	
+				if (iterField.expr != null) {
+					if (!isStd) r.addString("f_");
+					r.addFieldPathAuto(iterField);
+				} else printf(r, "undefined");
+				printf(r, ";\n");
+			}
+			iterClass = iterClass.superClass;
+		}
+		
+		if (!sepNew) {
+			SfArgVars.print(r, ctr);
+			printFieldExpr(r, ctr);
+		} else {
+			//
+			var args = ctr.args;
+			var argc = args.length;
+			var areq = -1;
+			while (++areq < argc) if (args[areq].value != null) break;
+			//
+			var ai:Int;
+			if (areq != argc) { // optional arguments, aren't they fun
+				printf(r, "switch`(argument_count)`{");
+				r.indent += 1;
+				var arc = areq;
+				while (arc <= argc) {
+					printf(r, "\ncase %d:`%s(this", arc, ctr_path);
+					ai = 0;
+					while (ai < arc) {
+						printf(r, ",`argument[%d]", ai);
+						ai++;
+					}
+					printf(r, ");`break;");
+					arc++;
+				}
+				printf(r, '\ndefault:`show_error("Expected %d..%d arguments.",`true);', areq, argc);
+				r.addLine( -1);
+				printf(r, "}\n");
+			} else {
+				printf(r, "%s(this", ctr_path);
+				ai = -1;
+				while (++ai < argc) {
+					printf(r, ",`argument[%d]", ai);
+				}
+				printf(r, ");\n");
+			}
+		}
+		
+		//
+		printf(r, "return this;\n");
+		ctr.isInst = ctr_isInst; ctr.name = ctr_name;
+	}
 	override public function printTo(out:SfBuffer, initBuf:SfBuffer):Void {
 		var hintFolds = sfConfig.hintFolds;
 		var r:SfBuffer = null;
@@ -153,144 +296,9 @@ class SfClass extends SfClassImpl {
 			// constructor:
 			var ctr = constructor;
 			if (ctr != null && !ctr.isHidden) {
-				var ctr_isInst = ctr.isInst;
-				var ctr_name = ctr.name;
-				var ctr_path = {
-					var b = new SfBuffer();
-					b.addFieldPathAuto(ctr);
-					b.toString();
-				};
-				
-				// _new, if this has children:
-				if (children.length > 0) {
-					ctr.isInst = true; ctr.name = "new";
-					printf(r, "\n#define %s\n", ctr_path);
-					SfArgVars.doc(r, ctr);
-					SfArgVars.print(r, ctr);
-					printFieldExpr(r, ctr);
-				}
-				
-				//
-				var ctr_native = ctr.metaGetText(ctr.meta, ":native");
-				ctr.isInst = false; ctr.name = (ctr_native != null ? ctr_native : "create");
-				printf(r, "\n#define %(field_auto)\n", ctr);
-				SfArgVars.doc(r, ctr);
-				if (objName != null) {
-					#if (sfgml_next)
-					printf(r, "var this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
-					#else
-					printf(r, "var this`=`instance_create(0,`0,`%s);\n", objName);
-					#end
-					if (!nativeGen) printf(r, "this.__class__`=`mt_%(type_auto);\n", this);
-				} else if (nativeGen && !sfConfig.fieldNames) {
-					printf(r, "var this");
-					if (sfConfig.hasArrayCreate) {
-						printf(r, "`=`array_create(%d);\n", indexes);
-					} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
-				} else {
-					inline function setMeta():Void {
-						printf(r, "this[1,0%(hint)]`=`", "metatype");
-						if (module != sf.opt.SfGmlType.mtModule) {
-							printf(r, "mt_%(type_auto)", this);
-						} else r.addInt(index);
-					}
-					if (indexes == 0) { // empty
-						printf(r, "var this");
-						if (sfConfig.hasArrayDecl) {
-							printf(r, "`=`[];");
-						} else if (sfConfig.hasArrayCreate) {
-							printf(r, "`=`array_create(0)");
-						} else printf(r, ";`this[0]`=`undefined");
-					}
-					else if (sfConfig.copyset) { // normal
-						printf(r, "var this`=`mq_%(type_auto);\n", this);
-						if (nativeGen) {
-							printf(r, "this[0%(hint)]`=`this[0]", "copyset");
-						} else setMeta();
-					}
-					else { // workarounds
-						printf(r, "var this");
-						if (nativeGen) {
-							if (sfConfig.hasArrayCreate) {
-								printf(r, "`=`array_create(0)");
-							} else printf(r, "`=`[];\n");
-						} else {
-							printf(r, ";\n");
-							setMeta();
-						}
-						printf(r, ";\nvar __this`=`mq_%(type_auto);\n", this);
-						printf(r, "array_copy(this,`0,`__this,`0,`array_length_1d(__this))");
-					}
-					printf(r, ";\n");
-				}
-				
-				// add dynamic functions (todo: check inheritance):
-				var dynFound = new Map();
-				var iterClass = this;
-				while (iterClass != null) {
-					for (iterField in iterClass.instList) {
-						if (!iterField.isDynFunc) continue;
-						if (iterField.expr == null && objName == null) continue;
-						var iterName = iterField.name;
-						if (dynFound.exists(iterName)) continue;
-						dynFound.set(iterName, true);
-						//
-						if (objName != null) {
-							printf(r, "this.%s`=`", iterField.name);
-						} else {
-							printf(r, "this[@%d%(hint)]`=`", iterField.index, iterField.name);
-						}
-						//	
-						if (iterField.expr != null) {
-							if (!isStd) r.addString("f_");
-							r.addFieldPathAuto(iterField);
-						} else printf(r, "undefined");
-						printf(r, ";\n");
-					}
-					iterClass = iterClass.superClass;
-				}
-				
-				if (children.length <= 0) {
-					SfArgVars.print(r, ctr);
-					printFieldExpr(r, ctr);
-				} else {
-					//
-					var args = ctr.args;
-					var argc = args.length;
-					var areq = -1;
-					while (++areq < argc) if (args[areq].value != null) break;
-					//
-					var ai:Int;
-					if (areq != argc) {
-						printf(r, "switch`(argument_count)`{");
-						r.indent += 1;
-						var arc = areq;
-						while (arc <= argc) {
-							printf(r, "\ncase %d:`%s(this", arc, ctr_path);
-							ai = 0;
-							while (ai < arc) {
-								printf(r, ",`argument[%d]", ai);
-								ai++;
-							}
-							printf(r, ");`break;");
-							arc++;
-						}
-						printf(r, '\ndefault:`show_error("Expected %d..%d arguments.",`true);', areq, argc);
-						r.addLine( -1);
-						printf(r, "}\n");
-					} else {
-						printf(r, "%s(this", ctr_path);
-						ai = -1;
-						while (++ai < argc) {
-							printf(r, ",`argument[%d]", ai);
-						}
-						printf(r, ");\n");
-					}
-				}
-				//
-				printf(r, "return this;\n");
-				ctr.isInst = ctr_isInst; ctr.name = ctr_name;
+				printConstructor(r, ctr);
 			}; // constructor
+			
 			// instance functions:
 			for (fd in instList) if (!fd.isHidden && fd.isCallable && fd.expr != null) {
 				printf(r, "\n#define %(field_auto)\n", fd);
