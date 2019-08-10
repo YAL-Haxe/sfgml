@@ -36,8 +36,8 @@ typedef NetworkEvent = {
 	var ?size:Int;
 }
 
-@:std @:native("network_type")
-extern enum abstract NetworkEventType(Int) {
+@:std @:native("network_type") @:snakeCase
+extern enum abstract NetworkEventType(Int) from Int to Int {
 	var Connect;
 	var Disconnect;
 	var Data;

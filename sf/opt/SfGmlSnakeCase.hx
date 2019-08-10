@@ -44,7 +44,7 @@ class SfGmlSnakeCase extends SfOptImpl {
 	public static function checkType(q:SfType):Bool {
 		return q.meta.has(":snakeCase")
 			// with -D sfgml_snake_case, we don't touch extern and/or std classes
-			|| sfConfig.snakeCase && !(q.isHidden || q.meta.has(":std"));
+			|| (sfConfig.snakeCase && !(q.isHidden || q.meta.has(":std")));
 	}
 	public static function applyToType(q:SfType):Void {
 		if (!q.meta.has(":native") && !q.meta.has(":expose")) {
@@ -57,7 +57,7 @@ class SfGmlSnakeCase extends SfOptImpl {
 		var apply = checkType(c);
 		if (!apply && c.meta.has(":enum")) do {
 			// Abstracts are named like com.pkg.Some,
-			// and their implementation classes are named like com.pkg._Some.Some_Impl_
+			// and their implementation classes are named like com.pkg._Outer.Thing_Impl_
 			// but most of metadata doesn't transfer to impl-class,
 			// so we need to parse the realPath and resolve the abstract
 			var path = c.realPath;
@@ -65,7 +65,7 @@ class SfGmlSnakeCase extends SfOptImpl {
 			var dot = path.lastIndexOf(".");
 			if (dot < 0) break;
 			var dot2 = path.lastIndexOf(".", dot - 1);
-			path = path.substring(0, dot2 + 1) + path.substring(dot2 + 2, dot);
+			path = path.substring(0, dot2 + 1) + path.substring(dot + 1, path.length - 6);
 			//
 			var sfa = sfGenerator.realMap[path];
 			if (sfa == null) break;
