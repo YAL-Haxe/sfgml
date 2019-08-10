@@ -89,11 +89,7 @@ class Boot {
 		r = null;
 		i = size; while (--i >= 0) r[i] = null;
 		#end
-		#if (sfgml_copyset)
-		MetaType.copyset(r, meta);
-		#else
 		MetaType.set(r, meta);
-		#end
 		var n:Int = gml.Lib.argc;
 		i = 2;
 		while (i < n) {
@@ -103,6 +99,7 @@ class Boot {
 		return cast r;
 	}
 	
+	/** ds_map literal function */
 	@:keep private static function mdecl<T:Dynamic>(pairs:SfRestMixed):T {
 		var r = new gml.ds.HashTable();
 		var i = 0;

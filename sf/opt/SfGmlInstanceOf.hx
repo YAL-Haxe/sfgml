@@ -30,6 +30,11 @@ class SfGmlInstanceOf extends SfOptImpl {
 		var _StdImpl_isNumber_usedBy:SfExpr = null;
 		var _StdImpl_isInt = _StdImpl != null ? _StdImpl.realMap["isIntNumber"] : null;
 		var _StdImpl_isInt_usedBy:SfExpr = null;
+		#if !sfgml_legacy_meta
+		var _MetaType:SfClass = cast sfg.realMap["gml.MetaType"];
+		var _MetaType_has = _MetaType != null ? _MetaType.realMap["has"] : null;
+		var _MetaType_has_usedBy:SfExpr = null;
+		#end
 		
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			e.iter(w, f);
@@ -68,17 +73,25 @@ class SfGmlInstanceOf extends SfOptImpl {
 					}
 				};
 				case SfStaticField(c, f): {
+					// check for StdImpl.is:
 					if (_StdImpl != null && c == _StdImpl && f == _StdImpl_is
 						&& (_Std == null || currentClass != _Std)
 					) _StdImpl_is_usedBy = e;
+					
+					#if !sfgml_legacy_meta
+					// check for MetaType.has (which the above uses):
+					if (_MetaType_has != null && c == _MetaType && f == _MetaType_has
+						&& (_StdImpl == null || currentClass != _StdImpl)
+					) _MetaType_has_usedBy = e;
+					#end
 				};
 				default:
 			}
 		});
 		isUsed = _StdImpl_is_usedBy != null;
+		//
+		var warn = false;
 		if (_StdImpl != null) {
-			var warn = false;
-			
 			if (_StdImpl_is_usedBy != null) {
 				if (warn) _StdImpl_is_usedBy.warning("Std.is is used by this expression");
 			} else _StdImpl.removeField(_StdImpl_is);
@@ -91,6 +104,15 @@ class SfGmlInstanceOf extends SfOptImpl {
 				if (warn) _StdImpl_isNumber_usedBy.warning("Std.isNumber is used by this expression");
 			} else _StdImpl.removeField(_StdImpl_isNumber);
 		}
+		#if !sfgml_legacy_meta
+		if (_MetaType_has == null || _StdImpl != null && _StdImpl_is_usedBy != null) {
+			// OK..?
+		} else if (_MetaType_has_usedBy != null) {
+			if (warn) _MetaType_has_usedBy.warning("MetaType.has is used by this expression");
+		} else {
+			_MetaType.removeField(_MetaType_has);
+		}
+		#end
 	}
 	
 }

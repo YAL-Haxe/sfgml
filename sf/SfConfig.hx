@@ -10,7 +10,7 @@ class SfConfig extends SfConfigImpl {
 	
 	// default target versions (if not specified):
 	static inline var defVersion1:String = "1.4.1804";
-	static inline var defVersion2:String = "2.1.4";
+	static inline var defVersion2:String = "2.2.1";
 	
 	/** */
 	public var version = string("sfgml-version", null);
@@ -92,6 +92,9 @@ class SfConfig extends SfConfigImpl {
 	
 	/** https://bugs.yoyogames.com/view.php?id=29749 */
 	public var slowTernary:Bool = true;
+	
+	/** Stores type information in [1,0] instead of [0] */
+	public var legacyMeta:Bool = bool("sfgml-legacy-meta");
 	
 	public function new() {
 		super();

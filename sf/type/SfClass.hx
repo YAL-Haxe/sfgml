@@ -115,40 +115,41 @@ class SfClass extends SfClassImpl {
 			} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
 		}
 		else {
-			inline function setMeta():Void {
+			inline function setLegacyMeta():Void {
 				printf(r, "this[1,0%(hint)]`=`", "metatype");
 				if (module != sf.opt.SfGmlType.mtModule) {
 					printf(r, "mt_%(type_auto)", this);
 				} else r.addInt(index);
+				printf(r, ";\n");
 			}
-			if (indexes == 0) { // empty
-				printf(r, "var this");
+			inline function setBlank():Void {
 				if (sfConfig.hasArrayDecl) {
 					printf(r, "`=`[];");
 				} else if (sfConfig.hasArrayCreate) {
 					printf(r, "`=`array_create(0)");
 				} else printf(r, ";`this[0]`=`undefined");
+				printf(r, ";\n");
+			}
+			if (indexes == 0) { // empty
+				printf(r, "var this");
+				setBlank();
 			}
 			else if (sfConfig.copyset) { // normal
 				printf(r, "var this`=`mq_%(type_auto);\n", this);
-				if (nativeGen) {
-					printf(r, "this[0%(hint)]`=`this[0]", "copyset");
-				} else setMeta();
+				if (nativeGen || !sfConfig.legacyMeta) {
+					printf(r, "this[0%(hint)]`=`this[0];\n", "copyset");
+				} else setLegacyMeta();
 			}
 			else { // workarounds
 				printf(r, "var this");
-				if (nativeGen) {
-					if (sfConfig.hasArrayCreate) {
-						printf(r, "`=`array_create(0)");
-					} else printf(r, "`=`[];\n");
+				if (nativeGen || !sfConfig.legacyMeta) {
+					setBlank();
 				} else {
 					printf(r, ";\n");
-					setMeta();
+					setLegacyMeta();
 				}
-				printf(r, ";\nvar __this`=`mq_%(type_auto);\n", this);
-				printf(r, "array_copy(this,`0,`__this,`0,`array_length_1d(__this))");
+				printf(r, "array_copy(this,`0,`mq_%(type_auto),`0,`%d);\n", this, indexes);
 			}
-			printf(r, ";\n");
 		}
 		
 		// add dynamic functions:

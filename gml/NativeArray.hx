@@ -19,6 +19,9 @@ extern class NativeArray {
 		return raw("array_create")(size, value);
 	}
 	
+	/** Returns the number of items in the given array */
+	@:native("length_1d") static function length1d<T>(q:Array<T>):Int;
+	
 	/** Returns the number of items in given row of an array */
 	@:native("length_2d") static function cols2d<T>(q:Array<T>, row:Int):Int;
 	

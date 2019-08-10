@@ -22,8 +22,20 @@ class SfOptIndexes extends SfOptImpl {
 			var i:Int = 0;
 			var superClass = c.superClass;
 			if (superClass != null) {
+				#if !sfgml_legacy_meta
+				if (superClass.nativeGen && !c.nativeGen) {
+					haxe.macro.Context.error(
+						'You can\'t inherit from a @:nativeGen class (${superClass.realPath}) '+
+						'into a non-@:nativeGen class (${c.realPath}).',
+						c.classType.pos);
+				}
+				#end
 				i = getIndexes(superClass, addNames);
-				c.fieldsByIndex = superClass.fieldsByIndex.copy();
+				if (i >= 0) c.fieldsByIndex = superClass.fieldsByIndex.copy();
+			} else {
+				#if !sfgml_legacy_meta
+				if (!c.nativeGen) i++;
+				#end
 			}
 			// if parent is an object, we're an object too, so quit:
 			if (i < 0) return -1;

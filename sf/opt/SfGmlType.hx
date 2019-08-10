@@ -117,6 +117,7 @@ class SfGmlType extends SfOptImpl {
 		if (sfConfig.hasArrayDecl || !usesProto) {
 			mtClass.staticMap.get("proto").isHidden = true;
 		}
+		#if sfgml_legacy_meta
 		var mtGet = mtClass.fieldMap.get("get");
 		var mtGetUsed = false;
 		var mtSet = mtClass.fieldMap.get("set");
@@ -132,11 +133,13 @@ class SfGmlType extends SfOptImpl {
 						if (SfGmlArrayAccess.needsWrapping(x)) {
 							mtGetUsed = true;
 						} else e.def = SfDynamic("{0}[1,0]", [x]);
-					} else if (f == mtSet) {
+					}
+					else if (f == mtSet) {
 						if (SfGmlArrayAccess.needsWrapping(x)) {
 							mtSetUsed = true;
 						} else e.def = SfBinop(OpAssign, e.mod(SfDynamic("{0}[@1,0]", [x])), m[1]);
-					} else if (f == mtCopySet) {
+					}
+					else if (f == mtCopySet) {
 						if (canCopySet) {
 							if (SfGmlArrayAccess.needsWrapping(x)) {
 								e.error("Can't expand MetaType.copyset here.");
@@ -154,6 +157,7 @@ class SfGmlType extends SfOptImpl {
 		});
 		if (!mtGetUsed) mtClass.removeField(mtGet);
 		if (!mtSetUsed) mtClass.removeField(mtSet);
+		#end
 	}
 	
 	function procConstructorReturns() {

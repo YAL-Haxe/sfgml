@@ -59,22 +59,25 @@ class SfEnum extends SfEnumImpl {
 			}
 			//
 			printf(out, "var this");
-			if (hasAC) printf(out, "`=`array_create(%d)", argc);
+			if (hasAC) printf(out, "`=`array_create(%d)", argc + 1);
 			printf(out, ";\n");
 			//
 			if (!nativeGen) {
+				#if !sfgml_legacy_meta
+				// todo: we can't just add overhead of metadata check to every ADT value retrieval
+				#else
 				if (debug) printf(out, 'this[1,1]`=`"%s";\n', ctr.name);
 				if (sf.opt.SfGmlType.usesType) {
 					printf(out, "this[1,0]`=`mt_%(type_auto);\n", this);
 				}
-			}
-			//
-			i = argc;
-			while (--i >= 0) {
-				printf(out, "this[%d%(hint)]`=`argument[%d];\n", i + 1, args[i].v.name, i);
+				#end
 			}
 			//
 			printf(out, "this[0%(hint)]`=`%d;\n", "id", ctr.index);
+			for (i in 0 ... argc) {
+				printf(out, "this[%d%(hint)]`=`argument[%d];\n", i + 1, args[i].v.name, i);
+			}
+			//
 			printf(out, "return this;\n");
 		}
 		if (out.length > 0) {

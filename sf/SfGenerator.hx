@@ -115,51 +115,28 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		// 
 		var stdPack = sfConfig.stdPack;
-		if (SfGmlType.usesProto) {
-			if (hintFolds) printf(init, "//{ prototypes\n");
-			var fns = sfConfig.fieldNames;
-			var next = sfConfig.next;
-			for (c in classList) {
-				if (c.isHidden || c.constructor == null) continue;
-				if (c.nativeGen && !fns) continue;
-				printf(init, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
-				if (!hasArrayDecl) {
-					if (stdPack != null) printf(init, "%s_", stdPack);
-					init.addString("haxe_type_proto(");
-				} else init.addChar("[".code);
-				if (c.indexes > 0) {
-					var proto:Array<String> = [];
-					var cng = c.nativeGen;
-					if (!cng) {
-						for (i in 0 ... c.indexes) proto.push("undefined");
-					} else for (i in 0 ... c.indexes) proto.push("0");
-					var q = c;
-					do {
-						for (f in q.instList) if (f.index >= 0) {
-							var fi = f.index;
-							if (fns) proto[fi - 1] = '"' + f.name + '"';
-							if (!cng) switch (f.type) {
-								case TAbstract(_.get() => { name: "Int" }, _): {
-									proto[fi] = "0";
-								};
-								default:
-							}
-							if (hint) proto[fi] = '/* $fi:${f.name} */' + proto[fi];
-						}
-						q = q.superClass;
-					} while (q != null);
-					init.addString(proto[0]);
-					for (i in 1 ... c.indexes) {
-						printf(init, ",`%s", proto[i]);
-					}
-				}
-				printf(init, "%c;\n", hasArrayDecl ? "]".code : ")".code);
-			}
-			if (hintFolds) printf(init, "//}\n");
-		}
+		//
 		if (SfGmlType.usesType) {
 			if (hintFolds) printf(init, "//{ metatype\n");
 			var mtModule = SfGmlType.mtModule;
+			//
+			#if !sfgml_legacy_meta
+			var qMetaType:SfClass = cast realMap["gml.MetaType"];
+			var qMetaMarker = qMetaType.realMap["markerValue"];
+			var qMetaMarkerText:String = null;
+			if (qMetaMarker != null) {
+				qMetaMarkerText = sprintf("%(field_auto)", qMetaMarker);
+				//
+				printf(init, "globalvar %s;`%s`=`", qMetaMarkerText, qMetaMarkerText);
+				if (!sfConfig.hasArrayCreate) {
+					printf(init, "0;`%s[0]`=`undefined", qMetaMarkerText);
+				} else if (!hasArrayDecl) {
+					printf(init, "array_create(0)");
+				} else printf(init, "[]");
+				printf(init, ";\n");
+			}
+			#end
+			//
 			for (t in typeList) if (!t.isHidden && t.isUsed && !t.nativeGen) {
 				var e:SfEnum = null;
 				if (Std.is(t, SfEnum)) {
@@ -198,10 +175,67 @@ class SfGenerator extends SfGeneratorImpl {
 			}
 			if (hintFolds) printf(init, "//}\n");
 		}
-		#if (!sfgml_version || sfgml_version < "2.1.5")
-		new SfGmlScriptRefs().apply();
-		init.addString(SfGmlScriptRefs.init);
-		#end
+		
+		//
+		if (true) { // regrettably, it seems like extension script IDs are busted for a while
+			new SfGmlScriptRefs().apply();
+			var gml = SfGmlScriptRefs.init;
+			if (gml != "") {
+				if (hintFolds) printf(init, "//{ functions\n");
+				init.addString(gml);
+				if (hintFolds) printf(init, "//}\n");
+			}
+		}
+		
+		//
+		if (SfGmlType.usesProto) {
+			if (hintFolds) printf(init, "//{ prototypes\n");
+			var fns = sfConfig.fieldNames;
+			var next = sfConfig.next;
+			
+			for (c in classList) {
+				if (c.isHidden || c.constructor == null) continue;
+				if (c.nativeGen && !fns) continue;
+				//
+				printf(init, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
+				if (!hasArrayDecl) {
+					if (stdPack != null) printf(init, "%s_", stdPack);
+					init.addString("haxe_type_proto(");
+				} else init.addChar("[".code);
+				if (c.indexes > 0) {
+					var proto:Array<String> = [];
+					var cng = c.nativeGen;
+					if (!cng) {
+						for (i in 0 ... c.indexes) proto.push("undefined");
+						#if !sfgml_legacy_meta
+						proto[0] = sprintf("mt_%(type_auto)", c);
+						#end
+					} else for (i in 0 ... c.indexes) proto.push("0");
+					var q = c;
+					do {
+						for (f in q.instList) if (f.index >= 0) {
+							var fi = f.index;
+							if (fns) proto[fi - 1] = '"' + f.name + '"';
+							if (!cng) switch (f.type) {
+								case TAbstract(_.get() => { name: "Int" }, _): {
+									proto[fi] = "0";
+								};
+								default:
+							}
+							if (hint) proto[fi] = '/* $fi:${f.name} */' + proto[fi];
+						}
+						q = q.superClass;
+					} while (q != null);
+					init.addString(proto[0]);
+					for (i in 1 ... c.indexes) {
+						printf(init, ",`%s", proto[i]);
+					}
+				}
+				printf(init, "%c;\n", hasArrayDecl ? "]".code : ")".code);
+			}
+			if (hintFolds) printf(init, "//}\n");
+		}
+		
 		// generate class inits:
 		for (c in classList) if (!SfExprTools.isEmpty(c.init)) {
 			var len = init.length;
@@ -211,6 +245,7 @@ class SfGenerator extends SfGeneratorImpl {
 				init.addLine();
 			}
 		}
+		
 		// generate static field init and the entrypoint call:
 		for (t in typeList) {
 			t.printTo(out, init);
