@@ -57,14 +57,25 @@ class Boot {
 	
 	/** Is used in array declaration `[e1, e2, ..., eN]` for GMS1. */
 	@:keep private static function decl<T>(values:SfRest<T>):Array<T> {
-		var i:Int = values.length;
-		var r:Array<T>;
-		#if (sfgml_array_create)
-		r = NativeArray.create(i);
-		#else
-		r = null; MetaType.copyset(r, null);
-		#end
-		while (--i >= 0) NativeArray.copyset(r, i, values[i]);
+		var n:Int = values.length, i:Int, r:Array<T>;
+		if (n == 0) {
+			#if (sfgml_array_create)
+			return NativeArray.create(0);
+			#else
+			r = null;
+			NativeArray.copyset2d(r, 1, 0, null);
+			return r;
+			#end
+		}
+		//
+		if (isJS) {
+			r = null;
+			r[0] = values[0];
+			i = 0; while (++i < n) r[i] = values[i];
+		} else {
+			r = null;
+			while (--n >= 0) r[n] = values[n];
+		}
 		return r;
 	}
 	
@@ -87,7 +98,11 @@ class Boot {
 		r = NativeArray.create(size, null);
 		#else
 		r = null;
-		i = size; while (--i >= 0) r[i] = null;
+		if (isJS) {
+			i = 0; while (i < size) r[i] = null;
+		} else {
+			i = size; while (--i >= 0) r[i] = null;
+		}
 		#end
 		MetaType.set(r, meta);
 		var n:Int = gml.Lib.argc;
