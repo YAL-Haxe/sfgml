@@ -11,12 +11,14 @@ import haxe.macro.Type.TConstant;
 import haxe.macro.Type.TypedExpr;
 import sf.opt.*;
 import sf.type.*;
+import sf.type.expr.*;
+import sf.type.expr.*;
 import sf.type.SfTypeMap;
-import sf.type.SfExprDef.*;
-import sf.type.SfExpr;
+import sf.type.expr.SfExprDef.*;
+import sf.type.expr.SfExpr;
 import SfTools.*;
 import sf.SfCore.*;
-using sf.type.SfExprTools;
+using sf.type.expr.SfExprTools;
 
 /**
  * ...

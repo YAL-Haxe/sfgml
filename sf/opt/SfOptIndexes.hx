@@ -2,11 +2,12 @@ package sf.opt;
 
 import haxe.ds.Map;
 import sf.type.*;
-import sf.type.SfExpr;
+import sf.type.expr.*;
+import sf.type.expr.SfExpr;
 import sf.SfCore.*;
-import sf.type.SfExprTools.SfExprIter;
-import sf.type.SfExprDef.*;
-using sf.type.SfExprTools;
+import sf.type.expr.SfExprTools.SfExprIter;
+import sf.type.expr.SfExprDef.*;
+using sf.type.expr.SfExprTools;
 
 /**
  * Assigns indexes to all types and fields.

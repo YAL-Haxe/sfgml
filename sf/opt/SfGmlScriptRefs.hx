@@ -2,9 +2,10 @@ package sf.opt;
 
 import haxe.ds.Map;
 import sf.opt.SfOptImpl;
-import sf.type.SfExprDef.*;
+import sf.type.expr.SfExprDef.*;
 import sf.type.*;
-using sf.type.SfExprTools;
+import sf.type.expr.*;
+using sf.type.expr.SfExprTools;
 import sf.SfCore.*;
 import haxe.macro.Expr.Binop.*;
 import haxe.macro.Expr.Unop;

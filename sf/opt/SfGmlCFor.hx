@@ -1,8 +1,8 @@
 package sf.opt;
-import sf.type.SfExpr;
-import sf.type.SfExprDef.*;
-import sf.type.SfExprList;
-using sf.type.SfExprTools;
+import sf.type.expr.SfExpr;
+import sf.type.expr.SfExprDef.*;
+import sf.type.expr.SfExprList;
+using sf.type.expr.SfExprTools;
 
 /**
  * ...

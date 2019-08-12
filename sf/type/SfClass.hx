@@ -5,8 +5,9 @@ import sf.SfCore.*;
 import sf.type.SfBuffer;
 import sf.type.SfClass;
 import sf.type.SfClassField;
-import sf.type.SfExprDef.*;
-using sf.type.SfExprTools;
+import sf.type.expr.*;
+import sf.type.expr.SfExprDef.*;
+using sf.type.expr.SfExprTools;
 
 /**
  * ...

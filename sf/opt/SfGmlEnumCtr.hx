@@ -1,10 +1,11 @@
 package sf.opt;
 
 import sf.opt.SfOptImpl;
-import sf.type.SfExprDef.*;
+import sf.type.expr.SfExprDef.*;
 import sf.type.*;
+import sf.type.expr.*;
 import sf.type.SfTypeMap;
-using sf.type.SfExprTools;
+using sf.type.expr.SfExprTools;
 import sf.SfCore.*;
 import haxe.macro.Expr.Binop.*;
 

@@ -1,11 +1,12 @@
 package sf.opt;
 
-import sf.type.SfExpr;
+import sf.type.expr.SfExpr;
 import sf.opt.SfOptImpl;
-import sf.type.SfExprDef.*;
+import sf.type.expr.SfExprDef.*;
 import sf.type.*;
+import sf.type.expr.*;
 import sf.SfCore.*;
-using sf.type.SfExprTools;
+using sf.type.expr.SfExprTools;
 import haxe.macro.Type;
 
 /**

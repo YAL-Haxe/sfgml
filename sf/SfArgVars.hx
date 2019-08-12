@@ -7,7 +7,7 @@ import sf.type.SfField;
 import sf.type.SfVar;
 import SfTools.*;
 import sf.SfCore.*;
-using sf.type.SfExprTools;
+using sf.type.expr.SfExprTools;
 
 /**
  * ...

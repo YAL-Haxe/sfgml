@@ -7,11 +7,12 @@ import sf.type.SfClass;
 import sf.type.SfClassField;
 import sf.type.SfEnum;
 import sf.type.*;
+import sf.type.expr.*;
 import sf.type.SfField;
 import sys.FileSystem;
 import sys.io.File;
 import sf.SfCore.*;
-using sf.type.SfExprTools;
+using sf.type.expr.SfExprTools;
 
 /**
  * ...

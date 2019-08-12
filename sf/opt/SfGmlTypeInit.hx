@@ -2,6 +2,7 @@ package sf.opt;
 import sf.SfCore.*;
 import sf.type.SfBuffer;
 import sf.type.*;
+import sf.type.expr.*;
 /**
  * ...
  * @author ...

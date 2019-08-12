@@ -1,15 +1,15 @@
 package sf.opt;
 
-import sf.type.SfExpr;
+import sf.type.expr.SfExpr;
 import sf.SfCore.*;
-import sf.type.SfExprList;
+import sf.type.expr.SfExprList;
 import sf.type.SfClass;
 import sf.type.SfClassField;
-import sf.type.SfExprTools.SfExprIter;
-import sf.type.SfExprDef.*;
+import sf.type.expr.SfExprTools.SfExprIter;
+import sf.type.expr.SfExprDef.*;
 import haxe.macro.Expr.Binop.*;
 import haxe.macro.Type.TConstant.*;
-using sf.type.SfExprTools;
+using sf.type.expr.SfExprTools;
 
 /**
  * "better safe than sorry", wrap bitwise operators in parenthesis,
