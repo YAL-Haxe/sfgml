@@ -58,4 +58,12 @@ class SfGmlScriptRefs extends SfOptImpl {
 		
 		init = buf.toString();
 	}
+	public static function main(buf:SfBuffer):Void {
+		new SfGmlScriptRefs().apply();
+		if (init != "") {
+			if (sfConfig.hintFolds) printf(buf, "//{ functions\n");
+			buf.addString(init);
+			if (sfConfig.hintFolds) printf(buf, "//}\n");
+		}
+	}
 }

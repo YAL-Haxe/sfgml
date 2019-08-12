@@ -87,7 +87,9 @@ class MetaType<T> {
 class MetaClass<T> extends MetaType<T> {
 	public var superClass:MetaClass<Dynamic> = null;
 	public function new(id:Int, name:String) {
+		#if !sfgml_legacy_meta
 		marker = MetaType.markerValue;
+		#end
 		this.index = id;
 		this.name = name;
 	}
@@ -97,7 +99,9 @@ class MetaClass<T> extends MetaType<T> {
 class MetaEnum<T> extends MetaType<T> {
 	public var constructors:Array<String>;
 	public function new(id:Int, name:String, ?ctrs:Array<String>) {
+		#if !sfgml_legacy_meta
 		marker = MetaType.markerValue;
+		#end
 		this.index = id;
 		this.name = name;
 		this.constructors = ctrs;

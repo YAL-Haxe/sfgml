@@ -100,7 +100,9 @@ class SfClass extends SfClassImpl {
 		ctr.isInst = false; ctr.name = (ctr_native != null ? ctr_native : "create");
 		printf(r, "\n#define %(field_auto)\n", ctr);
 		SfArgVars.doc(r, ctr);
+		//
 		if (objName != null) {
+			// it's instance-based
 			if (sfConfig.next) {
 				printf(r, "var this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
 			} else {
@@ -109,47 +111,54 @@ class SfClass extends SfClassImpl {
 			if (!nativeGen) printf(r, "this.__class__`=`mt_%(type_auto);\n", this);
 		}
 		else if (nativeGen && !sfConfig.fieldNames) {
+			// it's :nativeGen and we don't need field labels
+			// so we allocate the container and call it a day
 			printf(r, "var this");
 			if (sfConfig.hasArrayCreate) {
 				printf(r, "`=`array_create(%d);\n", indexes);
 			} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
 		}
 		else {
-			inline function setLegacyMeta():Void {
-				printf(r, "this[1,0%(hint)]`=`", "metatype");
-				if (module != sf.opt.SfGmlType.mtModule) {
-					printf(r, "mt_%(type_auto)", this);
-				} else r.addInt(index);
-				printf(r, ";\n");
+			inline function printMeta(r:SfBuffer):Void {
+				if (module == sf.opt.SfGmlType.mtModule) {
+					// if we are inside gml.MetaType.* constructors,
+					// we just embed the name because otherwise they are going to use themselves
+					printf(r, '"mt_%(type_auto)"', this);
+				} else printf(r, "mt_%(type_auto)", this);
 			}
-			inline function setBlank():Void {
+			//
+			printf(r, "var this");
+			var protoCopyOffset:Int = 0;
+			if (nativeGen) {
+				// it has no meta so we want an empty array
 				if (sfConfig.hasArrayDecl) {
-					printf(r, "`=`[];");
+					printf(r, "`=`[]");
 				} else if (sfConfig.hasArrayCreate) {
 					printf(r, "`=`array_create(0)");
-				} else printf(r, ";`this[0]`=`undefined");
-				printf(r, ";\n");
-			}
-			if (indexes == 0) { // empty
-				printf(r, "var this");
-				setBlank();
-			}
-			else if (sfConfig.copyset) { // normal
-				printf(r, "var this`=`mq_%(type_auto);\n", this);
-				if (nativeGen || !sfConfig.legacyMeta) {
-					printf(r, "this[0%(hint)]`=`this[0];\n", "copyset");
-				} else setLegacyMeta();
-			}
-			else { // workarounds
-				printf(r, "var this");
-				if (nativeGen || !sfConfig.legacyMeta) {
-					setBlank();
+				} else printf(r, ";`this[0]`=`0");
+			} else if (sfConfig.legacyMeta) {
+				// it has legacy meta so we set that, at the same time creating the array
+				printf(r, ";`this[1,0%(hint)]`=`", "metatype");
+				printMeta(r);
+			} else {
+				// we initialize the array to have the meta as the first item
+				// and skip that item when copying from prototype
+				protoCopyOffset = 1;
+				if (sfConfig.hasArrayDecl) {
+					printf(r, "`=`[");
+					printMeta(r);
+					printf(r, "]");
 				} else {
-					printf(r, ";\n");
-					setLegacyMeta();
+					printf(r, ";`this[0%(hint)]`=`", "metatype");
+					printMeta(r);
 				}
-				printf(r, "array_copy(this,`0,`mq_%(type_auto),`0,`%d);\n", this, indexes);
 			}
+			printf(r, ";\n");
+			// finally, if we need to, array_copy the protoype into the resulting structure.
+			if (indexes > protoCopyOffset) printf(r,
+				"array_copy(this,`%d,`mq_%(type_auto),`%d,`%d);\n",
+				protoCopyOffset, this, protoCopyOffset, indexes - protoCopyOffset
+			);
 		}
 		
 		// add dynamic functions:
