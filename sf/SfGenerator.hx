@@ -675,7 +675,7 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addChar("[".code);
 				for (i in 0 ... vals.length) {
 					if (i > 0) r.addComma();
-					r.addExpr(vals[i], false);
+					r.addExpr(vals[i], true);
 				}
 				r.addChar("]".code);
 			};
