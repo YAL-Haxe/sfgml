@@ -1,6 +1,7 @@
 package js;
 import gml.MetaType;
 import gml.NativeArray;
+import gml.sys.System;
 
 /**
  * ...
@@ -68,7 +69,7 @@ class Boot {
 			#end
 		}
 		//
-		if (isJS) {
+		if (System.isBrowser) {
 			r = null;
 			r[0] = values[0];
 			i = 0; while (++i < n) r[i] = values[i];
@@ -98,7 +99,7 @@ class Boot {
 		r = NativeArray.create(size, null);
 		#else
 		r = null;
-		if (isJS) {
+		if (System.isBrowser) {
 			i = 0; while (i < size) r[i] = null;
 		} else {
 			i = size; while (--i >= 0) r[i] = null;
