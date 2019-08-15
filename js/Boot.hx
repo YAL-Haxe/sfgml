@@ -20,9 +20,13 @@ class Boot {
 	private static function getClass<T>(o:T):Class<T> {
 		if (MetaType.has(o)) {
 			var r = MetaType.get(o);
+			#if !sfgml_legacy_meta
+			return cast r;
+			#else
 			if (MetaType.has(r)) {
 				return cast r;
 			}
+			#end
 		}
 		return null;
 	}
