@@ -1,6 +1,7 @@
 package js;
 import gml.MetaType;
 import gml.NativeArray;
+import gml.NativeString;
 import gml.sys.System;
 
 /**
@@ -146,6 +147,18 @@ class Boot {
 	#if (sfgml_script_execute_wrap)
 	@:keep private static function script_execute():Dynamic {
 		return null;
+	}
+	#end
+	
+	#if (sfgml_catch_error)
+	@:keep private static function catch_error():String {
+		var s:String = SfTools.raw("catch_error_dequeue")();
+		SfTools.raw("catch_error_clear")();
+		var p = NativeString.pos("\r\n\r\n", s);
+		if (p >= 0) s = NativeString.delete(s, 1, p + 3);
+		p = NativeString.pos("\r\n at ", s);
+		if (p >= 0) s = NativeString.copy(s, 1, p - 1);
+		return s;
 	}
 	#end
 }

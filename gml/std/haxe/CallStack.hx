@@ -6,7 +6,13 @@ package haxe;
  */
 class CallStack {
 	
-	@:extern public static inline function callStack():Array<Dynamic> {
+	public static inline function toString(stack:Array<StackItem>):String {
+		return stack.join("\n");
+	}
+	
+	public static inline function callStack():Array<StackItem> {
 		return SfTools.raw("debug_get_callstack")();
 	}
 }
+
+typedef StackItem = Dynamic;
