@@ -58,6 +58,8 @@ class SfGmlArgs extends SfOptImpl {
 			for (d in argList) {
 				if (d.found == 0) {
 					d.arg.hidden = true;
+				} else if (d.arg.value != null) {
+					// don't inline optional arguments
 				} else if (d.found == 1) {
 					var hide = false;
 					if (d.from == null) {
