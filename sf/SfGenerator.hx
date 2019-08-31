@@ -355,6 +355,9 @@ class SfGenerator extends SfGeneratorImpl {
 	override function getPreproc():Array<SfOptImpl> {
 		var r = super.getPreproc();
 		var pre = [
+			#if sfgml_catch_error
+			new SfGmlCatchError(),
+			#end
 			new SfGmlWith(),
 			new SfOptIndexes(),
 			new SfOptBinop(),
@@ -971,26 +974,6 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 				printf(r, "show_error(%x,`false)", x);
 			};
-			#if sfgml_catch_error
-			case SfTry(block, catches): {
-				if (catches.length == 1) {
-					if (!wrap) printf(r, "{%(+\n)");
-					r.addExpr(block, false);
-					printf(r, "\nif`(catch_error_size())`{%(+\n)");
-					var ce = typeBoot != null ? typeBoot.realMap["catch_error"] : null;
-					printf(r, "var %s%s`=`", sfConfig.localPrefix, catches[0].v.name);
-					if (ce != null) {
-						printf(r, "%(field_auto)();\n", ce);
-					} else {
-						printf(r, "catch_error_dequeue();\n");
-						printf(r, "catch_error_clear();\n");
-					}
-					r.addExpr(catches[0].expr, false);
-					printf(r, "%(-\n)}");
-					if (!wrap) printf(r, "%(-\n)}");
-				} else expr.error("Only single-catch is supported for now");
-			};
-			#end
 			case SfCast(x, _): addExpr(x, wrap);
 			case SfMeta(m, x): addExpr(x, wrap);
 			default: error(expr, "Can't print " + expr.getName());
