@@ -428,6 +428,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfLocal(v): {
 				printf(r, "%s%s", sfConfig.localPrefix, v.name);
 			};
+			case SfIdent(_name): r.addString(_name);
 			case SfDynamic(_code, []): r.addString(_code);
 			case SfDynamic(_code, _args): {
 				if (_args.length >= 10) error(expr, "Too many arguments");
@@ -713,6 +714,7 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 				//
 				switch (x.def) {
+					case SfIdent(name): r.addString(name);
 					case SfDynamic(code, []): {
 						if (code.charCodeAt(code.length - 1) == "]".code) {
 							i = 3;

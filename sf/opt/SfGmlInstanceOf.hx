@@ -44,7 +44,7 @@ class SfGmlInstanceOf extends SfOptImpl {
 					switch (t.def) {
 						case SfTypeExpr(sft): {
 							inline function isfn(s:String) {
-								e.def = SfCall(e.mod(SfDynamic(s, [])), [x]);
+								e.def = SfCall(e.mod(SfIdent(s)), [x]);
 							}
 							inline function isfd(fd:SfClassField):Void {
 								e.def = SfCall(e.mod(SfStaticField(_StdImpl, fd)), [x]);

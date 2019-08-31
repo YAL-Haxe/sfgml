@@ -21,6 +21,7 @@ class SfGmlArrayAccess extends SfOptImpl {
 	public static function needsWrapping(e:SfExpr):Bool {
 		return switch (e.unpack().def) {
 			case SfConst(_): false;
+			case SfIdent(_): false;
 			case SfDynamic(s, _): s.indexOf("[") >= 0;
 			case SfLocal(_): false;
 			case SfStaticField(_, _): false;
@@ -90,10 +91,10 @@ class SfGmlArrayAccess extends SfOptImpl {
 								cfi = mod(SfConst(TString(s)));
 								if (aop != null) {
 									checkSideEffects(o);
-									e.setTo(SfCall(mod(SfDynamic("ds_map_set", [])), [
+									e.setTo(SfCall(mod(SfIdent("ds_map_set")), [
 										o, cfi, mod(SfBinop(aop, x.clone(), v))
 									]));
-								} else e.setTo(SfCall(mod(SfDynamic("ds_map_set", [])), [
+								} else e.setTo(SfCall(mod(SfIdent("ds_map_set")), [
 									o, cfi, v
 								]));
 							} else if (at.indexMap.exists(s)) {
@@ -117,7 +118,7 @@ class SfGmlArrayAccess extends SfOptImpl {
 						var at = sfGenerator.anonMap.baseGet(dt);
 						if (at != null) {
 							if (at.isDsMap) {
-								e.setTo(SfCall(mod(SfDynamic("ds_map_find_value", [])), [
+								e.setTo(SfCall(mod(SfIdent("ds_map_find_value")), [
 									o, mod(SfConst(TString(s)))
 								]));
 							} else if (at.indexMap.exists(s)) {
@@ -166,7 +167,7 @@ class SfGmlArrayAccess extends SfOptImpl {
 			e.iter(w, f);
 			switch (e.def) {
 				case SfInstField(x, q) if (q == flen): {
-					e.def = SfCall(e.mod(SfDynamic("array_length_1d", [])), [x]);
+					e.def = SfCall(e.mod(SfIdent("array_length_1d")), [x]);
 				};
 				default:
 			}

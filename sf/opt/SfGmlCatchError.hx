@@ -29,19 +29,19 @@ class SfGmlCatchError extends SfOptImpl {
 					if (catcherFunc != null) {
 						errorTextFunc = SfStaticField(typeBoot, catcherFunc);
 					} else {
-						errorTextFunc = SfDynamic("catch_error_dequeue", []);
+						errorTextFunc = SfIdent("catch_error_dequeue");
 					}
 					var errorTextVal = cx.mod(SfCall(cx.mod(errorTextFunc), []));
 					var then:Array<SfExpr> = [
 						cx.mod(SfVarDecl(c.v, true, errorTextVal))
 					];
 					if (catcherFunc == null) {
-						var clearFunc = cx.mod(SfDynamic("catch_error_clear", []));
+						var clearFunc = cx.mod(SfIdent("catch_error_clear"));
 						then.push(cx.mod(SfCall(clearFunc, [])));
 					}
 					then.push(cx);
 					//
-					var sizeFunc = cx.mod(SfDynamic("catch_error_size", []));
+					var sizeFunc = cx.mod(SfIdent("catch_error_size"));
 					var callSize = cx.mod(SfCall(sizeFunc, []));
 					expr.def = SfBlock([
 						stat,

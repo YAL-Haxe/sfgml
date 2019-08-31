@@ -92,7 +92,7 @@ class SfOptBinop extends SfOptImpl {
 		if (needStd && toString != null) {
 			toStringUsed = true;
 			cx = x.mod(SfStaticField(cStd, toString));
-		} else cx = x.mod(SfDynamic("string", []));
+		} else cx = x.mod(SfIdent("string"));
 		return x.mod(SfCall(cx, [x.clone()]));
 	}
 	
@@ -119,7 +119,7 @@ class SfOptBinop extends SfOptImpl {
 		switch (e.def) {
 			case SfBinop(o = OpAssignOp(OpAdd), a, b): { // `s += i` -> `s += string(i)`
 				if (a.isString() && !b.isString()) {
-					x = e.mod(SfCall(e.mod(SfDynamic("string", [])), [b.unpack()]));
+					x = e.mod(SfCall(e.mod(SfIdent("string")), [b.unpack()]));
 					e.setTo(SfBinop(o, a, x));
 				}
 			};

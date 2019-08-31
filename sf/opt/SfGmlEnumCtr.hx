@@ -69,7 +69,7 @@ class SfGmlEnumCtr extends SfOptImpl {
 					switch (v.unpack().def) {
 						case SfTypeExpr(t) if (Std.is(t, SfEnum)): {
 							var sfEnum:SfEnum = cast t;
-							var def = SfDynamic(ensureNames(sfEnum), []);
+							var def = SfIdent(ensureNames(sfEnum));
 							var sfArrayImpl:SfClass = cast sfGenerator.realMap["ArrayImpl"];
 							var fdCopy = sfArrayImpl != null ? sfArrayImpl.realMap["copy"] : null;
 							if (fdCopy != null) {
@@ -95,7 +95,7 @@ class SfGmlEnumCtr extends SfOptImpl {
 								if (!sfEnum.isFake) {
 									v = e.mod(SfEnumAccess(v, sfEnum, e.mod(SfConst(TInt(0)))));
 								}
-								e.setTo(SfArrayAccess(e.mod(SfDynamic(namesPath, [])), v));
+								e.setTo(SfArrayAccess(e.mod(SfIdent(namesPath)), v));
 							}
 						};
 						default: usesEnumConstructor = true;

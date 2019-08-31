@@ -34,7 +34,7 @@ class SfGmlArrayDecl extends SfOptImpl {
 				case SfArrayDecl(values): if (noArrayDecl) {
 					if (values.length == 0 && hasArrayCreate) {
 						e.setTo(SfCall(
-							e.mod(SfDynamic("array_create", [])),
+							e.mod(SfIdent("array_create")),
 							[e.mod(SfConst(TInt(0)))]
 						));
 					} else {

@@ -74,7 +74,10 @@ class SfGmlArgs extends SfOptImpl {
 					}
 					if (hide) {
 						d.arg.hidden = true;
-						d.first.def = SfDynamic('argument[${d.index}/* ${d.v.name} */]', []);
+						d.first.def = SfArrayAccess(
+							d.first.mod(SfIdent("argument")),
+							d.first.mod(SfConst(TInt(d.index)))
+						);
 					}
 				}
 			}
