@@ -713,7 +713,9 @@ class SfGenerator extends SfGeneratorImpl {
 				//
 				switch (x.def) {
 					case SfDynamic(code, []): {
-						r.addString(code);
+						if (code.charCodeAt(code.length - 1) == "]".code) {
+							i = 3;
+						} else r.addString(code);
 					};
 					case SfConst(TSuper): {
 						if (currentClass == null) {
