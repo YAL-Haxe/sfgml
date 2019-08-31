@@ -66,7 +66,7 @@ extern class Array<T> implements ArrayAccess<T> {
 		return new ArrayIterator(this);
 	}
 }
-@:native("array_hx_iterator")
+@:std @:native("array_hx_iterator")
 @:nativeGen private class ArrayIterator<T> {
 	public function new(arr:Array<T>) {
 		this.array = arr;
