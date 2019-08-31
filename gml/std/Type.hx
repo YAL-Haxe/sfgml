@@ -111,10 +111,14 @@ enum ValueType {
 	
 	public static function enumParameters(e:EnumValue):Array<Dynamic> {
 		var m:Array<Dynamic> = cast e;
+		#if !sfgml_legacy_meta
+		return m.slice(1);
+		#else
 		var n = NativeArray.cols2d(m, 0);
 		var r = NativeArray.create(n - 1);
 		while (--n >= 0) r[n - 1] = m[n];
 		return r;
+		#end
 	}
 	
 	public static inline function enumIndex(e:EnumValue):Int {
