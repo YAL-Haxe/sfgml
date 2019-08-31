@@ -26,8 +26,15 @@ class SfArgVars {
 		var expr = f.expr;
 		var args = f.args;
 		var argc:Int = args.length;
+		var usesArgs = false;
+		var i:Int, v:SfVar, arg:SfArgument;
+		i = -1; while (++i < argc) {
+			arg = args[i];
+			if (!arg.hidden) {
+				usesArgs = true;
+			}
+		}
 		var self:Int = inst ? expr.countThis() : 0;
-		var i:Int, v:SfVar;
 		var ropt:SfBuffer = null;
 		var lp = sfConfig.localPrefix;
 		if (self > 0 || argc > 0) {
@@ -43,9 +50,9 @@ class SfArgVars {
 			}
 			var ternary = sfConfig.ternary && !sfConfig.slowTernary;
 			i = -1; while (++i < argc) {
-				var arg = args[i];
+				arg = args[i];
 				v = arg.v;
-				if (expr.countLocal(v) > 0) {
+				if (!arg.hidden) {
 					var vname = sfGenerator.getVarName(v.name);
 					var vdef = arg.value;
 					if (vdef == null || !ternary) {

@@ -380,6 +380,7 @@ class SfGenerator extends SfGeneratorImpl {
 		r.push(new SfGmlTypeSwitch());
 		r.push(new SfGmlBigSwitch());
 		r.push(new SfGmlRepeat());
+		r.push(new SfGmlArgs());
 		r.push(new SfGmlArrayAccess());
 		r.push(new SfGmlCFor());
 		return r;
