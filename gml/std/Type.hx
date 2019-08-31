@@ -83,8 +83,9 @@ enum ValueType {
 		return null;
 	}
 	
-	public static inline function getEnumConstructs(e:Enum<Dynamic>):Array<String> {
-		throw "Type.getEnumConstructs is not supported.";
+	public static function getEnumConstructs(e:Enum<Dynamic>):Array<String> {
+		var reserveArrayCopy = [].copy();
+		throw "Dynamic Type.getEnumConstructs is not supported.";
 		return null;
 	}
 	
