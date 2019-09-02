@@ -30,7 +30,7 @@ extern class Instance {
 	#end
 	//
 	static function exists(inst:Instance):Bool;
-	static function count(type:EitherType<Object, Class<Instance>>):Int;
+	@:native("number") static function count(type:EitherType<Object, Class<Instance>>):Int;
 	static inline function fromId(id:Int):Instance return cast id;
 	//
 	function copy(performCreate:Bool):Instance;
