@@ -54,16 +54,22 @@ class Std {
 	}
 	
 	public static function parseFloat(s:String):Float {
+		var l = s.length;
 		var n = NativeString.digits(s).length;
 		var p = NativeString.pos(".", s);
 		var e = NativeString.pos("e", s);
+		if (e == 0) e = NativeString.pos("E", s); // allow "1E2"
 		switch (e) {
 			case 0: {};
 			case 1: return Math.NaN;
 			case 2: if (p > 0) return Math.NaN;
 			default: if (p > 0 && e < p) return Math.NaN;
 		}
-		return (cast n) && n == s.length
+		// allow "1e+1" / "1e-1"
+		if (e != 0 && e < l - 1) switch (NativeString.charCodeAt(s, e + 1)) {
+			case "+".code, "-".code: l--;
+		}
+		return (cast n) && n == l
 			- (cast (s.charCodeAt(0) == "-".code))
 			- (cast (p != 0))
 			- (cast (e != 0))
