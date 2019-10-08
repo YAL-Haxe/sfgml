@@ -17,14 +17,19 @@ class StringTools {
 	private static var urlEncode_hex:Array<Int> = null;
 	private static function urlEncode_init() {
 		//
-		var arr = NativeArray.create(256, false);
-		for (i in 0 ... 32) arr[i] = true;
-		for (i in 126 ... 256) arr[i] = true;
-		for (i in [
-			"$".code, "&".code, "+".code, ",".code, "/".code, ":".code, ";".code, "=".code, "?".code,
-			"@".code, " ".code, '"'.code, "<".code, ">".code, "#".code, "%".code, "{".code, "}".code,
-			"|".code, "\\".code, "^".code, "~".code, "[".code, "]".code, "`".code
-		]) arr[i] = true;
+		var arr = NativeArray.create(256, true), i:Int;
+		i = "A".code; while (i <= "Z".code) arr[i++] = false;
+		i = "a".code; while (i <= "z".code) arr[i++] = false;
+		i = "0".code; while (i <= "9".code) arr[i++] = false;
+		arr["-".code] = false;
+		arr["_".code] = false;
+		arr[".".code] = false;
+		arr["!".code] = false;
+		arr["~".code] = false;
+		arr["*".code] = false;
+		arr["'".code] = false;
+		arr["(".code] = false;
+		arr[")".code] = false;
 		urlEncode_esc = arr;
 		//
 		var hex = NativeArray.create(256, 0);
