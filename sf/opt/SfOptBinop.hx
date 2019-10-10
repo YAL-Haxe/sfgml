@@ -68,6 +68,11 @@ class SfOptBinop extends SfOptImpl {
 			), x): {
 				e.setTo(SfBinop(OpAssign, vx, e.mod(SfBinop(o, vx.clone(), x))));
 			};
+			case SfBinop(OpAssign | OpAssignOp(_), _,
+				_.def => SfBinop(OpAssign | OpAssignOp(_), _, _)
+			): {
+				SfExprTools.error(e, "Can't do chain assignment in GML");
+			};
 			default:
 		}
 	}
