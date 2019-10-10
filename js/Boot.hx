@@ -77,10 +77,10 @@ class Boot {
 		if (System.isBrowser) {
 			r = null;
 			r[0] = values[0];
-			i = 0; while (++i < n) r[i] = values[i];
+			i = 0; while (++i < n) NativeArray.copyset(r, i, values[i]);
 		} else {
 			r = null;
-			while (--n >= 0) r[n] = values[n];
+			while (--n >= 0) NativeArray.copyset(r, n, values[n]);
 		}
 		return r;
 	}
