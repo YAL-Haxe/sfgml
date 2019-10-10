@@ -42,7 +42,7 @@ class SfYyGen {
 		if (!FileSystem.exists(path) && FileSystem.exists(path + ".base")) path_in += ".base";
 		var json:String = File.getContent(path_in);
 		// GMS2 uses non-spec int64s in extensions JSON
-		json = ~/("copyToTargets":\s*)(\d{12,32})/g.replace(json, '$1"$2"');
+		json = ~/("(?:copyToTargets|supportedTargets)":\s*)(\d{12,32})/g.replace(json, '$1"$2"');
 		//
 		var timeShow = false, timeStamp = 0.;
 		inline function timeStart(name:String) {
@@ -169,16 +169,11 @@ class SfYyGen {
 		SfGmxGen.iter(addFunc, addMacro);
 		//
 		timeStart("Encoding JSON");
-		json = Json.stringify(extension, null, "    ");
+		json = SfYyJson.stringify(extension);
 		timeEnd();
 		//
-		//println("Postfixing linebreaks...");
-		//json = StringTools.replace(json, "\n", "\r\n");
-		//json = ~/\n/g.replace(json, "\r\n");
-		//
 		//println("Postfixing flags...");
-		json = ~/("copyToTargets":\s*)"([^"]+)"/g.replace(json, '$1$2');
-		json = StringTools.replace(json, "\n", "\r\n");
+		json = ~/("(?:copyToTargets|supportedTargets)":\s*)"([^"]+)"/g.replace(json, '$1$2');
 		//
 		timeStart("Saving");
 		File.saveContent(path, json);
