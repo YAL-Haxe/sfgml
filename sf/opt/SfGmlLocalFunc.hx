@@ -88,7 +88,7 @@ class SfGmlLocalFunc extends SfOptImpl {
 							pos: f.expr.getPos(),
 							doc: null,
 							overloads: null,
-							#if !(haxe <= "4.0.0-preview.4")
+							#if (haxe >= "4.0.0")
 							isFinal: true,
 							isExtern: false,
 							#end

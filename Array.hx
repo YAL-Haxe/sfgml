@@ -36,33 +36,33 @@ extern class Array<T> implements ArrayAccess<T> {
 	
 	inline function sort(fn:T->T->Int):Void ArrayImpl.sort(this, fn);
 	inline function map<S>(fn:T->S):Array<S> return ArrayImpl.map(this, fn);
-	inline function filter(fn:T->Bool):Array<T> return ArrayImpl.filter(this, fn);
+	@:runtime inline function filter(fn:T->Bool):Array<T> return ArrayImpl.filter(this, fn);
 	
 	inline function resize(len:Int):Void ArrayImpl.resize(this, len);
 	
 	//{
 	/** Array.pop cannot be implemented because GML arrays cannot be contracted */
-	@:extern public inline function pop():Null<T> {
+	extern public inline function pop():Null<T> {
 		throw "Array.pop is not supported.";
 	}
 	
 	/** Array.shift cannot be implemented because GML arrays cannot be contracted */
-	@:extern public inline function shift():Null<T> {
+	extern public inline function shift():Null<T> {
 		throw "Array.shift is not supported.";
 	}
 	
 	/** Array.remove cannot be implemented because GML arrays cannot be contracted */
-	@:extern public inline function remove(v:T):Bool {
+	extern public inline function remove(v:T):Bool {
 		throw "Array.remove is not supported.";
 	}
 	
 	/** Array.splice cannot be implemented because GML arrays cannot be contracted */
-	@:extern public inline function splice(pos:Int, len:Int):Array<T> {
+	extern public inline function splice(pos:Int, len:Int):Array<T> {
 		throw "Array.splice is not supported";
 	}
 	//}
 	
-	inline function iterator():Iterator<T> {
+	@:runtime inline function iterator():Iterator<T> {
 		return new ArrayIterator(this);
 	}
 }
