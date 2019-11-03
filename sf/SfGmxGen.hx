@@ -46,7 +46,7 @@ class SfGmxGen {
 				Context.warning('First definition of $dupName was here', dupPos);
 				if (dupName != name) {
 					Context.warning('This is technically OK (`$dupName`<>`$name`), '
-					+ 'but your extension will not compiled under YYC on Windows '
+					+ 'but your extension will not compile under YYC on Windows '
 					+ 'because file system is case-insensitive and thus they are the same name',
 					dupPos);
 				}
