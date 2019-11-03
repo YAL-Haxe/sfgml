@@ -182,7 +182,9 @@ class SfGenerator extends SfGeneratorImpl {
 				#if (sf_hint_const)
 				var src = pos.getSource();
 				var z = true;
-				if (src.indexOf("0x") >= 0) {
+				if (src == null) {
+					// don't touch
+				} else if (src.indexOf("0x") >= 0) {
 					printf(r, "$%s", StringTools.hex(i)); z = false;
 				} else if (src.indexOf('".code') >= 0 || src.indexOf("'.code") >= 0) {
 					if (i == 92) {
@@ -218,7 +220,7 @@ class SfGenerator extends SfGeneratorImpl {
 				var p = s.indexOf(".");
 				if (p >= 0 && s.length - p > 6) {
 					var src = pos.getSource();
-					if (!identRx.match(src)) {
+					if (src != null && !identRx.match(src)) {
 						printf(r, "(%s)", src);
 					} else r.addString(s);
 				} else r.addString(s);
