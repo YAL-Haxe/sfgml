@@ -16,6 +16,8 @@ extern class Lib {
 	/** Returns the number of milliseconds since sometime. */
 	static inline function getTimer():Int return currentTime;
 	
+	@:expose("undefined") static var undefined:Dynamic;
+	
 	//{ GML-specific features
 	
 	/** A quick and generally-alright integer division. Result is int32 */
