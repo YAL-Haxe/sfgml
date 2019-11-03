@@ -51,10 +51,10 @@ class String {
 		//
 		return arr;
 	}
-	public inline function substr(pos:Int, length:Int = 0x7fffffff):String {
+	public function substr(pos:Int, length:Int = 0x7fffffff):String {
 		return NativeString.copy(NativeString.delete(this, 1, pos), 1, length);
 	}
-	public inline function substring(start:Int, end:Int = 0x7fffffff):String {
+	public function substring(start:Int, end:Int = 0x7fffffff):String {
 		return NativeString.delete(NativeString.copy(this, 1, end), 1, start);
 	}
 	@:extern public inline function toString():String {
