@@ -37,7 +37,7 @@ class String {
 	public function split(del:String):Array<String> {
 		var str:String = this, num:Int = 0;
 		//
-		var arr:Array<String> = gml.NativeArray.create(NativeString.count(del, str) + 1);
+		var arr:Array<String> = gml.NativeArray.createEmpty(NativeString.count(del, str) + 1);
 		//
 		var pos = NativeString.pos(del, str);
 		while (pos > 0) {

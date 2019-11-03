@@ -212,7 +212,7 @@ class ArrayImpl {
 		}
 		if (end == null || end > len) end = len;
 		var len = end - pos;
-		var out = NativeArray.create(len);
+		var out = NativeArray.createEmpty(len);
 		NativeArray.copyPart(out, 0, arr, pos, len);
 		return out;
 	}
@@ -235,7 +235,7 @@ class ArrayImpl {
 	//{
 	public static function map<T, S>(arr:Array<T>, fn:T->S):Array<S> {
 		var len = arr.length;
-		var out = NativeArray.create(len);
+		var out = NativeArray.createEmpty(len);
 		for (i in 0 ... len) out[i] = fn(arr[i]);
 		return out;
 	}
@@ -256,7 +256,7 @@ class ArrayImpl {
 		}
 		//
 		len = acc.length;
-		var out = NativeArray.create(len);
+		var out = NativeArray.createEmpty(len);
 		pos = 0;
 		while (pos < len) {
 			out[pos] = acc[pos];

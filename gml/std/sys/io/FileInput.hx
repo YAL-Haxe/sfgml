@@ -12,7 +12,7 @@ class FileInput extends Input {
 	function new(path:String) {
 		var buf = Buffer.load(path);
 		var size = buf.length;
-		var d = gml.NativeArray.create(size);
+		var d = gml.NativeArray.createEmpty(size);
 		for (i in 0 ... size) {
 			d[i] = buf.readByte();
 		}

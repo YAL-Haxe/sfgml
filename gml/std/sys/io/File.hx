@@ -16,7 +16,7 @@ import haxe.io.BytesData;
 	private static function getBytesData(path:String):BytesData {
 		var buf = Buffer.load(path);
 		var size = buf.length;
-		var d = gml.NativeArray.create(size);
+		var d = gml.NativeArray.createEmpty(size);
 		for (i in 0 ... size) {
 			d[i] = buf.readByte();
 		}

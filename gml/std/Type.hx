@@ -116,7 +116,7 @@ enum ValueType {
 		return m.slice(1);
 		#else
 		var n = NativeArray.cols2d(m, 0);
-		var r = NativeArray.create(n - 1);
+		var r = NativeArray.createEmpty(n - 1);
 		while (--n >= 0) r[n - 1] = m[n];
 		return r;
 		#end

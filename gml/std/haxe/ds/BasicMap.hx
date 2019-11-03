@@ -167,7 +167,7 @@ class BasicMap<K, V> {
 		}
 	}
 	private inline function rawFindAllImpl<T>(fn:BasicMapPair<K, V>->T):Array<T> {
-		var out = NativeArray.create(size);
+		var out = NativeArray.createEmpty(size);
 		var found = 0;
 		rawIterImpl(function(item) {
 			out[found++] = fn(item);
@@ -189,7 +189,8 @@ class BasicMap<K, V> {
 		var tableSize = this.tableSize;
 		var nextPairs;
 		if (next.tableSize != tableSize) {
-			nextPairs = NativeArray.create(tableSize);
+			nextPairs = NativeArray.createEmpty(tableSize);
+			next.pairs = nextPairs;
 			next.tableSize = tableSize;
 		} else nextPairs = next.pairs;
 		NativeArray.copyPart(nextPairs, 0, pairs, 0, tableSize);

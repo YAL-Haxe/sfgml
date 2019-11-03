@@ -122,7 +122,7 @@ class Input {
 		var start = dataPos;
 		var till = dataLen;
 		var size = till - start;
-		var out = NativeArray.create(size);
+		var out = NativeArray.createEmpty(size);
 		NativeArray.copyPart(out, 0, data, start, size);
 		dataPos = till;
 		return Bytes.ofData(out);
@@ -132,7 +132,7 @@ class Input {
 		var start = dataPos;
 		var avail = dataLen - start;
 		if (len > avail) len = avail;
-		var out = NativeArray.create(len);
+		var out = NativeArray.createEmpty(len);
 		NativeArray.copyPart(out, 0, data, start, len);
 		dataPos = start + len;
 		return Bytes.ofData(out);

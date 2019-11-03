@@ -218,7 +218,7 @@ private class BytesImpl {
 		b.rewind();
 		b.writeChars(s);
 		var size = b.position;
-		var out = NativeArray.create(size);
+		var out = NativeArray.createEmpty(size);
 		b.rewind();
 		for (i in 0 ... size) out[i] = b.readByte();
 		return out;

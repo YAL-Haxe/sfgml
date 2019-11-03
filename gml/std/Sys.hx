@@ -13,7 +13,7 @@ import gml.NativeArray;
 	}
 	public static function args():Array<String> {
 		var argc = raw("parameter_count")() - 1;
-		var argv = NativeArray.create(argc);
+		var argv = NativeArray.createEmpty(argc);
 		for (i in 0 ... argc) {
 			argv[i] = raw("parameter_string")(i + 1);
 		}

@@ -14,7 +14,7 @@ import haxe.io.BytesData;
 	private var strLen:Int = 0;
 	private static inline var strMax:Int = 128;
 	
-	private var arr:Array<String> = NativeArray.create(arrMax0);
+	private var arr:Array<String> = NativeArray.createEmpty(arrMax0);
 	private var arrLen:Int = 0;
 	private var arrMax:Int = arrMax0;
 	private static inline var arrMax0 = 4;

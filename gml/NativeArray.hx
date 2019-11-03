@@ -8,15 +8,17 @@ import SfTools.*;
 @:native("array") @:final @:std
 extern class NativeArray {
 	
+	/** Creates an array of given size and fills it with given value */
+	@:noUsing static function create<T>(size:Int, val:T):Array<T>;
+	
 	/**
-	   Creates an array of given size.
-	   If value is not specified, the array will be filled with zeroes
-	**/
-	//@:noUsing static function create<T>(size:Int, ?value:T):Array<T>;
-	@:noUsing static inline function create<T>(size:Int, value:T = cast 0):Array<T> {
-		// calling with 1 argument won't work b/c https://bugs.yoyogames.com/view.php?id=29362
-		// can't call with null as value specifically..?
-		return raw("array_create")(size, value);
+	 * Same as above, but lets GM select the value (currently 0).
+	 * This will eventually (GMS >= 2.3) be faster than normal create(),
+	 * and is to be used if you are going to populate it yourself anyway.
+	 * @see https://bugs.yoyogames.com/view.php?id=29362
+	 */
+	@:noUsing static inline function createEmpty<T>(size:Int):Array<T> {
+		return create(size, cast 0);
 	}
 	
 	/** Returns the number of items in the given array */

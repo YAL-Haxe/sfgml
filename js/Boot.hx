@@ -66,7 +66,7 @@ class Boot {
 		var n:Int = values.length, i:Int, r:Array<T>;
 		if (n == 0) {
 			#if (sfgml_array_create)
-			return NativeArray.create(0);
+			return NativeArray.createEmpty(0);
 			#else
 			r = null;
 			NativeArray.copyset2d(r, 1, 0, null);

@@ -70,7 +70,7 @@ class MetaType<T> {
 	@:keep private static function proto<T>(rest:SfRest<Any>):Any {
 		var n = rest.length, out:Array<Any>;
 		#if (sfgml_array_create)
-		out = NativeArray.create(n);
+		out = NativeArray.createEmpty(n);
 		#else
 		out = null;
 		#end
