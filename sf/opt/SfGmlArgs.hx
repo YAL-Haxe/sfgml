@@ -76,7 +76,7 @@ class SfGmlArgs extends SfOptImpl {
 					}
 					if (hide) {
 						d.arg.hidden = true;
-						d.first.def = SfIdent("argument[" + d.index + "]");
+						d.first.def = SfDynamic("argument[" + d.index + "]", []);
 					}
 				}
 			}
