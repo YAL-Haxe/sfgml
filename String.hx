@@ -51,16 +51,56 @@ class String {
 		//
 		return arr;
 	}
-	public function substr(pos:Int, length:Int = 0x7fffffff):String {
+	#if (haxe >= "4.0.0")
+	public function substr(pos:Int, ?len:Int):String {
+		if (pos < 0) pos += this.length;
+		if (len == null) {
+			return NativeString.delete(this, 1, pos);
+		} else {
+			return NativeString.copy(this, 1 + pos, len);
+		}
+	}
+	public function substring(start:Int, ?end:Int):String {
+		if (end == null) {
+			if (start > 0) {
+				return NativeString.delete(this, 1, start);
+			} else return this;
+		}
+		// If `startIndex` or `endIndex` are negative, 0 is used instead.
+		if (start < 0) start = 0;
+		if (end < 0) end = 0;
+		// If `startIndex` exceeds `endIndex`, they are swapped.
+		if (start > end) {
+			var tmp = start;
+			start = end;
+			end = tmp;
+		}
+		//
+		var len = this.length;
+		if (start >= len) {
+			return "";
+		} else if (end >= len) {
+			if (start > 0) {
+				return NativeString.delete(this, 1, start);
+			} else return this;
+		} else {
+			return NativeString.copy(this, start, end - start);
+		}
+	}
+	#else
+	// these get optimized in SfGmlNativeString
+	public inline function substr(pos:Int, length:Int = 0x7fffffff):String {
 		return NativeString.copy(NativeString.delete(this, 1, pos), 1, length);
 	}
-	public function substring(start:Int, end:Int = 0x7fffffff):String {
+	public inline function substring(start:Int, end:Int = 0x7fffffff):String {
 		return NativeString.delete(NativeString.copy(this, 1, end), 1, start);
 	}
-	@:extern public inline function toString():String {
+	#end
+	
+	public inline function toString():String {
 		return this;
 	}
-	@:extern public static inline function fromCharCode(i:Int):String {
+	public static inline function fromCharCode(i:Int):String {
 		return NativeString.fromCharCode(i);
 	}
 	public inline function toLowerCase():String {
