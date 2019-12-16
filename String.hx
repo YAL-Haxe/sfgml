@@ -97,7 +97,7 @@ class String {
 	}
 	#end
 	
-	public inline function toString():String {
+	extern public inline function toString():String {
 		return this;
 	}
 	public static inline function fromCharCode(i:Int):String {
