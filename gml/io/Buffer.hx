@@ -116,9 +116,9 @@ import haxe.Int64;
 	inline function peekShortUnsigned(pos:Int):Int return peek(pos, u16);
 	inline function peekShort(pos:Int):Int return peek(pos, u16);
 	//
-	inline function peekIntSigned(pos:Int):Int return peek(pos, s16);
-	inline function peekIntUnsigned(pos:Int):Int return peek(pos, u16);
-	inline function peekInt(pos:Int):Int return peek(pos, s16);
+	inline function peekIntSigned(pos:Int):Int return peek(pos, s32);
+	inline function peekIntUnsigned(pos:Int):Int return peek(pos, u32);
+	inline function peekInt(pos:Int):Int return peek(pos, s32);
 	//
 	inline function peekFloat(pos:Int):Float return peek(pos, f32);
 	inline function peekDouble(pos:Int):Float return peek(pos, f64);
