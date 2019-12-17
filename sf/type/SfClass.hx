@@ -77,6 +77,10 @@ class SfClass extends SfClassImpl {
 		sfGenerator.currentField = null;
 	}
 	
+	public function needsSeparateNewFunc():Bool {
+		return children.length > 0 || meta.has(":gml.keep.new");
+	}
+	
 	private function printConstructor(r:SfBuffer, ctr:SfClassField):Void {
 		var ctr_isInst = ctr.isInst;
 		var ctr_name = ctr.name;
@@ -87,7 +91,7 @@ class SfClass extends SfClassImpl {
 		};
 		
 		// _new, if this has children:
-		var sepNew = children.length > 0 || meta.has(":gml.keep.new");
+		var sepNew = needsSeparateNewFunc();
 		if (sepNew) {
 			ctr.isInst = true; ctr.name = "new";
 			printf(r, "\n#define %s\n", ctr_path);

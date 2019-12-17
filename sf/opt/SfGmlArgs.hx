@@ -22,7 +22,12 @@ class SfGmlArgs extends SfOptImpl {
 			if (fd.expr == null) return;
 			var argMap = new Map<String, SfGmlArgsData>();
 			var argList:Array<SfGmlArgsData> = [];
-			var argCount:Int = fd.isInst ? 1 : 0;
+			var argCount:Int = 0;
+			if (fd.isInst || (currentClass != null
+				&& fd == currentClass.constructor
+				&& currentClass.needsSeparateNewFunc()
+			)) argCount = 1;
+			//
 			for (arg in fd.args) {
 				var v = arg.v;
 				var d:SfGmlArgsData = {
