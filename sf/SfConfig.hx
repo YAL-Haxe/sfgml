@@ -93,6 +93,9 @@ class SfConfig extends SfConfigImpl {
 	/** https://bugs.yoyogames.com/view.php?id=29749 */
 	public var slowTernary:Bool = true;
 	
+	/** https://bugs.yoyogames.com/view.php?id=30411 */
+	public var slowPostfix:Bool = true;
+	
 	/** Stores type information in [1,0] instead of [0] */
 	public var legacyMeta:Bool = bool("sfgml-legacy-meta");
 	
@@ -108,6 +111,7 @@ class SfConfig extends SfConfigImpl {
 		//Sys.println(d);
 		ternary = d.ternary;
 		copyset = d.copyset;
+		slowPostfix = compare(d.version, "2.2.3") < 0;
 	}
 	static var findVersion_1:SfGmlVersion = null;
 	static function findVersion():SfGmlVersion {

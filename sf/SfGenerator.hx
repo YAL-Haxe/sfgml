@@ -527,7 +527,8 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfUnop(o = OpIncrement | OpDecrement, _postFix, x): { // ++\--
 				z = (o == OpIncrement);
-				if (!_postFix || wrap == false) r.addString(z ? "++" : "--");
+				var wantPrefix = (_postFix && wrap == false && sfConfig.slowPostfix);
+				if (!_postFix || wantPrefix) r.addString(z ? "++" : "--");
 				switch (x.def) {
 					case SfInstField(q, f): {
 						if ((i = f.index) >= 0) {
@@ -543,7 +544,7 @@ class SfGenerator extends SfGeneratorImpl {
 					};
 					default: r.addExpr(x, true);
 				}
-				if (wrap != false && _postFix) r.addString(z ? "++" : "--");
+				if (!wantPrefix && _postFix) r.addString(z ? "++" : "--");
 			};
 			case SfUnop(_op, _postFix, _expr): {
 				if (wrap) {
