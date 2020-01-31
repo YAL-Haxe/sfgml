@@ -33,6 +33,11 @@ extern class NativeType {
 		return NativeTypeHelper.isIntNumber(v);
 	}
 	
+	/** Returns whether the value is a NaN or inf */
+	static inline function isNonFinite(v:Dynamic):Bool {
+		return NativeTypeHelper.isNonFinite(v);
+	}
+	
 	@:expose("typeof") static function typeof(v:Dynamic):String;
 	
 	@:expose("string") static function toString(v:Dynamic):String;
@@ -54,5 +59,8 @@ extern class NativeType {
 		return NativeType.isInt64(value)
 			|| NativeType.isInt32(value)
 			|| NativeType.isBool(value);
+	}
+	public static function isNonFinite(value:Dynamic):Bool {
+		return NativeType.isNaN(value) || NativeType.isInfinity(value);
 	}
 }
