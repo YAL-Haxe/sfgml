@@ -84,7 +84,7 @@ class String {
 				return NativeString.delete(this, 1, start);
 			} else return this;
 		} else {
-			return NativeString.copy(this, start, end - start);
+			return NativeString.copy(this, start + 1, end - start);
 		}
 	}
 	#else
