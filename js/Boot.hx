@@ -2,6 +2,7 @@ package js;
 import gml.MetaType;
 import gml.NativeArray;
 import gml.NativeString;
+import gml.io.Buffer;
 import gml.sys.System;
 
 /**
@@ -151,27 +152,45 @@ class Boot {
 	#end
 	
 	#if (sfgml_catch_error)
-	@:keep private static function catch_error():String {
+	@:keep private static function catch_error():js.lib.Error {
 		var s:String = SfTools.raw("catch_error_dequeue")();
 		SfTools.raw("catch_error_clear")();
-		var p = NativeString.pos("\r\n\r\n", s);
-		if (p >= 0) s = NativeString.delete(s, 1, p + 3);
-		p = NativeString.pos("\r\n at ", s);
-		if (p >= 0) s = NativeString.copy(s, 1, p - 1);
-		return s;
+		var e = new js.lib.Error();
+		e.parseGMError(s);
+		return e;
 	}
 	#end
 }
 
-@:remove private class HaxeError extends js.lib.Error {
+#if !sfgml_catch_error @:remove #end
+private class HaxeError extends js.lib.Error {
 	var val:Dynamic;
+	//
+	private static var concatBuf:Buffer = Buffer.defValue;
 	@:pure public function new(val:Dynamic) {
 		super();
+		this.val = val;
+		//
+		var b = concatBuf;
+		if (b == Buffer.defValue) {
+			b = new Buffer(1024, Grow, 1);
+			concatBuf = b;
+		}
+		b.rewind();
+		var stack:Array<String> = SfTools.raw("debug_get_callstack")();
+		for (i in 1 ... stack.length) { // (excluding this item)
+			if (i > 1) b.writeChars("\r\n");
+			b.writeChars(stack[i]);
+		}
+		b.writeByte(0);
+		b.rewind();
+		//
+		this.name = "HaxeError";
+		this.message = Std.string(val);
+		this.stack = b.readString();
 	}
+	//
 	public static function wrap(val:Dynamic):js.lib.Error {
 		return if (js.Syntax.instanceof(val, js.lib.Error)) val else new HaxeError(val);
-	}
-	public static function create(v:Dynamic) {
-		return v;
 	}
 }
