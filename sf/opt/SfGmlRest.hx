@@ -14,6 +14,22 @@ import haxe.macro.Type;
  * @author YellowAfterlife
  */
 class SfGmlRest extends SfOptImpl {
+	static function isSfRestRec(t:Type):Bool {
+		switch (t) {
+			case TAbstract(_.get() => { name: "SfRest" }, _): {
+				return true;
+			};
+			case TAbstract(_.get() => { name: "Null" }, [
+				TAbstract(_.get() => { name: "SfRest" }, _)
+			]): {
+				return true;
+			};
+			case TType(_.get() => td, _): {
+				return isSfRestRec(td.type);
+			};
+			default: return false;
+		}
+	}
 	override public function apply() {
 		var sfRest:SfClass = sfGenerator.typeFind("SfRest:SfRest", SfClass);
 		if (sfRest == null) return;
@@ -22,16 +38,8 @@ class SfGmlRest extends SfOptImpl {
 			var args = currentField.args;
 			if (args == null) return;
 			var argc = args.length;
-			if (argc > 0) switch (args[argc - 1].v.type) {
-				case TAbstract(_.get() => { name: "SfRest" }, _): {
-					currentField.restOffset = argc - (currentField.isInst ? 0 : 1);
-				};
-				case TAbstract(_.get() => { name: "Null" }, [
-					TAbstract(_.get() => { name: "SfRest" }, _)
-				]): {
-					currentField.restOffset = argc - (currentField.isInst ? 0 : 1);
-				};
-				default:
+			if (argc > 0 && isSfRestRec(args[argc - 1].v.type)) {
+				currentField.restOffset = argc - (currentField.isInst ? 0 : 1);
 			}
 		});
 		sfRest.isHidden = true;
