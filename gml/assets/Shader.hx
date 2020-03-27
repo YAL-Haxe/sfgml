@@ -8,6 +8,7 @@ extern class Shader extends Asset {
 	//
 	static inline function fromIndex(i:Int):Shader return cast i;
 	//{
+	/** GMS2 only */
 	var name(get, never):String;
 	private function get_name():String;
 	

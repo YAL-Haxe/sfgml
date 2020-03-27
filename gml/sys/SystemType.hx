@@ -4,7 +4,8 @@ package gml.sys;
  * ...
  * @author YellowAfterlife
  */
-@:enum abstract SystemType(Int) from Int to Int {
+enum abstract SystemType(Int) from Int to Int {
+	var Unknown = -1;
 	var Windows = 0;
 	var MacOSX = 1;
 	var iOS = 3;
@@ -19,4 +20,5 @@ package gml.sys;
 	var XBox360 = 17;
 	var UWP = 18;
 	var TVOS = 20;
+	var Switch = 21;
 }

@@ -10,7 +10,7 @@ abstract UdpWrapSocket(Socket) {
 	public static var defValue:UdpWrapSocket = cast -1;
 	//
 	public inline function new() {
-		this = new Socket.createClient(SocketType.UDP);
+		this = Socket.createClient(SocketType.UDP);
 	}
 	public static inline function createAt(port:Int):UdpWrapSocket {
 		return cast Socket.createClientAt(SocketType.UDP, port);
