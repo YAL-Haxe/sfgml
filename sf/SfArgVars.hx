@@ -259,6 +259,6 @@ class SfArgVars {
 		// print @:doc:
 		if (flags & 2 != 0) r.addLine();
 		if (jsdoc != null && jsdoc.length > 0) r.addString(jsdoc.toString());
-		if ((ext || jsdoc == null) && doc != null) printf(r, "// %s", doc);
+		if ((ext || jsdoc == null) && doc != null && doc.indexOf("\n") < 0) printf(r, "// %s", doc);
 	}
 }
