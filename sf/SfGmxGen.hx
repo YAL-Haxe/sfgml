@@ -206,6 +206,15 @@ class SfGmxGen {
 				addMacro(b1.toString(), b2.toString(), true, sff.doc, sff);
 			}
 		}
+		function addAnon(sfq:SfAnon) {
+			if (sfq.isHidden) return;
+			var sfqd = sfq.docState;
+			for (sff in sfq.fields) {
+				if (!sff.checkDocState(sfqd)) continue;
+				var b1 = new SfBuffer(); b1.addFieldPathAuto(sff);
+				addMacro(b1.toString(), Std.string(sff.index), true, sff.doc, sff);
+			}
+		}
 		for (t in sfGenerator.typeList) {
 			if (Std.is(t, SfClass)) {
 				addClass(cast t);
@@ -213,6 +222,8 @@ class SfGmxGen {
 				addEnum(cast t);
 			} else if (Std.is(t, SfAbstract)) {
 				addAbstract(cast t);
+			} else if (Std.is(t, SfAnon)) {
+				addAnon(cast t);
 			}
 		}
 	}
