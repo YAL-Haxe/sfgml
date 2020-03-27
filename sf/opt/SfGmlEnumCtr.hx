@@ -18,6 +18,7 @@ import haxe.macro.Expr.Binop.*;
 class SfGmlEnumCtr extends SfOptImpl {
 	public static var code:String = null;
 	override public function apply() {
+		ignoreHidden = true;
 		code = "";
 		//
 		var clType:SfClass = cast sfGenerator.realMap["Type"];
@@ -25,7 +26,7 @@ class SfGmlEnumCtr extends SfOptImpl {
 		var fdEnumConstructor = clType.realMap["enumConstructor"];
 		var fdGetEnumConstructs = clType.realMap["getEnumConstructs"];
 		if (fdEnumConstructor == null && fdGetEnumConstructs == null) return;
-		var usesEnumConstructor = false;
+		var usesEnumConstructorAt:SfExpr = null;
 		var usesGetEnumConstructs = false;
 		//
 		var found = new SfTypeMap<String>();
@@ -98,13 +99,13 @@ class SfGmlEnumCtr extends SfOptImpl {
 								e.setTo(SfArrayAccess(e.mod(SfIdent(namesPath)), v));
 							}
 						};
-						default: usesEnumConstructor = true;
+						default: usesEnumConstructorAt = e;
 					}
 				};
 				default:
 			}
 		});
-		if (!usesEnumConstructor && fdEnumConstructor != null) fdEnumConstructor.isHidden = true;
+		if (usesEnumConstructorAt == null && fdEnumConstructor != null) fdEnumConstructor.isHidden = true;
 		if (!usesGetEnumConstructs && fdGetEnumConstructs != null) fdGetEnumConstructs.isHidden = true;
 		code = out.toString();
 	}

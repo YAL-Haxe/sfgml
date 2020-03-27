@@ -18,6 +18,7 @@ class SfGmlInstanceOf extends SfOptImpl {
 	public static var isUsed:Bool;
 	
 	override public function apply() {
+		ignoreHidden = true;
 		var sfg = sfGenerator;
 		
 		// Std class is usually eliminated from AST, but, just in case it isn't, we want
