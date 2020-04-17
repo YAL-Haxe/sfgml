@@ -10,7 +10,7 @@ import haxe.io.Bytes;
 #if !sfgml_native_bytes
 class Output {
 	private static inline var dataLen0 = 32;
-	private var data:BytesData = NativeArray.createEmpty(dataLen0, 0);
+	private var data:BytesData = NativeArray.createEmpty(dataLen0);
 	private var dataPos:Int = 0;
 	private var dataLen:Int = dataLen0;
 	public var bigEndian:Bool = false;
