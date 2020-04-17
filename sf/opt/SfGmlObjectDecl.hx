@@ -55,7 +55,7 @@ class SfGmlObjectDecl extends SfOptImpl {
 					case TType(_.get() => dt, _): sfGenerator.anonMap.baseGet(dt);
 					default: null;
 				};
-				if (at != null) {
+				if (at != null && !at.isStruct) {
 					var idm = at.indexMap;
 					var found = false;
 					var prev = w[0];

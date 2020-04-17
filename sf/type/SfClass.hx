@@ -23,24 +23,41 @@ class SfClass extends SfClassImpl {
 	/** Classes marked `@:std` get unprefixed variable access. */
 	public var isStd:Bool;
 	
-	/** */
+	/** If this is based on an object instance, indicates object to create */
 	public var objName:String = null;
+	
+	/**
+	 * Whether dotAccess should apply to static fields.
+	 * As of 2.3, sfgml does not make use of this for generated code
+	 * (since flat_paths are preferred for auto-completion),
+	 * but this could come in handy for interfacing with extern code
+	 * that does store functions in global structs.
+	 */
+	public var dotStatic:Bool = false;
 	
 	public function new(t:ClassType) {
 		super(t);
 		isStd = t.meta.has(":std");
+		//
 		objName = metaGetText(t.meta, ":object", 2);
 		if (objName == "") {
 			var sb = new SfBuffer();
 			sb.addTypePathAuto(this);
 			objName = sb.toString();
 		}
-		if (sfConfig.dynMethods) for (fd in instList) switch (fd.kind) {
-			case FMethod(_): {
-				fd.isVar = true;
-				fd.isDynFunc = true;
-			};
-			default:
+		if (objName != null) {
+			isStruct = false;
+			dotAccess = true;
+		}
+		//
+		if (!sfConfig.modern) {
+			if (sfConfig.dynMethods) for (fd in instList) switch (fd.kind) {
+				case FMethod(_): {
+					fd.isVar = true;
+					fd.isDynFunc = true;
+				};
+				default:
+			}
 		}
 		if (t.meta.has(":noRefWrite")) for (fd in fieldList) fd.noRefWrite = true;
 	}
@@ -52,8 +69,8 @@ class SfClass extends SfClassImpl {
 	
 	static function printFieldExpr(r:SfBuffer, f:SfClassField) {
 		sfGenerator.currentField = f;
-		var c = sfConfig.printIf;
-		if (c != null) printf(r, "if (%s) {%(+\n)", c);
+		var printCond = sfConfig.printIf;
+		if (printCond != null) printf(r, "if (%s) {%(+\n)", printCond);
 		#if (sfgml_tracecall)
 		printf(r, 'tracecall("+ %(field_auto)");\n', f);
 		#end
@@ -62,7 +79,7 @@ class SfClass extends SfClassImpl {
 		#if (sfgml_tracecall)
 		if (!x.endsWithExits()) printf(r, '\ntracecall("- %(field_auto)",`0);', f);
 		#end
-		if (c != null) {
+		if (printCond != null) {
 			printf(r, "%(-\n)}");
 			var v = f.metaGetText(f.meta, ":defValue");
 			if (v == null) v = switch (f.type) {
@@ -73,7 +90,6 @@ class SfClass extends SfClassImpl {
 			}
 			if (v != null) printf(r, " else return %s;", v);
 		}
-		r.addLine();
 		sfGenerator.currentField = null;
 	}
 	
@@ -94,19 +110,36 @@ class SfClass extends SfClassImpl {
 		var sepNew = needsSeparateNewFunc();
 		if (sepNew) {
 			ctr.isInst = true; ctr.name = "new";
-			printf(r, "\n#define %s\n", ctr_path);
+			r.addTopLevelFuncOpen(ctr_path);
 			SfArgVars.doc(r, ctr);
 			SfArgVars.print(r, ctr);
 			printFieldExpr(r, ctr);
+			r.addTopLevelFuncClose();
 		}
 		
 		//
-		var ctr_native = ctr.metaGetText(ctr.meta, ":native");
-		ctr.isInst = false; ctr.name = (ctr_native != null ? ctr_native : "create");
-		printf(r, "\n#define %(field_auto)\n", ctr);
+		ctr.isInst = false;
+		var ctr_exposePath:String;
+		if (isStruct) {
+			printf(r, "\nfunction %(type_auto)() constructor {%(+\n)", this);
+			ctr_exposePath = ctr.exposePath;
+			ctr.exposePath = {
+				var b = new SfBuffer();
+				b.addTypePathAuto(this);
+				b.toString();
+			};
+		} else {
+			var ctr_native = ctr.metaGetText(ctr.meta, ":native");
+			ctr.name = (ctr_native != null ? ctr_native : "create");
+			r.addTopLevelFuncOpenField(ctr);
+		}
 		SfArgVars.doc(r, ctr);
-		//
-		if (objName != null) {
+		if (isStruct) ctr.exposePath = ctr_exposePath;
+		
+		// generate initalizer:
+		if (isStruct) {
+			printf(r, "var this`=`self;\n");
+		} else if (objName != null) {
 			// it's instance-based
 			if (sfConfig.next) {
 				printf(r, "var this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
@@ -123,7 +156,7 @@ class SfClass extends SfClassImpl {
 				printf(r, "`=`array_create(%d);\n", indexes);
 			} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
 		}
-		else {
+		else { // normal linear
 			inline function printMeta(r:SfBuffer):Void {
 				if (module == sf.opt.SfGmlType.mtModule) {
 					// if we are inside gml.MetaType.* constructors,
@@ -166,35 +199,58 @@ class SfClass extends SfClassImpl {
 			);
 		}
 		
-		// add dynamic functions:
-		var dynFound = new Map();
-		var iterClass = this;
-		while (iterClass != null) {
-			for (iterField in iterClass.instList) {
-				if (!iterField.isDynFunc) continue;
-				if (iterField.expr == null && objName == null) continue;
-				var iterName = iterField.name;
-				if (dynFound.exists(iterName)) continue;
-				dynFound.set(iterName, true);
-				//
-				if (objName != null) {
-					printf(r, "this.%s`=`", iterField.name);
-				} else {
-					printf(r, "this[@%d%(hint)]`=`", iterField.index, iterField.name);
+		if (isStruct) { // add prototype fields
+			var iterFound = new Map();
+			var iterClass = this;
+			while (iterClass != null) {
+				for (iterField in iterClass.instList) {
+					var iterName = iterField.name;
+					if (iterFound.exists(iterName)) continue;
+					iterFound[iterName] = true;
+					//
+					printf(r, "static %s`=`", iterName);
+					if (iterField.isCallable) {
+						printf(r, "method(undefined,`%(field_auto))", iterField);
+					} else {
+						printf(r, "undefined");
+					}
+					printf(r, ";\n");
 				}
-				//	
-				if (iterField.expr != null) {
-					if (!isStd) r.addString("f_");
-					r.addFieldPathAuto(iterField);
-				} else printf(r, "undefined");
-				printf(r, ";\n");
+				iterClass = iterClass.superClass;
 			}
-			iterClass = iterClass.superClass;
+		}
+		else { // add dynamic functions
+			var dynFound = new Map();
+			var iterClass = this;
+			var refs = sf.opt.SfGmlScriptRefs.enabled;
+			while (iterClass != null) {
+				for (iterField in iterClass.instList) {
+					if (!iterField.isDynFunc) continue;
+					if (iterField.expr == null && objName == null) continue;
+					var iterName = iterField.name;
+					if (dynFound.exists(iterName)) continue;
+					dynFound.set(iterName, true);
+					//
+					if (objName != null) {
+						printf(r, "this.%s`=`", iterField.name);
+					} else {
+						printf(r, "this[@%d%(hint)]`=`", iterField.index, iterField.name);
+					}
+					//	
+					if (iterField.expr != null) {
+						if (!isStd && refs) r.addString("f_");
+						r.addFieldPathAuto(iterField);
+					} else printf(r, "undefined");
+					printf(r, ";\n");
+				}
+				iterClass = iterClass.superClass;
+			}
 		}
 		
-		if (!sepNew) {
+		if (!sepNew) { // merge constructor implementation in here
 			SfArgVars.print(r, ctr);
 			printFieldExpr(r, ctr);
+			r.addLine();
 		} else {
 			//
 			var args = ctr.args;
@@ -208,10 +264,19 @@ class SfClass extends SfClassImpl {
 				r.indent += 1;
 				var arc = areq;
 				while (arc <= argc) {
-					printf(r, "\ncase %d:`%s(this", arc, ctr_path);
+					var asep:Bool;
+					printf(r, "\ncase %d:`");
+					if (isStruct) {
+						printf(r, "method(this, %s)(", ctr_path);
+						asep = false;
+					} else {
+						printf(r, "%s(this", arc, ctr_path);
+						asep = true;
+					}
 					ai = 0;
 					while (ai < arc) {
-						printf(r, ",`argument[%d]", ai);
+						if (asep) printf(r, ",`"); else asep = true;
+						printf(r, "argument[%d]", ai);
 						ai++;
 					}
 					printf(r, ");`break;");
@@ -221,19 +286,33 @@ class SfClass extends SfClassImpl {
 				r.addLine( -1);
 				printf(r, "}\n");
 			} else {
-				printf(r, "%s(this", ctr_path);
+				var asep:Bool;
+				if (isStruct) {
+					printf(r, "method(this, %s)(", ctr_path);
+					asep = false;
+				} else {
+					printf(r, "%s(this", ctr_path);
+					asep = true;
+				}
 				ai = -1;
 				while (++ai < argc) {
-					printf(r, ",`argument[%d]", ai);
+					if (asep) printf(r, ",`"); else asep = true;
+					printf(r, "argument[%d]", ai);
 				}
 				printf(r, ");\n");
 			}
 		}
 		
 		//
-		printf(r, "return this;\n");
+		if (isStruct) {
+			printf(r, "static __class__ = mt_%(type_auto);", this);
+		} else {
+			printf(r, "return this;");
+		}
+		r.addTopLevelFuncClose();
 		ctr.isInst = ctr_isInst; ctr.name = ctr_name;
 	}
+	
 	override public function printTo(out:SfBuffer, initBuf:SfBuffer):Void {
 		var hintFolds = sfConfig.hintFolds;
 		var r:SfBuffer = null;
@@ -274,10 +353,11 @@ class SfClass extends SfClassImpl {
 					}
 					// function cc_yal_Some_field(...) { ... }
 					if (fbody) {
-						printf(r, "\n#define %s\n", path);
+						r.addTopLevelFuncOpen(path);
 						SfArgVars.doc(r, f);
 						SfArgVars.print(r, f);
 						printFieldExpr(r, f);
+						r.addTopLevelFuncClose();
 					}
 					//
 				}; // static function
@@ -316,10 +396,11 @@ class SfClass extends SfClassImpl {
 			
 			// instance functions:
 			for (fd in instList) if (!fd.isHidden && fd.isCallable && fd.expr != null) {
-				printf(r, "\n#define %(field_auto)\n", fd);
+				r.addTopLevelFuncOpenField(fd);
 				SfArgVars.doc(r, fd);
 				SfArgVars.print(r, fd);
 				printFieldExpr(r, fd);
+				r.addTopLevelFuncClose();
 			}
 			//
 			sfGenerator.currentClass = null;

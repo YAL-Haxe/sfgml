@@ -1,6 +1,7 @@
 package sf.type;
 import haxe.macro.Type;
 import sf.SfCore.*;
+import sf.type.SfClassField;
 import sf.type.SfTypeMap;
 
 /**
@@ -17,12 +18,38 @@ class SfBuffer extends SfBufferImpl {
 		var i = indent; while (--i >= 0) addChar("\t".code);
 		#end
 	}
+	
 	public inline function addTypePathAuto(t:SfType) {
 		addTypePath(t, "_".code);
 	}
-	public inline function addFieldPathAuto(f:SfField) {
+	
+	public function addFieldPathAuto(f:SfField) {
+		if (Std.is(f, SfClassField)) {
+			var cf:SfClassField = cast f;
+			if (!cf.isInst && cf.parentClass.dotStatic) {
+				addFieldPath(f, "_".code, ".".code);
+				return;
+			}
+		}
 		addFieldPath(f, "_".code, "_".code);
 	}
+	
+	public function addTopLevelFuncOpen(name:String) {
+		if (sfConfig.topLevelFuncs) {
+			printf(this, "\nfunction %s()`{%(+\n)", name);
+		} else printf(this, "\n#define %s\n", name);
+	}
+	public function addTopLevelFuncOpenField(fd:SfField) {
+		if (sfConfig.topLevelFuncs) {
+			printf(this, "\nfunction %(field_auto)()`{%(+\n)", fd);
+		} else printf(this, "\n#define %(field_auto)\n", fd);
+	}
+	public function addTopLevelFuncClose() {
+		if (sfConfig.topLevelFuncs) {
+			printf(this, "%(-\n)}\n");
+		} else this.addLine();
+	}
+	
 	private static var docNameFieldsCache:SfTypeMap<String> = new SfTypeMap();
 	private static function docNameFields(dt:DefType):String {
 		switch (dt.type) {

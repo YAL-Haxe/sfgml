@@ -181,6 +181,7 @@ class SfGmlArrayAccess extends SfOptImpl {
 				default: e.matchIter(w, f);
 			}
 		});
+		//
 		wset = atype.fieldMap.get("wset");
 		if (wset == null) throw "Array has no wset";
 		wsetUsed = matchEachExpr(function(e:SfExpr, w, f) {
@@ -190,7 +191,8 @@ class SfGmlArrayAccess extends SfOptImpl {
 			}
 		});
 		//
-		forEachExpr(check);
+		if (!sfConfig.hasChainedAccessors) forEachExpr(check);
+		//
 		if (!wgetUsed) atype.removeField(wget);
 		if (!wsetUsed) atype.removeField(wset);
 	}

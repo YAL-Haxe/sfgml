@@ -9,6 +9,7 @@ import haxe.macro.Expr.Binop.*;
 import haxe.macro.Expr.Unop.*;
 import haxe.macro.Type.TConstant;
 import haxe.macro.Type.TypedExpr;
+import sf.SfArgVars;
 import sf.opt.*;
 import sf.type.*;
 import sf.type.expr.*;
@@ -102,7 +103,11 @@ class SfGenerator extends SfGeneratorImpl {
 			default:
 		}
 		//
-		if (sfConfig.entrypoint != "") printf(mixed, "#define %s\n", sfConfig.entrypoint);
+		if (sfConfig.entrypoint != "" && !(
+			sfConfig.topLevelFuncs && !sfConfig.gmxMode
+		)) {
+			printf(mixed, "#define %s\n", sfConfig.entrypoint);
+		}
 		var cond = sfConfig.printIf;
 		//if (cond != null) printf(init, "if (%s) {\n", cond);
 		//
@@ -306,9 +311,10 @@ class SfGenerator extends SfGeneratorImpl {
 	
 	private static var reserved:Map<String, String> = {
 		var out = new Map();
-		for (kw in SfGmlBuiltin.keywords.split(" ")) out.set(kw, "var_" + kw);
-		for (kw in SfGmlBuiltin.vars.split(" ")) out.set(kw, "var_" + kw);
-		for (kw in SfGmlBuiltin.functions.split(" ")) out.set(kw, "var_" + kw);
+		var pre = "l_";
+		for (s in SfGmlBuiltin.keywords.split(" ")) out[s] = pre + s;
+		for (s in SfGmlBuiltin.vars.split(" ")) out[s] = pre + s;
+		for (s in SfGmlBuiltin.functions.split(" ")) out[s] = pre + s;
 		out;
 	};
 	override public function getVarName(name:String) {
@@ -340,12 +346,14 @@ class SfGenerator extends SfGeneratorImpl {
 		var typeClassImpl = typeMap.get("Class", "Class_Impl_");
 		if (typeClassImpl != null) typeClassImpl.isHidden = true;
 		super.typeInit();
+		// propagate object names to children:
 		for (c in classList) if (c.objName == null) {
 			var q = c.superClass;
 			while (q != null) {
 				var o = q.objName;
 				if (o != null) {
 					c.objName = o;
+					c.dotAccess = true;
 					break;
 				} else q = q.superClass;
 			}
@@ -374,13 +382,13 @@ class SfGenerator extends SfGeneratorImpl {
 	}
 	override function getOptimizers():Array<SfOptImpl> {
 		var r = super.getOptimizers();
-		if (sfConfig.analyzer) r.replace(SfOptAutoVar, new SfGmlAutoVar());
+		var c = sfConfig;
+		if (c.analyzer) r.replace(SfOptAutoVar, new SfGmlAutoVar());
 		r.push(new SfGmlRest());
 		r.push(new SfGmlNativeString());
 		r.push(new SfGmlArrayDecl());
 		r.push(new SfGmlType());
 		r.push(new SfGmlTypeSwitch());
-		r.push(new SfGmlBigSwitch());
 		r.push(new SfGmlRepeat());
 		r.push(new SfGmlArgs());
 		r.push(new SfGmlArrayAccess());
@@ -426,6 +434,7 @@ class SfGenerator extends SfGeneratorImpl {
 				haxe.macro.PositionTools.make({min:0, max:0, file:sfGenerator.outputPath}));
 		}
 		else switch (expr.def) {
+			//{ identifiers and literals
 			case SfConst(c): printConst(r, c, expr);
 			case SfLocal(v): {
 				printf(r, "%s%s", sfConfig.localPrefix, v.name);
@@ -450,119 +459,62 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 				r.addSub(_code, l, n + 2 - l);
 			};
+			case SfArrayDecl(vals): {
+				r.addChar("[".code);
+				for (i in 0 ... vals.length) {
+					if (i > 0) r.addComma();
+					r.addExpr(vals[i], true);
+				}
+				r.addChar("]".code);
+			};
+			case SfObjectDecl(pairs): {
+				if (sfConfig.modern) {
+					r.addChar("{".code);
+					for (i in 0 ... pairs.length) {
+						if (i > 0) r.addComma();
+						printf(r, "%s:`", pairs[i].name);
+						r.addExpr(pairs[i].expr, true);
+					}
+					r.addChar("}".code);
+				} else {
+					expr.error("Anonymous object literals are only supported in >= 2.3."
+						+ " If this is an array-object, try assigning into a typed variable");
+				}
+			};
+			case SfTypeExpr(t): {
+				if (Std.is(t, SfEnum)) {
+					var e:SfEnum = cast t;
+					if (e.isFake) expr.error("Can't reference a fake enum.");
+				} else if (t.isExtern) {
+					expr.error("Can't reference an extern class.");
+				}
+				r.addString("mt_");
+				r.addTypePath(t, "_".code);
+			};
+			case SfFunction(fn): {
+				if (wrap == false) printf(r, "var %s`=`", fn.name);
+				printf(r, "function");
+				if (fn.name != null) printf(r, " %s", fn.name);
+				printf(r, "()`");
+				if (!fn.expr.isEmpty()) {
+					printf(r, "{%(+\n)");
+					var flags:SfArgVarsExt = 0;
+					var cf = currentField;
+					if (cf != null && cf.isInst && cf.isStructField) {
+						flags |= SfArgVarsExt.ThisSelf;
+					}
+					SfArgVars.printExt(r, fn.expr, fn.args, flags);
+					r.addExpr(fn.expr, false);
+					printf(r, "%(-\n)}");
+				} else printf(r, "{}");
+			};
+			//}
+			
+			//{ array/field access
 			case SfArrayAccess(a, i) | SfEnumAccess(a, _, i): printf(r, "%x[%x]", a, i);
 			case SfEnumParameter(_expr, _, _index): printf(r, "%x[%d]", _expr, _index + 1);
-			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfInstField(q, f), v): {
-				if (f.parentClass.objName != null) {
-					printf(r, "%x.%s", q, f.name);
-					printSetOp(r, o, expr);
-					printf(r, "%x", v);
-				} else {
-					i = f.index;
-					if (i >= 0) {
-						printf(r, "%x[@%d%(hint)]", q, i, f.name);
-						printSetOp(r, o, expr);
-						printf(r, "%x", v);
-					} else expr.error("Field " + f.name + " has no index.");
-				}
-			};
-			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfDynamicField(q, f), v): {
-				z = true;
-				switch (q.getTypeNz()) {
-					case TType(_.get() => dt, _): {
-						var at = anonMap.baseGet(dt);
-						if (at != null) {
-							s = f;
-							if (at.isDsMap) {
-								var fd = at.fieldMap[s];
-								if (fd != null) s = fd.name;
-								printf(r, '%x[?"%s"]', q, s);
-								z = false;
-							} else if (at.indexMap.exists(s)) {
-								printf(r, "%x[@", q);
-								at.printAnonFieldTo(r, s, at.indexMap[s]);
-								printf(r, "]");
-								z = false;
-							}
-							if (!z) {
-								printSetOp(r, o, expr);
-								r.addExpr(v, true);
-							}
-						}
-					};
-					case TInst(_.get() => ct, _): {
-						var ct = classMap.baseGet(ct);
-						if (ct != null && ct.objName != null) {
-							printf(r, "%x.%s", q, f);
-							printSetOp(r, o, expr);
-							r.addExpr(v, true);
-							z = false;
-						}
-					};
-					default:
-				}
-				if (z) {
-					expr.error("[SfGenerator:printExpr] Can't do dynamic field write on " + SfExprTools.dump(expr) + " type " + q.getType());
-				}
-			};
-			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfArrayAccess(a, i), v): {
-				switch (a.def) {
-					case SfInstField(_, f) | SfStaticField(_, f)
-					if (f.noRefWrite): printf(r, "%x[%x]", a, i);
-					default: printf(r, "%x[@%x]", a, i);
-				}
-				printSetOp(r, o, expr);
-				printf(r, "%x", v);
-			};
-			case SfBinop(OpUShr, a, b): { // a >>> b
-				switch (b.def) {
-					case SfConst(TInt(0)): printf(r, "(%x & $FFFFFFFF)", a);
-					default: printf(r, "((%x & $FFFFFFFF) >> %x)", a, b);
-				}
-			};
-			case SfBinop(o, a, b): { // a @ b
-				addExpr(a, true);
-				printBinOp(r, o, expr);
-				addExpr(b, true);
-			};
-			case SfUnop(o = OpIncrement | OpDecrement, _postFix, x): { // ++\--
-				z = (o == OpIncrement);
-				var wantPrefix = (_postFix && wrap == false && sfConfig.slowPostfix);
-				if (!_postFix || wantPrefix) r.addString(z ? "++" : "--");
-				switch (x.def) {
-					case SfInstField(q, f): {
-						if ((i = f.index) >= 0) {
-							printf(r, "%x[@%d%(hint)]", q, i, f.name);
-						} else expr.error("Field " + f.name + " has no index.");
-					}
-					case SfArrayAccess(a, i): {
-						switch (a.def) {
-							case SfInstField(_, f) | SfStaticField(_, f)
-							if (f.noRefWrite): printf(r, "%x[%x]", a, i);
-							default: printf(r, "%x[@%x]", a, i);
-						}
-					};
-					default: r.addExpr(x, true);
-				}
-				if (!wantPrefix && _postFix) r.addString(z ? "++" : "--");
-			};
-			case SfUnop(_op, _postFix, _expr): {
-				if (wrap) {
-					if (_postFix) addExpr(_expr, true);
-					switch (_op) {
-						case OpIncrement: r.addChar2("+".code, "+".code);
-						case OpDecrement: r.addChar2("-".code, "-".code);
-						case OpNot: r.addChar("!".code);
-						case OpNeg: r.addChar("-".code);
-						case OpNegBits: r.addChar("~".code);
-					};
-					if (!_postFix) addExpr(_expr, true);
-				} else {
-					expr.error("Can't apply " + _op.getName() + " here.");
-				}
-			};
 			case SfInstField(_inst, _field): {
-				if (_field.parentClass.objName != null) {
+				if (_field.dotAccess) {
 					printf(r, "%x.%s", _inst, _field.name);
 				} else {
 					i = _field.index;
@@ -572,12 +524,14 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 			};
 			case SfStaticField(c, f): {
-				if (f.isVar && !c.isStd) {
+				if (c.dotStatic) {
+					printf(r, "%(type_auto).%s", c, f.name);
+				} else if (f.isVar && !c.isStd) {
 					r.addString("g_");
 					r.addFieldPathAuto(f);
 				} else {
 					#if (1) // assume extension script IDs cursed till further notice
-					if (!f.isVar && !(c.isHidden || c.isExtern)) {
+					if (SfGmlScriptRefs.enabled && !f.isVar && !(c.isHidden || c.isExtern)) {
 						printf(r, 'f_');
 						r.addFieldPathAuto(f);
 					} else r.addFieldPathAuto(f);
@@ -641,7 +595,10 @@ class SfGenerator extends SfGeneratorImpl {
 							var at = anonMap.baseGet(dt);
 							if (at != null) {
 								s = _field;
-								if (at.isDsMap) {
+								if (at.dotAccess) {
+									printf(r, '%x.%s', obj, s);
+									z = false;
+								} else if (at.isDsMap) {
 									var fd = at.fieldMap[s];
 									if (fd != null) s = fd.name;
 									printf(r, '%x[?"%s"]', obj, s);
@@ -656,7 +613,7 @@ class SfGenerator extends SfGeneratorImpl {
 						};
 						case TInst(_.get() => ct, _): {
 							var ct = classMap.baseGet(ct);
-							if (ct != null && ct.objName != null) {
+							if (ct != null && ct.dotAccess) {
 								printf(r, "%x.%s", obj, _field);
 								z = false;
 							}
@@ -665,28 +622,140 @@ class SfGenerator extends SfGeneratorImpl {
 					}
 				}
 				if (z) {
-					expr.error("[SfGenerator:printExpr] Can't do dynamic field read for `" + _field + "` from `" + obj.dump() + "` (" + obj.getName() + "," + obj.getTypeNz() + ")");
+					if (sfConfig.modern) {
+						printf(r, "%x.%s", obj, _field);
+					} else {
+						expr.error("[SfGenerator:printExpr] Can't do dynamic field read for `" + _field + "` from `" + obj.dump() + "` (" + obj.getName() + "," + obj.getTypeNz() + ")");
+					}
 				}
 			};
-			case SfTypeExpr(t): {
-				if (Std.is(t, SfEnum)) {
-					var e:SfEnum = cast t;
-					if (e.isFake) expr.error("Can't reference a fake enum.");
-				} else if (t.isExtern) {
-					expr.error("Can't reference an extern class.");
+			//}
+			
+			//{ operators
+			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfInstField(q, f), v): {
+				if (f.parentClass.dotAccess) {
+					printf(r, "%x.%s", q, f.name);
+					printSetOp(r, o, expr);
+					printf(r, "%x", v);
+				} else {
+					i = f.index;
+					if (i >= 0) {
+						printf(r, "%x[@%d%(hint)]", q, i, f.name);
+						printSetOp(r, o, expr);
+						printf(r, "%x", v);
+					} else expr.error("Field " + f.name + " has no index.");
 				}
-				r.addString("mt_");
-				r.addTypePath(t, "_".code);
-			}
-			case SfParenthesis(x): printf(r, "(%x)", x);
-			case SfArrayDecl(vals): {
-				r.addChar("[".code);
-				for (i in 0 ... vals.length) {
-					if (i > 0) r.addComma();
-					r.addExpr(vals[i], true);
-				}
-				r.addChar("]".code);
 			};
+			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfDynamicField(q, f), v): {
+				z = true;
+				switch (q.getTypeNz()) {
+					case TType(_.get() => dt, _): {
+						var at = anonMap.baseGet(dt);
+						if (at != null) {
+							s = f;
+							if (at.dotAccess) {
+								printf(r, '%x.%s', q, s);
+								z = false;
+							} else if (at.isDsMap) {
+								var fd = at.fieldMap[s];
+								if (fd != null) s = fd.name;
+								printf(r, '%x[?"%s"]', q, s);
+								z = false;
+							} else if (at.indexMap.exists(s)) {
+								printf(r, "%x[@", q);
+								at.printAnonFieldTo(r, s, at.indexMap[s]);
+								printf(r, "]");
+								z = false;
+							}
+							if (!z) {
+								printSetOp(r, o, expr);
+								r.addExpr(v, true);
+							}
+						}
+					};
+					case TInst(_.get() => ct, _): {
+						var ct = classMap.baseGet(ct);
+						if (ct != null && ct.dotAccess) {
+							printf(r, "%x.%s", q, f);
+							printSetOp(r, o, expr);
+							r.addExpr(v, true);
+							z = false;
+						}
+					};
+					default:
+				}
+				if (z) {
+					if (sfConfig.modern) {
+						printf(r, "%x.%s", q, f);
+						printSetOp(r, o, expr);
+						r.addExpr(v, true);
+					} else {
+						expr.error("[SfGenerator:printExpr] Can't do dynamic field write on "
+							+ SfExprTools.dump(expr) + " type " + q.getType());
+					}
+				}
+			};
+			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfArrayAccess(a, i), v): {
+				switch (a.def) {
+					case SfInstField(_, f) | SfStaticField(_, f)
+					if (f.noRefWrite): printf(r, "%x[%x]", a, i);
+					default: printf(r, "%x[@%x]", a, i);
+				}
+				printSetOp(r, o, expr);
+				printf(r, "%x", v);
+			};
+			case SfBinop(OpUShr, a, b): { // a >>> b
+				switch (b.def) {
+					case SfConst(TInt(0)): printf(r, "(%x & $FFFFFFFF)", a);
+					default: printf(r, "((%x & $FFFFFFFF) >> %x)", a, b);
+				}
+			};
+			case SfBinop(o, a, b): { // a @ b
+				addExpr(a, true);
+				printBinOp(r, o, expr);
+				addExpr(b, true);
+			};
+			case SfUnop(o = OpIncrement | OpDecrement, _postFix, x): { // ++\--
+				z = (o == OpIncrement);
+				var wantPrefix = (_postFix && wrap == false && sfConfig.slowPostfix);
+				if (!_postFix || wantPrefix) r.addString(z ? "++" : "--");
+				switch (x.def) {
+					case SfInstField(q, f): {
+						if (f.dotAccess) {
+							printf(r, "%x.%s", q, f.name);
+						} else if ((i = f.index) >= 0) {
+							printf(r, "%x[@%d%(hint)]", q, i, f.name);
+						} else expr.error("Field " + f.name + " has no index.");
+					}
+					case SfArrayAccess(a, i): {
+						switch (a.def) {
+							case SfInstField(_, f) | SfStaticField(_, f)
+							if (f.noRefWrite): printf(r, "%x[%x]", a, i);
+							default: printf(r, "%x[@%x]", a, i);
+						}
+					};
+					default: r.addExpr(x, true);
+				}
+				if (!wantPrefix && _postFix) r.addString(z ? "++" : "--");
+			};
+			case SfUnop(_op, _postFix, _expr): {
+				if (wrap) {
+					if (_postFix) addExpr(_expr, true);
+					switch (_op) {
+						case OpIncrement: r.addChar2("+".code, "+".code);
+						case OpDecrement: r.addChar2("-".code, "-".code);
+						case OpNot: r.addChar("!".code);
+						case OpNeg: r.addChar("-".code);
+						case OpNegBits: r.addChar("~".code);
+					};
+					if (!_postFix) addExpr(_expr, true);
+				} else {
+					expr.error("Can't apply " + _op.getName() + " here.");
+				}
+			};
+			//}
+			
+			//{ calls
 			case SfCall(x, _args): { // func(...args)
 				n = _args.length;
 				sep = false;
@@ -695,7 +764,7 @@ class SfGenerator extends SfGeneratorImpl {
 				// if we are calling a field that's being wget, we need to resolve that
 				// this is asking for a refactor of some sort
 				var selfExpr:SfExpr = null;
-				switch (x.def) {
+				if (!sfConfig.hasChainedAccessors) switch (x.def) {
 					case SfCall(
 						_.def => SfInstField(self, field),
 						[_.def => SfConst(TInt(i))]
@@ -732,18 +801,22 @@ class SfGenerator extends SfGeneratorImpl {
 						i = 0; sep = true;
 					};
 					case SfInstField(_.def => SfConst(TSuper), _field): {
-						r.addFieldPathAuto(_field);
-						printf(r, "(this");
-						sep = true;
-						i = 0;
+						if (_field.parentClass.dotAccess) {
+							printf(r, "method(this, %(field_auto))(", _field);
+							i = 0;
+						} else {
+							printf(r, "%(field_auto)(this", _field);
+							sep = true;
+							i = 0;
+						}
 					};
 					case SfStaticField(cl, fd): {
 						if (fd.name == "set_2D" && fd.parentType.realPath == "gml.NativeArray"
 							&& _args[0].def.match(SfLocal(_) | SfStaticField(_, _))
-						) {
+						) { // NativeArray.set2D(a, b, c, d) -> a[@b, c] = d;
 							printf(r, "%x[@%x,`%x]`=`%x", _args[0], _args[1], _args[2], _args[3]);
 							return;
-						} else if (!fd.isVar || fd.meta.has(":script")) {
+						} else if (cl.dotStatic || !fd.isVar || fd.meta.has(":script")) {
 							r.addFieldPathAuto(fd);
 						} else i = 3;
 					};
@@ -766,6 +839,8 @@ class SfGenerator extends SfGeneratorImpl {
 							} else printf(r, "script_execute(%x", x);
 							sep = true;
 							i = 0;
+						} else if (_field.parentClass.dotAccess) {
+							printf(r, "%x.%s", _inst, _field.name);
 						} else {
 							k = 0;
 							switch (_field.parentType.name) {
@@ -859,27 +934,33 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addParClose();
 			};
 			case SfNew(t, _, m): {
-				var ctr:SfClassField = t.constructor;
-				if (ctr != null) {
-					s = ctr.metaString(":expose");
+				if (t.isStruct) {
+					printf(r, "new %(type_auto)", t);
+				} else {
+					var ctr:SfClassField = t.constructor;
+					if (ctr != null) {
+						s = ctr.metaString(":expose");
+						if (s != null) {
+							r.addString(s);
+							s = null;
+						} else {
+							s = ctr.metaString(":native");
+							if (s == null) s = "create";
+						}
+					} else s = "create";
 					if (s != null) {
+						l = r.length;
+						r.addTypePathAuto(t);
+						if (r.length > l) r.addChar("_".code);
 						r.addString(s);
-						s = null;
-					} else {
-						s = ctr.metaString(":native");
-						if (s == null) s = "create";
 					}
-				} else s = "create";
-				if (s != null) {
-					l = r.length;
-					r.addTypePathAuto(t);
-					if (r.length > l) r.addChar("_".code);
-					r.addString(s);
 				}
 				r.addParOpen();
 				addExprs(m);
 				r.addParClose();
 			};
+			//}
+			
 			case SfVarDecl(v, z, x): { // var v = x
 				printf(r, "var %s%s", sfConfig.localPrefix, v.name);
 				printVarType(v);
@@ -933,6 +1014,7 @@ class SfGenerator extends SfGeneratorImpl {
 					}
 				}
 			};
+			//{ branching
 			case SfIf(c, a, z, b): { // if (c) a else b
 				if (wrap) {
 					if (sfConfig.ternary) {
@@ -975,15 +1057,36 @@ class SfGenerator extends SfGeneratorImpl {
 			}
 			case SfBreak: r.addString("break");
 			case SfContinue: r.addString("continue");
+			case SfTry(block, catches): {
+				if (sfConfig.hasTryCatch) {
+					if (catches.length > 1) {
+						catches[1].expr.error("Only 1-catch blocks are supported at this time.");
+					}
+					printf(r, "try`{%(+\n)");
+					r.addExpr(block, false);
+					var c = catches[0];
+					printf(r, "%(-\n)}`catch`(%s)`{%(+\n)", c.v.name);
+					r.addExpr(c.expr, false);
+					printf(r, "%(-\n)}");
+				} else expr.error("try-catch is only supported in GMS>=2.3");
+			};
 			case SfThrow(x): {
 				switch (x.def) {
 					case SfNew(c, _, [v]) if (c.name == "HaxeError"): x = v;
 					default:
 				}
-				printf(r, "show_error(%x,`false)", x);
+				if (sfConfig.hasTryCatch) {
+					printf(r, "throw %x", x);
+				} else {
+					printf(r, "show_error(%x,`false)", x);
+				}
 			};
+			//}
+			//{ other wrappers
+			case SfParenthesis(x): printf(r, "(%x)", x);
 			case SfCast(x, _): addExpr(x, wrap);
 			case SfMeta(m, x): addExpr(x, wrap);
+			//}
 			default: error(expr, "Can't print " + expr.getName());
 		} // switch (expr)
 	}

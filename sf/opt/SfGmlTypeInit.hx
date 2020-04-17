@@ -33,6 +33,7 @@ class SfGmlTypeInit {
 		#end
 		//
 		var typeBoot = sfGenerator.typeBoot;
+		var modern = sfConfig.modern;
 		for (t in sfGenerator.typeList) {
 			if (t.isHidden || t.nativeGen) continue;
 			if (!t.isUsed) continue;
@@ -47,7 +48,11 @@ class SfGmlTypeInit {
 			//
 			printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
 			if (stdPack != null) printf(init, "%s_", stdPack);
-			init.addString(e != null ? "haxe_enum_create" : "haxe_class_create");
+			if (modern) {
+				printf(init, "new %s", e != null ? "haxe_enum" : "haxe_class");
+			} else {
+				printf(init, "%s_create", e != null ? "haxe_enum" : "haxe_class");
+			}
 			printf(init, '(%d,`"%(type_auto)"', t.index, t);
 			if (Std.is(t, SfEnum)) {
 				var e:SfEnum = cast t;
@@ -86,6 +91,7 @@ class SfGmlTypeInit {
 		for (c in sfGenerator.classList) {
 			if (c.isHidden || c.constructor == null) continue;
 			if (c.nativeGen && !fns) continue;
+			if (c.isStruct) continue;
 			//
 			printf(init, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
 			if (!hasArrayDecl) {

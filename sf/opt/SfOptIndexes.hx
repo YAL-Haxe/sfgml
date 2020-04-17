@@ -17,7 +17,7 @@ using sf.type.expr.SfExprTools;
 class SfOptIndexes extends SfOptImpl {
 	function getIndexes(c:SfClass, addNames:Bool):Int {
 		// if this is an object-class, don't assign indexes at all:
-		if (c.objName != null) return -1;
+		if (c.dotAccess) return -1;
 		// otherwise, if indexes weren't assigned yet,
 		if (c.indexes < 0) {
 			var i:Int = 0;

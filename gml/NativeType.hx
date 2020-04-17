@@ -17,6 +17,9 @@ extern class NativeType {
 	static function isVec3(v:Dynamic):Bool;
 	static function isVec4(v:Dynamic):Bool;
 	
+	/** >= 2.3 */
+	static function isStruct(v:Dynamic):Bool;
+	
 	/** >= 2.2.3 */
 	@:expose("is_nan") static function isNaN(v:Dynamic):Bool;
 	

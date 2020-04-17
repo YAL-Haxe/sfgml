@@ -87,6 +87,21 @@ class SfConfig extends SfConfigImpl {
 	/** Whether [...] array initializer is supported */
 	public var hasArrayDecl:Bool;
 	
+	/** Whether try-catch is supported */
+	public var hasTryCatch:Bool;
+	
+	/** Whether function(){} is supported */
+	public var hasFunctionLiterals:Bool;
+	
+	/** Whether a[i][k] is supported */
+	public var hasChainedAccessors:Bool;
+	
+	/** >=2.3 */
+	public var modern:Bool;
+	
+	/** Whether to use function(){} at top-level */
+	public var topLevelFuncs:Bool;
+	
 	/** Whether copy-on-write behaviour works correctly */
 	public var copyset:Bool;
 	
@@ -112,6 +127,12 @@ class SfConfig extends SfConfigImpl {
 		ternary = d.ternary;
 		copyset = d.copyset;
 		slowPostfix = compare(d.version, "2.2.3") < 0;
+		var v23 = compare(d.version, "2.3") >= 0;
+		modern = v23;
+		hasTryCatch = v23;
+		hasFunctionLiterals = v23;
+		hasChainedAccessors = v23;
+		topLevelFuncs = v23 && !gmxMode;
 	}
 	static var findVersion_1:SfGmlVersion = null;
 	static function findVersion():SfGmlVersion {
@@ -119,6 +140,8 @@ class SfConfig extends SfConfigImpl {
 		if (d != null) return d;
 		var v = value("sfgml_version");
 		var next = bool("sfgml_next", null);
+		var modern = bool("sfgml_modern", null);
+		//
 		var path = Compiler.getOutput();
 		if (Path.extension(path) == "_") path = Path.withoutExtension(path);
 		var ext:Bool;
@@ -127,8 +150,11 @@ class SfConfig extends SfConfigImpl {
 			case "yy":  ext =  true; next = true;
 			default:    ext = false;
 		}
+		//
 		if (next == null && v != null) next = compare(v, "2") >= 0;
-		return { version: v, next: next, extension: ext };
+		if (modern == null && v != null) modern = compare(v, "2.3") >= 0;
+		//
+		return { version: v, next: next, extension: ext, modern: modern };
 	}
 	static function findData(?vd:SfGmlVersion):SfGmlFeatures {
 		if (vd == null) vd = findVersion();
@@ -142,6 +168,7 @@ class SfConfig extends SfConfigImpl {
 		return {
 			version: v,
 			next: next,
+			modern: vd.modern,
 			extension: vd.extension,
 			array_create: bool("sfgml_array_create", gml2),
 			array_decl: bool("sfgml_array_decl", gml2),
@@ -168,10 +195,12 @@ class SfConfig extends SfConfigImpl {
 		def("sfgml_array_decl", d.array_decl);
 		def("sfgml_ternary", d.ternary);
 		def("sfgml_copyset", d.copyset);
+		def("sfgml.modern", d.modern);
 	}
 }
 private typedef SfGmlVersion = {
 	next:Bool,
+	modern:Bool,
 	version:String,
 	extension:Bool,
 }

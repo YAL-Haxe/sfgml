@@ -13,6 +13,22 @@ class SfField extends SfFieldImpl {
 	 */
 	public var noRefWrite:Bool;
 	
+	/**
+	 * @see SfType.dotAccess
+	 */
+	public var dotAccess(get, never):Bool;
+	private inline function get_dotAccess():Bool {
+		return parentType.dotAccess;
+	}
+	
+	/**
+	 * @see SfType.isStruct
+	 */
+	public var isStructField(get, never):Bool;
+	private inline function get_isStructField():Bool {
+		return parentType.isStruct;
+	}
+	
 	public function new(t:SfType, f:TypeField) {
 		super(t, f);
 		noRefWrite = f.meta.has(":noRefWrite");

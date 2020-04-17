@@ -6,7 +6,10 @@ import sf.type.expr.SfExprDef.*;
 using sf.type.expr.SfExprTools;
 
 /**
- * ...
+ * GMS<2.3 does not support try-catch,
+ * but it is possible to use one of my extensions,
+ * https://yellowafterlife.itch.io/gamemaker-catch-error
+ * to a similar effect.
  * @author YellowAfterlife
  */
 class SfGmlCatchError extends SfOptImpl {

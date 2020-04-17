@@ -8,8 +8,11 @@ using sf.type.expr.SfExprTools;
 import sf.SfCore.*;
 
 /**
- * GML is yet to support closures (planned tho), so local functions without scope access are best
- * exported into static class fields.
+ * GMS<2.3 does not support inline functions,
+ * so we'll export local functions without scope access into static class fields.
+ * 
+ * On >=2.3 we'll just check that you are not trying to share scope since GML
+ * doesn't support that and it'd need a fancy workaround like that on C#/Java.
  * @author YellowAfterlife
  */
 class SfGmlLocalFunc extends SfOptImpl {
@@ -125,8 +128,37 @@ class SfGmlLocalFunc extends SfOptImpl {
 		};
 		seek(expr, stack, seek);
 	}
+	function verifyFunc(func:SfExprFunction) {
+		var locals = new Map();
+		for (arg in func.args) locals[arg.v.name] = true;
+		function verify(expr:SfExpr, st:SfExprList, it:SfExprIter) {
+			switch (expr.def) {
+				case SfLocal(v): {
+					if (!locals.exists(v.name)) {
+						expr.warning('Variable ${v.name} is not accessible here.');
+					}
+				};
+				case SfVarDecl(v, set, expr): {
+					locals[v.name] = true;
+					expr.iter(st, it);
+				};
+				case SfFunction(fn): verifyFunc(fn);
+				default: expr.iter(st, it);
+			}
+		}
+		verify(func.expr, null, verify);
+	}
+	function verifyOuter(expr:SfExpr, st:SfExprList, it:SfExprIter) {
+		switch (expr.def) {
+			case SfFunction(fn): verifyFunc(fn);
+			default: expr.iter(st, it);
+		}
+	}
 	override public function apply() {
-		super.apply();
-		forEachExpr(proc, []);
+		if (sfConfig.hasFunctionLiterals) {
+			forEachExpr(verifyOuter);
+		} else {
+			forEachExpr(proc, []);
+		}
 	}
 }

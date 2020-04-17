@@ -193,6 +193,8 @@ class SfOptBinop extends SfOptImpl {
 	}
 	
 	override public function apply() {
+		ignoreHidden = true;
+		//
 		cStd = cast sfGenerator.realMap["Std"];
 		toString = cStd != null ? cStd.staticMap["string"] : null;
 		forEachExpr(wrapBitOperations, []);
@@ -203,8 +205,10 @@ class SfOptBinop extends SfOptImpl {
 		forEachExpr(wrapNullChecks);
 		#end
 		forEachExpr(simplifyComparisonsWithConstants);
+		//
 		if (toString != null && !toStringUsed && !matchEachExpr(checkToString)) {
 			toString.isHidden = true;
 		}
+		//
 	}
 }

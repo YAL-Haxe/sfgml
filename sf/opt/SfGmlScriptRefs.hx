@@ -15,8 +15,11 @@ import haxe.macro.Expr.Unop;
  * @author YellowAfterlife
  */
 class SfGmlScriptRefs extends SfOptImpl {
+	public static var enabled:Bool = true;
 	public static var init:String = "";
 	override public function apply() {
+		enabled = sfConfig.gmxMode;
+		if (!enabled) return;
 		var buf = new SfBuffer();
 		var map = new Map();
 		inline function proc(f:SfClassField):Void {

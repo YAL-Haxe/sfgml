@@ -7,24 +7,11 @@ import sf.type.SfField;
 import sf.type.SfVar;
 import SfTools.*;
 import sf.SfCore.*;
+import sf.type.expr.SfExpr;
 using sf.type.expr.SfExprTools;
 
-/**
- * ...
- * @author YellowAfterlife
- */
 class SfArgVars {
-	
-	/**
-	 * Generates code to copy GML arguments into actual named local variables.
-	 * It can be a good idea to use argument# directly if it's used only once,
-	 * but that has it's own implications.
-	 */
-	public static function print(r:SfBuffer, f:SfClassField) {
-		var inst:Bool = f.isInst;
-		//
-		var expr = f.expr;
-		var args = f.args;
+	public static function printExt(r:SfBuffer, expr:SfExpr, args:Array<SfArgument>, flags:SfArgVarsExt) {
 		var argc:Int = args.length;
 		var usesArgs = false;
 		var i:Int, v:SfVar, arg:SfArgument;
@@ -34,18 +21,36 @@ class SfArgVars {
 				usesArgs = true;
 			}
 		}
-		var self:Int = inst ? expr.countThis() : 0;
+		//
+		var checkThis = flags.hasAny(SfArgVarsExt.ThisArg | SfArgVarsExt.ThisSelf);
+		var showThis:Bool;
+		if (checkThis) {
+			if (argc == 0 && flags.has(SfArgVarsExt.ThisArg)) {
+				// if it's the only argument, let it be
+				// - less confusing than warnings.
+				showThis = true;
+			} else {
+				showThis = expr.countThis() > 0;
+			}
+		} else showThis = false;
+		//
 		var ropt:SfBuffer = null;
 		var lp = sfConfig.localPrefix;
-		if (self > 0 || argc > 0) {
+		if (showThis || argc > 0) {
 			//
 			var found:Int = 0;
 			var arid:Int = 0;
-			if (inst) {
-				if (self > 0) {
+			if (showThis) {
+				if (flags.has(SfArgVarsExt.ThisSelf)) {
+					printf(r, "var this`=`self");
+					found += 1;
+				} else {
 					printf(r, "var this`=`argument[%d]", arid);
 					found += 1;
+					arid += 1;
 				}
+			} else if (checkThis) {
+				// "this" argument is not needed but we'll keep it in mind
 				arid += 1;
 			}
 			var ternary = sfConfig.ternary && !sfConfig.slowTernary;
@@ -84,6 +89,22 @@ class SfArgVars {
 			if (ropt != null) r.addBuffer(ropt);
 		}
 	}
+	/**
+	 * Generates code to copy GML arguments into actual named local variables.
+	 * Also see SfGmlArgs for a mini-optimization with replacing single-use
+	 * arguments by their argument[ind].
+	 */
+	public static function print(r:SfBuffer, f:SfClassField) {
+		var flags:SfArgVarsExt = 0;
+		if (f.isInst) {
+			if (f.parentClass.isStruct) {
+				flags |= SfArgVarsExt.ThisSelf;
+			} else {
+				flags |= SfArgVarsExt.ThisArg;
+			}
+		}
+		printExt(r, f.expr, f.args, flags);
+	}
 	
 	/**
 	 * Prints a documentation line for the script in "name(a:t1, b:t2, ...)" format.
@@ -96,21 +117,19 @@ class SfArgVars {
 		var jsdoc:SfBuffer = null;
 		var ext = sfConfig.gmxMode;
 		var next = sfConfig.next;
+		var showDoc = f.checkDocState(f.parentClass.docState);
 		if (flags & 3 == 3) {
 			if (sfConfig.noCodeDoc) return;
-			if (next && !ext) {
+			if (next && !ext && showDoc) {
 				jsdoc = new SfBuffer();
 				jsdoc.indent = r.indent;
 			}
 		}
 		if (flags & 1 != 0) {
-			if (ext) {
-				// we don't actually want "real" JSDoc in extensions because
-				// you can't see it and GMS2 may convert it on import
+			if (ext || !showDoc) {
 				r.addString("// ");
 			} else {
 				r.addString("/// ");
-				if (next) r.addString("@function ");
 			}
 		}
 		var doc = flags & 4 != 0 ? f.doc : null;
@@ -260,5 +279,18 @@ class SfArgVars {
 		if (flags & 2 != 0) r.addLine();
 		if (jsdoc != null && jsdoc.length > 0) r.addString(jsdoc.toString());
 		if ((ext || jsdoc == null) && doc != null && doc.indexOf("\n") < 0) printf(r, "// %s", doc);
+	}
+}
+enum abstract SfArgVarsExt(Int) from Int to Int {
+	var ThisArg = 1;
+	var ThisSelf = 2;
+	public function has(flag:SfArgVarsExt):Bool {
+		return (this & flag) == flag;
+	}
+	public inline function hasAny(flag:SfArgVarsExt):Bool {
+		return (this & flag) != 0;
+	}
+	@:op(A|B) public inline function or(flag:SfArgVarsExt):SfArgVarsExt {
+		return this | flag;
 	}
 }

@@ -22,11 +22,18 @@ class SfGmlArgs extends SfOptImpl {
 			if (fd.expr == null) return;
 			var argMap = new Map<String, SfGmlArgsData>();
 			var argList:Array<SfGmlArgsData> = [];
-			var argCount:Int = 0;
-			if (fd.isInst || (currentClass != null
-				&& fd == currentClass.constructor
-				&& currentClass.needsSeparateNewFunc()
-			)) argCount = 1;
+			//
+			var thisArg:Bool;
+			if (fd.parentClass != null) {
+				var fdc = fd.parentClass;
+				if (fdc.isStruct) {
+					thisArg = false;
+				} else if (fd == fdc.constructor && fdc.needsSeparateNewFunc()) {
+					thisArg = true;
+				} else thisArg = fd.isInst;
+			} else thisArg = fd.isInst;
+			//
+			var argCount:Int = thisArg ? 1 : 0;
 			//
 			for (arg in fd.args) {
 				var v = arg.v;
