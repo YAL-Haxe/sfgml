@@ -139,7 +139,8 @@ class SfYyGen {
 				mvc: "1.0",
 				name: name,
 				externalName: name,
-				help: gd && doc != null ? doc : "",
+				// https://bugs.yoyogames.com/view.php?id=30523
+				help: (gd && doc != null) ? doc : (debug ? name + "(...)" : ""),
 				hidden: !debug && !(gd && doc != null),
 				kind: 2,
 				returnType: 2,
