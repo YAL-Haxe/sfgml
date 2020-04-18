@@ -20,6 +20,9 @@ extern class NativeType {
 	/** >= 2.3 */
 	static function isStruct(v:Dynamic):Bool;
 	
+	/** >= 2.3 */
+	static function isMethod(v:Dynamic):Bool;
+	
 	/** >= 2.2.3 */
 	@:expose("is_nan") static function isNaN(v:Dynamic):Bool;
 	
@@ -27,9 +30,13 @@ extern class NativeType {
 	static function isInfinity(v:Dynamic):Bool;
 	
 	/** Returns whether the value is any of numeric types */
+	#if sfgml.modern
+	@:expose("is_numeric") static function isNumber(v:Dynamic):Bool;
+	#else
 	static inline function isNumber(v:Dynamic):Bool {
 		return NativeTypeHelper.isNumber(v);
 	}
+	#end
 	
 	/** Returns whether the value is numeric and has no fractions */
 	static inline function isIntNumber(v:Dynamic):Bool {
@@ -59,9 +66,13 @@ extern class NativeType {
 		if (NativeType.isReal(value)) {
 			return (value | 0) == value;
 		}
+		#if sfgml.modern
+		return NativeType.isNumber(value);
+		#else
 		return NativeType.isInt64(value)
 			|| NativeType.isInt32(value)
 			|| NativeType.isBool(value);
+		#end
 	}
 	public static function isNonFinite(value:Dynamic):Bool {
 		return NativeType.isNaN(value) || NativeType.isInfinity(value);

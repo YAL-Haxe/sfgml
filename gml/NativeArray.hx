@@ -17,9 +17,13 @@ extern class NativeArray {
 	 * and is to be used if you are going to populate it yourself anyway.
 	 * @see https://bugs.yoyogames.com/view.php?id=29362
 	 */
+	#if sfgml.modern
+	@:native("create") @:noUsing static inline function createEmpty<T>(size:Int):Array<T>;
+	#else
 	@:noUsing static inline function createEmpty<T>(size:Int):Array<T> {
 		return create(size, cast 0);
 	}
+	#end
 	
 	/** Returns the number of items in the given array */
 	@:native("length_1d") static function length1d<T>(q:Array<T>):Int;
