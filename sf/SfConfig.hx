@@ -106,10 +106,18 @@ class SfConfig extends SfConfigImpl {
 	public var copyset:Bool;
 	
 	/** https://bugs.yoyogames.com/view.php?id=29749 */
-	public var slowTernary:Bool = true;
+	public var avoidTernaries:Bool = true;
 	
-	/** https://bugs.yoyogames.com/view.php?id=30411 */
-	public var slowPostfix:Bool = true;
+	/**
+	 * https://bugs.yoyogames.com/view.php?id=30411
+	 */
+	public var avoidPostfixStatements:Bool = true;
+	
+	/**
+	 * In a grand fit of comedy, 2.3 makes `if (cond) ++v;` illegal
+	 * https://bugs.yoyogames.com/view.php?id=31639
+	 */
+	public var avoidPrefixStatements:Bool = false;
 	
 	/** Stores type information in [1,0] instead of [0] */
 	public var legacyMeta:Bool = bool("sfgml-legacy-meta");
@@ -126,8 +134,9 @@ class SfConfig extends SfConfigImpl {
 		//Sys.println(d);
 		ternary = d.ternary;
 		copyset = d.copyset;
-		slowPostfix = compare(d.version, "2.2.3") < 0;
+		avoidPostfixStatements = compare(d.version, "2.2.3") < 0;
 		var v23 = compare(d.version, "2.3") >= 0;
+		avoidPrefixStatements = v23;
 		modern = v23;
 		hasTryCatch = v23;
 		hasFunctionLiterals = v23;

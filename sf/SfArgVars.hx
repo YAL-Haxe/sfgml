@@ -53,7 +53,7 @@ class SfArgVars {
 				// "this" argument is not needed but we'll keep it in mind
 				arid += 1;
 			}
-			var ternary = sfConfig.ternary && !sfConfig.slowTernary;
+			var ternary = sfConfig.ternary && !sfConfig.avoidTernaries;
 			i = -1; while (++i < argc) {
 				arg = args[i];
 				v = arg.v;
