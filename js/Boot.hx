@@ -9,7 +9,7 @@ import gml.sys.System;
  * ...
  * @author YellowAfterlife
  */
-@:native("haxe.boot") @:std
+@:native("haxe.boot") @:std @:snakeCase
 class Boot {
 	
 	/** Whether currently exported to JavaScript */
@@ -154,6 +154,19 @@ class Boot {
 		return e;
 	}
 	#end
+	
+	//{ closure tricks: some.method -> closure_post(closure_pre(self).method)
+	@:keep public static var closureSelf:Dynamic;
+	@:keep public static function closurePre(self:Dynamic):Dynamic {
+		closureSelf = self;
+		return self;
+	}
+	@:keep public static function closurePost(func:Dynamic):Dynamic {
+		var result = gml.NativeFunction.bind(closureSelf, func);
+		closureSelf = null;
+		return result;
+	}
+	//}
 }
 
 #if !sfgml_catch_error @:remove #end
