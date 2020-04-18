@@ -14,7 +14,11 @@ import gml.ds.ArrayList;
 extern class Array<T> implements ArrayAccess<T> {
 	var length(get, never):Int;
 	private inline function get_length():Int {
+		#if sfgml.modern
+		return raw("array_length")(this);
+		#else
 		return raw("array_length_1d")(this);
+		#end
 	}
 	
 	function new();
