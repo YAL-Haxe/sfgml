@@ -13,12 +13,12 @@ using sf.type.expr.SfExprTools;
 class SfArgVars {
 	public static function printExt(r:SfBuffer, expr:SfExpr, args:Array<SfArgument>, flags:SfArgVarsExt) {
 		var argc:Int = args.length;
-		var usesArgs = false;
+		var showArgs = false;
 		var i:Int, v:SfVar, arg:SfArgument;
 		i = -1; while (++i < argc) {
 			arg = args[i];
 			if (!arg.hidden) {
-				usesArgs = true;
+				showArgs = true;
 			}
 		}
 		//
@@ -36,7 +36,7 @@ class SfArgVars {
 		//
 		var ropt:SfBuffer = null;
 		var lp = sfConfig.localPrefix;
-		if (showThis || argc > 0) {
+		if (showThis || showArgs) {
 			//
 			var found:Int = 0;
 			var arid:Int = 0;
@@ -96,12 +96,10 @@ class SfArgVars {
 	 */
 	public static function print(r:SfBuffer, f:SfClassField) {
 		var flags:SfArgVarsExt = 0;
-		if (f.isInst) {
-			if (f.parentClass.isStruct) {
-				flags |= SfArgVarsExt.ThisSelf;
-			} else {
-				flags |= SfArgVarsExt.ThisArg;
-			}
+		if (f.isInst && f.parentClass.isStruct) {
+			flags |= SfArgVarsExt.ThisSelf;
+		} else if (f.needsThisArg()) {
+			flags |= SfArgVarsExt.ThisArg;
 		}
 		printExt(r, f.expr, f.args, flags);
 	}
@@ -161,13 +159,10 @@ class SfArgVars {
 		// catch the actual rest-argument:
 		if (argc > 0) {
 			arg = args[argc - 1];
-			switch (arg.v.type) {
-				case TAbstract(_.get() => { name: "SfRest" }, [q]): {
-					emName = arg.v.name;
-					emStart = argc - 1;
-					emType = q;
-				};
-				default:
+			emType = sf.opt.SfGmlRest.getRestType(arg.v.type);
+			if (emType != null) {
+				emName = arg.v.name;
+				emStart = argc - 1;
 			}
 		}
 		// otherwise see if there are trailing optionals that are all the same:

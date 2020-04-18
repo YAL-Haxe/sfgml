@@ -7,6 +7,8 @@ import haxe.macro.Type;
  */
 class SfClassField extends SfClassFieldImpl {
 	public var index:Int = -1;
+	
+	/** Whether `this` is used in the call (included as argument or otherwise) */
 	public var callNeedsThis:Bool = false;
 	public function new(parent:SfType, field:ClassField, inst:Bool) {
 		super(parent, field, inst);
@@ -21,5 +23,16 @@ class SfClassField extends SfClassFieldImpl {
 			SfArgVars.doc(sfb, this, 4);
 			return sfb.toString();
 		} else return null;
+	}
+	/** Whether `this` prefix-argument should be included. */
+	public function needsThisArg():Bool {
+		if (isStructField) return false;
+		var fdc = parentClass;
+		if (fdc != null) {
+			if (this == fdc.constructor && fdc.needsSeparateNewFunc()) {
+				return true;
+			}
+		}
+		return isInst;
 	}
 }

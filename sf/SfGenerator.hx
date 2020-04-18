@@ -759,7 +759,8 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfCall(x, _args): { // func(...args)
 				n = _args.length;
 				sep = false;
-				i = 2; // 1: expr, 2: par, -1: nothing
+				/** |1: print expr, |2: print `(`, <0: print nothing */
+				var callFlags = 2;
 				
 				// if we are calling a field that's being wget, we need to resolve that
 				// this is asking for a refactor of some sort
@@ -787,30 +788,31 @@ class SfGenerator extends SfGeneratorImpl {
 				//
 				switch (x.def) {
 					case SfIdent(name): r.addString(name);
-					case SfDynamic(code, []): {
-						if (code.charCodeAt(code.length - 1) == "]".code) {
-							i = 3;
+					case SfDynamic(code, []): { // arbitrary code
+						if (!sfConfig.modern && code.charCodeAt(code.length - 1) == "]".code) {
+							// if we are trying to call dynamic `arr[x]`,
+							// we need script_execute around it in pre-2.3
+							callFlags = 3;
 						} else r.addString(code);
 					};
-					case SfConst(TSuper): {
+					case SfConst(TSuper): { // super(...constructor args)
 						if (currentClass == null) {
 							expr.error("Trying to call super outside a class");
 						}
 						var superClass = this.currentClass.superClass;
 						printf(r, "%(field_auto)(this", superClass.constructor);
-						i = 0; sep = true;
+						callFlags = 0; sep = true;
 					};
-					case SfInstField(_.def => SfConst(TSuper), _field): {
+					case SfInstField(_.def => SfConst(TSuper), _field): { // super.method(...)
 						if (_field.parentClass.dotAccess) {
 							printf(r, "method(this, %(field_auto))(", _field);
-							i = 0;
+							callFlags = 0;
 						} else {
 							printf(r, "%(field_auto)(this", _field);
-							sep = true;
-							i = 0;
+							callFlags = 0; sep = true;
 						}
 					};
-					case SfStaticField(cl, fd): {
+					case SfStaticField(cl, fd): { // Type.func(...)
 						if (fd.name == "set_2D" && fd.parentType.realPath == "gml.NativeArray"
 							&& _args[0].def.match(SfLocal(_) | SfStaticField(_, _))
 						) { // NativeArray.set2D(a, b, c, d) -> a[@b, c] = d;
@@ -818,19 +820,22 @@ class SfGenerator extends SfGeneratorImpl {
 							return;
 						} else if (cl.dotStatic || !fd.isVar || fd.meta.has(":script")) {
 							r.addFieldPathAuto(fd);
-						} else i = 3;
+						} else callFlags = 3;
 					};
-					case SfDynamicField(_inst, _field): {
-						if (!_inst.isSimple()) {
-							_inst.warning("This call may have side effects.");
+					case SfDynamicField(_inst, _field): { // typedef.field(...)
+						if (sfConfig.modern) {
+							callFlags = 3;
+						} else {
+							if (!_inst.isSimple()) {
+								_inst.warning("This call may have side effects.");
+							}
+							printf(r, "script_execute(%x,`%x", x, _inst);
+							callFlags = 0; sep = true;
 						}
-						printf(r, "script_execute(%x,`%x", x, _inst);
-						sep = true;
-						i = 0;
 					};
 					case SfInstField(_inst, _field): {
 						k = _field.index;
-						if (k >= 0) {
+						if (k >= 0) { // inst.dynMethod(...)
 							if (_field.callNeedsThis) {
 								if (!_inst.isSimple()) {
 									_inst.warning("This call may have side effects.");
@@ -838,7 +843,7 @@ class SfGenerator extends SfGeneratorImpl {
 								printf(r, "script_execute(%x,`%x", x, _inst);
 							} else printf(r, "script_execute(%x", x);
 							sep = true;
-							i = 0;
+							callFlags = 0;
 						} else if (_field.parentClass.dotAccess) {
 							printf(r, "%x.%s", _inst, _field.name);
 						} else {
@@ -859,7 +864,9 @@ class SfGenerator extends SfGeneratorImpl {
 							}
 							if (k <= 0) {
 								//
-							} else if (_inst.def.match(SfLocal(_) | SfStaticField(_, _))) {
+							} else if (sfConfig.hasChainedAccessors
+								|| _inst.def.match(SfLocal(_) | SfStaticField(_, _))
+							) {
 								switch (k) {
 									case 1: printf(r, "%x[|%x]", _inst, _args[0]);
 									case 2: printf(r, "%x[|%x]`=`%x", _inst, _args[0], _args[1]);
@@ -874,7 +881,7 @@ class SfGenerator extends SfGeneratorImpl {
 							r.addFieldPathAuto(_field);
 							printf(r, "(%x", _inst);
 							sep = true;
-							i = 0;
+							callFlags = 0;
 						}
 					};
 					case SfEnumField(_enum, _field): {
@@ -890,29 +897,33 @@ class SfGenerator extends SfGeneratorImpl {
 							return;
 						}
 						r.addFieldPathAuto(_field);
-						i = 2;
+						callFlags = 2;
 					};
-					default: i = 3;
+					default: callFlags = 3;
 				}
-				if (i & 3 == 3) {
-					#if (sfgml_script_execute_wrap)
-					var cf = SfGmlScriptExecuteWrap.map[n];
-					if (cf != null) {
-						printf(r, "%(field_auto)(", cf);
-					} else 
-					#end
-					printf(r, "script_execute(");
-					printf(r, "%x", x);
-					if (selfExpr != null) {
-						if (!selfExpr.isSimple()) {
-							selfExpr.warning("This call may have side effects.");
+				if (callFlags & 3 == 3) {
+					if (sfConfig.modern) {
+						printf(r, "%x(", x);
+					} else {
+						#if (sfgml_script_execute_wrap)
+						var cf = SfGmlScriptExecuteWrap.map[n];
+						if (cf != null) {
+							printf(r, "%(field_auto)(", cf);
+						} else 
+						#end
+						printf(r, "script_execute(");
+						printf(r, "%x", x);
+						if (selfExpr != null) {
+							if (!selfExpr.isSimple()) {
+								selfExpr.warning("This call may have side effects.");
+							}
+							printf(r, ", %x", selfExpr);
 						}
-						printf(r, ", %x", selfExpr);
+						sep = true;
 					}
-					sep = true;
-				} else if (i & 2 != 0) r.addParOpen();
+				} else if (callFlags & 2 != 0) r.addParOpen();
 				//
-				if (i >= 0) {
+				if (callFlags >= 0) {
 					i = 0; while (i < n) {
 						if (sep) r.addComma(); else sep = true;
 						addExpr(_args[i], true);

@@ -14,20 +14,20 @@ import haxe.macro.Type;
  * @author YellowAfterlife
  */
 class SfGmlRest extends SfOptImpl {
-	static function isSfRestRec(t:Type):Bool {
+	public static function getRestType(t:Type):Type {
 		switch (t) {
-			case TAbstract(_.get() => { name: "SfRest" }, _): {
-				return true;
+			case TAbstract(_.get() => { name: "SfRest" }, [q]): {
+				return q;
 			};
 			case TAbstract(_.get() => { name: "Null" }, [
-				TAbstract(_.get() => { name: "SfRest" }, _)
+				TAbstract(_.get() => { name: "SfRest" }, [q])
 			]): {
-				return true;
+				return q;
 			};
 			case TType(_.get() => td, _): {
-				return isSfRestRec(td.type);
+				return getRestType(td.type);
 			};
-			default: return false;
+			default: return null;
 		}
 	}
 	override public function apply() {
@@ -38,8 +38,8 @@ class SfGmlRest extends SfOptImpl {
 			var args = currentField.args;
 			if (args == null) return;
 			var argc = args.length;
-			if (argc > 0 && isSfRestRec(args[argc - 1].v.type)) {
-				currentField.restOffset = argc - (currentField.isInst ? 0 : 1);
+			if (argc > 0 && getRestType(args[argc - 1].v.type) != null) {
+				currentField.restOffset = argc - (currentField.isInst && !currentField.dotAccess ? 0 : 1);
 			}
 		});
 		sfRest.isHidden = true;
@@ -104,58 +104,6 @@ class SfGmlRest extends SfOptImpl {
 		}
 		forEachExpr(function(e, w, f) {
 			if (currentField != null) iter(e, w, iter);
-		}, []);
-		//trace(sfRest.impl.staticMap.keys());
-		/*if (sfRest == null) return;
-		forEachExpr(function(e:SfExpr, w, f) {
-			if (currentField != null && currentField.name == "map_create") {
-				var args = currentField.args;
-				var argc = args.length;
-				if (argc > 0) switch (args[argc - 1].v.type) {
-					case TAbstract(_.get() => t, _) if (t.name == "SfRest"): {
-						currentField.restOffset = argc - 1;
-					};
-					default:
-				}
-			}
-		});
-		var sfRest_create = sfRest.staticMap["create"];
-		var sfRest_get = sfRest.staticMap["get"];
-		var sfRest_set = sfRest.staticMap["set"];
-		forEachExpr(function(e:SfExpr, w:Array<SfExpr>, f) {
-			e.iter(w, f);
-			switch (e) {
-				case SfCall(SfStaticField(c, f), par) if (c == sfRest): {
-					if (f == sfRest_create) {
-						trace(par[0].dump());
-						var rest = switch (par[0]) {
-							case SfArrayDecl(w): w;
-							default: e.error("" + currentClass.name);
-						}
-						var q = w[0], p = e;
-						switch (q) { // @:implicitCast
-							case SfMeta(_, _): q = w[1]; p = w[0];
-							default:
-						}
-						switch (q) {
-							case SfCall(x, args): {
-								var argc = args.length;
-								if (args[argc - 1] != p) {
-									e.error("SfRest may only be the last argument.");
-								}
-								args.splice(argc - 1, 1);
-								for (q in rest) args.push(q);
-							};
-							default: e.error("SfRest may not be constructed standalone.");
-						}
-					} else if (f == sfRest_get) {
-						
-					} else if (f == sfRest_set) {
-						
-					}
-				};
-				default:
-			}
-		}, []);*/
+		}, []); 
 	}
 }
