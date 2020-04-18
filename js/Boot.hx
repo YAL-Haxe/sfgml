@@ -145,12 +145,6 @@ class Boot {
 		arr[index] = value;
 	}
 	
-	#if (sfgml_script_execute_wrap)
-	@:keep private static function script_execute():Dynamic {
-		return null;
-	}
-	#end
-	
 	#if (sfgml_catch_error)
 	@:keep private static function catch_error():js.lib.Error {
 		var s:String = SfTools.raw("catch_error_dequeue")();

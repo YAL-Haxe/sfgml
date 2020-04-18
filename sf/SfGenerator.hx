@@ -373,7 +373,6 @@ class SfGenerator extends SfGeneratorImpl {
 			new SfOptBinop(),
 			new SfGmlObjectDecl(),
 			new SfGmlEnumCtr(),
-			new SfGmlScriptExecuteWrap(),
 		]; pre.reverse(); for (o in pre) r.unshift(o);
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());
@@ -905,12 +904,6 @@ class SfGenerator extends SfGeneratorImpl {
 					if (sfConfig.modern) {
 						printf(r, "%x(", x);
 					} else {
-						#if (sfgml_script_execute_wrap)
-						var cf = SfGmlScriptExecuteWrap.map[n];
-						if (cf != null) {
-							printf(r, "%(field_auto)(", cf);
-						} else 
-						#end
 						printf(r, "script_execute(");
 						printf(r, "%x", x);
 						if (selfExpr != null) {
