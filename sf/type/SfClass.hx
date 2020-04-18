@@ -379,15 +379,23 @@ class SfClass extends SfClassImpl {
 								init.addLine();
 								var wn = w.length;
 								var wx = w.slice(0, wn - 1);
-								wx.push(fx.mod(SfBinop(OpAssign, fsf, w[wn - 1])));
-								fx = fx.mod(SfBlock(wx));
+								if (sfConfig.modern) {
+									wx.push(fx.mod(SfReturn(true, w[wn - 1])));
+									fx = fx.mod(SfBlock(wx));
+									printf(init, "g_%(field_auto)`=`(function()`{", f);
+									printf(init, "%(+\n)%(stat);%(-\n)})();\n", fx);
+								} else {
+									wx.push(fx.mod(SfBinop(OpAssign, fsf, w[wn - 1])));
+									fx = fx.mod(SfBlock(wx));
+									printf(init, "%(stat);\n", fx);
+								}
 							};
 							default: {
 								init.addSep();
 								fx = fx.mod(SfBinop(OpAssign, fsf, fx));
+								printf(init, "%(stat);\n", fx);
 							};
 						}
-						init.addExpr(fx, false); printf(init, ";\n");
 					} else init.addLine();
 				};
 			}
