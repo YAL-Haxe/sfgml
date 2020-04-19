@@ -111,11 +111,11 @@ class SfArgVars {
 	 * 2	Append a linebreak (also used in script headers)
 	 * 4	Include short documentation, if marked with `@:doc` (used for extensions)
 	 */
-	public static function doc(r:SfBuffer, f:SfClassField, flags:Int = 3) {
+	public static function doc(r:SfBuffer, f:SfField, flags:Int = 3) {
 		var jsdoc:SfBuffer = null;
 		var ext = sfConfig.gmxMode;
 		var next = sfConfig.next;
-		var showDoc = f.checkDocState(f.parentClass.docState);
+		var showDoc = f.checkDocState(f.parentType.docState);
 		if (flags & 3 == 3) {
 			if (sfConfig.noCodeDoc) return;
 			if (next && !ext && showDoc) {
@@ -141,7 +141,7 @@ class SfArgVars {
 		r.addFieldPathAuto(f);
 		r.addParOpen();
 		var comma = false;
-		if (f.isInst) {
+		if (Std.is(f, SfClassField) && (cast f:SfClassField).needsThisArg()) {
 			r.addString("this:");
 			r.addString(f.parentType.name);
 			if (jsdoc != null) {

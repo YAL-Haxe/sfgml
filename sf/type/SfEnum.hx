@@ -1,5 +1,6 @@
 package sf.type;
 import haxe.macro.Type.MetaAccess;
+import sf.SfArgVars;
 import sf.type.SfBuffer;
 import sf.SfCore.*;
 
@@ -45,18 +46,8 @@ class SfEnum extends SfEnumImpl {
 				path += "_new";
 			}
 			if (noScripts) continue;
-			printf(out, "\n#define %s\n", path);
-			var i:Int = 0;
-			if (!sfConfig.noCodeDoc) {
-				printf(out, "/// %s(", path);
-				while (i < argc) {
-					if (i > 0) printf(out, ", ");
-					printf(out, "%s:", args[i].v.name);
-					out.addBaseTypeName(args[i].v.type);
-					i += 1;
-				}
-				printf(out, ")\n");
-			}
+			out.addTopLevelFuncOpen(path);
+			SfArgVars.doc(out, ctr);
 			//
 			printf(out, "var this");
 			if (hasAC) printf(out, "`=`array_create(%d)", argc + 1);
@@ -75,10 +66,33 @@ class SfEnum extends SfEnumImpl {
 			//
 			printf(out, "this[0%(hint)]`=`%d;\n", "id", ctr.index);
 			for (i in 0 ... argc) {
-				printf(out, "this[%d%(hint)]`=`argument[%d];\n", i + 1, args[i].v.name, i);
+				var arg = args[i];
+				inline function addArgSet():Void {
+					printf(out, "this[%d%(hint)]`=`", i + 1, arg.v.name);
+				}
+				if (arg.value != null) {
+					if (sfConfig.ternary) {
+						addArgSet();
+						printf(out, "argument_count`>`%d`?`argument[%d]`:`", i, i);
+						sfGenerator.printConst(out, arg.value, null);
+					} else {
+						printf(out, "if`(argument_count`>`%d)`{%(+\n)", i, i);
+						addArgSet();
+						printf(out, "argument[%d];", i);
+						printf(out, "%(-\n)}`else`{%(+\n)");
+						addArgSet();
+						sfGenerator.printConst(out, arg.value, null);
+						printf(out, ";%(-\n)}");
+					}
+				} else {
+					addArgSet();
+					printf(out, "argument[%d]", i);
+				}
+				printf(out, ";\n");
 			}
 			//
-			printf(out, "return this;\n");
+			printf(out, "return this;");
+			out.addTopLevelFuncClose();
 		}
 		if (out.length > 0) {
 			if (hintFolds) printf(outb, "\n//{ %(type_dot)\n", this);

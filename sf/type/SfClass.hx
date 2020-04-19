@@ -121,7 +121,7 @@ class SfClass extends SfClassImpl {
 		ctr.isInst = false;
 		var ctr_exposePath:String;
 		if (isStruct) {
-			printf(r, "\nfunction %(type_auto)() constructor {%(+\n)", this);
+			printf(r, "\nfunction %(type_auto)()`constructor`{%(+\n)", this);
 			ctr_exposePath = ctr.exposePath;
 			ctr.exposePath = {
 				var b = new SfBuffer();
