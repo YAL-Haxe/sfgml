@@ -6,17 +6,17 @@ package gml;
  */
 @:std extern class NativeStruct {
 	@:expose("variable_struct_get")
-	@:pure static function getField<T:{}>(obj:T, fd:String):Dynamic;
+	@:pure static function getField(obj:Dynamic, fd:String):Dynamic;
 	
 	@:expose("variable_struct_get_names")
-	@:pure static function getFieldNames<T:{}>(obj:T):Array<String>;
+	@:pure static function getFieldNames(obj:Dynamic):Array<String>;
 	
 	@:expose("variable_struct_names_count")
-	@:pure static function getFieldCount<T:{}>(obj:T):Int;
+	@:pure static function getFieldCount(obj:Dynamic):Int;
 	
 	@:expose("variable_struct_exists")
-	@:pure static function hasField<T:{}>(obj:T, fd:String):Dynamic;
+	@:pure static function hasField(obj:Dynamic, fd:String):Dynamic;
 	
 	@:expose("variable_struct_set")
-	static function setField<T:{}>(obj:T, fd:String, val:Dynamic):Void;
+	static function setField(obj:Dynamic, fd:String, val:Dynamic):Void;
 }
