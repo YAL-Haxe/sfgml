@@ -1,8 +1,11 @@
 package;
 import gml.MetaType;
 import gml.NativeArray;
+import gml.NativeStruct;
+import gml.NativeType;
+import gml.ds.HashTable;
 
-enum ValueType {
+@:std enum ValueType {
 	TNull;
 	TInt;
 	TFloat;
@@ -20,37 +23,45 @@ enum ValueType {
  */
 @:std @:native("haxe_type_tools") @:snakeCase
 @:coreApi class Type {
+	private static inline var modernOnly:String = "This method is only available in GMS>=2.3.";
+	private static inline var structOnly:String = "This method can only be used with struct values.";
+	
 	public static inline function getClass<T>(o:T):Class<T> {
 		return @:privateAccess js.Boot.getClass(o);
 	}
 	
-	public static inline function getEnum(o:EnumValue):Enum<Dynamic> {
-		throw "Type.getEnum is not supported.";
-		return null;
+	public static function getEnum(o:EnumValue):Enum<Dynamic> {
+		#if sfgml.modern
+		if (NativeType.isStruct(o)) {
+			return NativeStruct.getField(o, "__enum__");
+		} else throw structOnly;
+		#else
+		throw modernOnly;
+		#end
 	}
 	
 	public static inline function getSuperClass(c:Class<Dynamic>):Class<Dynamic> {
-		throw "Type.getSuperClass is not supported.";
-		return null;
+		#if sfgml.modern
+		return (cast c:MetaClass<Dynamic>).superClass;
+		#else
+		// todo: could store superClass on non-modern
+		throw modernOnly;
+		#end
 	}
 	
 	public static inline function getClassName(c:Class<Dynamic>):String {
-		return (cast c:MetaType<Dynamic>).name;
+		return (cast c:MetaClass<Dynamic>).name;
 	}
 	
 	public static inline function getEnumName(e:Enum<Dynamic>):String {
-		throw "Type.getEnumName is not supported.";
-		return null;
+		return (cast e:MetaEnum<Dynamic>).name;
 	}
 	
 	public static inline function resolveClass(name:String):Class<Dynamic> {
-		throw "Type.resolveClass is not supported.";
-		return null;
+		return js.Boot.resolveClassMap[name];
 	}
-	
 	public static inline function resolveEnum(name:String):Enum<Dynamic> {
-		throw "Type.resolveEnum is not supported.";
-		return null;
+		return js.Boot.resolveEnumMap[name];
 	}
 	
 	public static inline function createInstance<T>(cl:Class<T>, args:Array<Dynamic>):T {

@@ -14,8 +14,10 @@ class SfGmlTypeInit {
 		//
 		if (sfConfig.hintFolds) printf(init, "//{ metatype\n");
 		var mtModule = SfGmlType.mtModule;
-		//
+		
 		#if !sfgml_legacy_meta
+		// we'll need markerValue defined before anything else
+		// since meta type constructors will reference it:
 		var qMetaType:SfClass = cast sfGenerator.realMap["gml.MetaType"];
 		var qMetaMarker = qMetaType.realMap["markerValue"];
 		var qMetaMarkerText:String = null;
@@ -31,20 +33,13 @@ class SfGmlTypeInit {
 			printf(init, ";\n");
 		}
 		#end
+		
 		//
 		var typeBoot = sfGenerator.typeBoot;
 		var modern = sfConfig.modern;
 		for (t in sfGenerator.typeList) {
-			if (t.isHidden || t.nativeGen) continue;
-			if (!t.isUsed) continue;
-			var e:SfEnum = null;
-			if (Std.is(t, SfEnum)) {
-				e = cast t;
-				if (e.isFake) continue;
-			} else if (Std.is(t, SfClass)) {
-				var c:SfClass = cast t;
-				if (c.constructor == null && c.instList.length == 0) continue;
-			} else continue;
+			if (!t.hasMetaType()) continue;
+			var e:SfEnum = Std.is(t, SfEnum) ? cast t : null;
 			//
 			printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
 			if (stdPack != null) printf(init, "%s_", stdPack);
@@ -54,28 +49,28 @@ class SfGmlTypeInit {
 				printf(init, "%s_create", e != null ? "haxe_enum" : "haxe_class");
 			}
 			printf(init, '(%d,`"%(type_auto)"', t.index, t);
-			if (Std.is(t, SfEnum)) {
-				var e:SfEnum = cast t;
-				if (e.ctrNames) {
-					if (hasArrayDecl) {
-						printf(init, ",`[");
-					} else {
-						printf(init, ",`%(field_auto)(", typeBoot.realMap["decl"]);
-					}
-					var sep = false;
-					for (c in e.ctrList) {
-						if (sep) init.addComma(); else sep = true;
-						printf(init, '"%s"', c.name);
-					}
-					if (hasArrayDecl) {
-						printf(init, "]");
-					} else {
-						printf(init, ")");
-					}
+			if (e != null && e.ctrNames) {
+				if (hasArrayDecl) {
+					printf(init, ",`[");
+				} else {
+					printf(init, ",`%(field_auto)(", typeBoot.realMap["decl"]);
+				}
+				var sep = false;
+				for (c in e.ctrList) {
+					if (sep) init.addComma(); else sep = true;
+					printf(init, '"%s"', c.name);
+				}
+				if (hasArrayDecl) {
+					printf(init, "]");
+				} else {
+					printf(init, ")");
 				}
 			}
 			printf(init, ");\n");
 		}
+		
+		//
+		
 		//
 		if (sfConfig.hintFolds) printf(init, "//}\n");
 	}
@@ -88,6 +83,7 @@ class SfGmlTypeInit {
 		var fns = sfConfig.fieldNames;
 		var next = sfConfig.next;
 		
+		// generate prototypes for linear classes:
 		for (c in sfGenerator.classList) {
 			if (c.isHidden || c.constructor == null) continue;
 			if (c.nativeGen && !fns) continue;

@@ -2,8 +2,11 @@ package js;
 import gml.MetaType;
 import gml.NativeArray;
 import gml.NativeString;
+import gml.NativeStruct;
+import gml.NativeType;
 import gml.io.Buffer;
 import gml.sys.System;
+import gml.ds.HashTable;
 
 /**
  * ...
@@ -87,7 +90,7 @@ class Boot {
 	}
 	
 	/**
-	 * Appends up to 15 elements to the end of given array (GMS1 only).
+	 * Appends up to 15 elements to the end of given array (legacy GMS1 only).
 	 * Is used in inline array declaration for trailing groups of elements.
 	 */
 	@:keep private static function trail<T>(array:Array<T>, values:T) {
@@ -138,12 +141,14 @@ class Boot {
 		return c ? a : b;
 	}
 	
+	//{ pre-2.3 functions to replace chained accessors
 	@:pure @:keep public static function wget<T>(arr:Array<T>, index:Int):T {
 		return arr[index];
 	}
 	@:keep public static function wset<T>(arr:Array<T>, index:Int, value:T):Void {
 		arr[index] = value;
 	}
+	//}
 	
 	#if (sfgml_catch_error)
 	@:keep private static function catch_error():js.lib.Error {
@@ -166,6 +171,11 @@ class Boot {
 		closureSelf = null;
 		return result;
 	}
+	//}
+	
+	//{
+	public static var resolveClassMap:HashTable<String, Class<Dynamic>> = HashTable.defValue;
+	public static var resolveEnumMap:HashTable<String, Enum<Dynamic>> = HashTable.defValue;
 	//}
 }
 

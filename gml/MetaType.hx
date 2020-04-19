@@ -30,21 +30,39 @@ class MetaType<T> {
 	
 	/** Returns whether the object has a metatype. */
 	@:keep public static function has(obj:Dynamic):Bool {
+		#if sfgml.modern
+		if (NativeType.isStruct(obj)) {
+			return NativeStruct.hasField(obj, "__class__");
+		}
+		#end
 		if (NativeArray.length1d(obj) < 1) return false;
 		var meta:MetaType<Any> = obj[0];
+		#if sfgml.modern
+		return NativeType.isStruct(meta)
+			&& meta.marker == markerValue;
+		#else
 		return NativeArray.length1d(cast meta) >= 3
 			&& NativeType.isArray(meta.marker)
 			&& meta.marker == markerValue;
+		#end
 	}
 	
+	#if sfgml.modern
+	public static function get<T>(obj:T):MetaType<T> {
+		if (NativeType.isStruct(obj)) {
+			return (cast obj:Dynamic).__class__;
+		} else return (cast obj:Dynamic)[0];
+	}
+	#else
 	public static inline function get<T>(obj:T):MetaType<T> {
 		return (cast obj:Dynamic)[0];
 	}
+	#end
 	
 	public static inline function set<T>(obj:T, meta:Dynamic):Void {
 		(cast obj:Dynamic)[0] = meta;
 	}
-	#else
+	#else // -> sfgml_legacy_meta
 	
 	/** Returns whether the object has a metatype. */
 	public static inline function has(obj:Dynamic):Bool {
