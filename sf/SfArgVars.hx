@@ -72,7 +72,10 @@ class SfArgVars {
 					if (vdef == null) {
 						printf(r, "`=`argument[%d]", arid);
 					} else {
-						if (ropt == null) ropt = new SfBuffer();
+						if (ropt == null) {
+							ropt = new SfBuffer();
+							ropt.indent = r.indent;
+						}
 						if (ternary) {
 							printf(ropt, "var %s%s`=`argument_count`>`%d`", lp, vname, arid);
 							printf(ropt, "?`argument[%d]`:`%(const);\n", arid, vdef);
