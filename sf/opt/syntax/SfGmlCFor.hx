@@ -1,11 +1,12 @@
-package sf.opt;
+package sf.opt.syntax;
 import sf.type.expr.SfExpr;
 import sf.type.expr.SfExprDef.*;
 import sf.type.expr.SfExprList;
 using sf.type.expr.SfExprTools;
 
 /**
- * ...
+ * Having blocks/calls as for-loop initializer is not allowed anymore
+ * so we'll move it out if needed.
  * @author YellowAfterlife
  */
 class SfGmlCFor extends SfOptImpl {

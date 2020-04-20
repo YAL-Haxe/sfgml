@@ -1,9 +1,10 @@
-package sf.opt;
+package sf.opt.legacy;
 
 import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;
 import sf.type.*;
 import sf.type.expr.*;
+import sf.opt.type.*;
 using sf.type.expr.SfExprTools;
 import sf.SfCore.*;
 import haxe.macro.Expr.Binop.*;
@@ -27,7 +28,7 @@ class SfGmlArrayDecl extends SfOptImpl {
 		if (noArrayDecl) {
 			var rType:SfClass = cast sfGenerator.realMap["Type"];
 			if (rType != null && rType.staticMap.exists("enumConstructor")) arrayDeclUsed = true;
-			if (SfGmlEnumCtr.code.length > 0) arrayDeclUsed = true;
+			if (sf.opt.api.SfGmlEnumCtr.code.length > 0) arrayDeclUsed = true;
 		}
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			switch (e.def) {

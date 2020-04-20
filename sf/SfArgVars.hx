@@ -64,7 +64,7 @@ class SfArgVars {
 						if (found++ > 0) r.addComma(); else r.addString("var ");
 						printf(r, "%s%s", lp, vname);
 						if (sfConfig.hintVarTypes) {
-							var t = sf.opt.SfGmlTypeHint.get(v.type);
+							var t = sf.opt.type.SfGmlTypeHint.get(v.type);
 							//printf(r, '/*%s*/', Std.string(v.type));
 							if (t != null) printf(r, "/*:%s*/", t);
 						}
@@ -159,7 +159,7 @@ class SfArgVars {
 		// catch the actual rest-argument:
 		if (argc > 0) {
 			arg = args[argc - 1];
-			emType = sf.opt.SfGmlRest.getRestType(arg.v.type);
+			emType = sf.opt.syntax.SfGmlRest.getRestType(arg.v.type);
 			if (emType != null) {
 				emName = arg.v.name;
 				emStart = argc - 1;

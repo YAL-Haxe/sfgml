@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.type;
 
 import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;
@@ -12,8 +12,14 @@ import haxe.macro.Type.Type.*;
 import SfTools.*;
 
 /**
- * GML arrays are actually always 2d, so the second row is used to store a "metatype" reference.
- * Metatype (gml.MetaType) in turn stores a reference to parent type and any additional data.
+ * In pre-2.3, GML arrays were always 2d, so the second row could be used to store metadata.
+ * This behaviour is enabled via -D sfgml_legacy_meta.
+ * 
+ * In 2.3, sfgml will store metadata in the first array index for linear objects,
+ * or in __class__/__enum__ for struct-based ones.
+ * 
+ * Metadata is represented by gml.MetaType, which is instantiated for each non-extern type
+ * and then is used when that type is referenced.
  * @author YellowAfterlife
  */
 class SfGmlType extends SfOptImpl {
@@ -75,41 +81,40 @@ class SfGmlType extends SfOptImpl {
 		i = -1; n = sfTypes.length;
 		while (++i < n) {
 			var t = sfTypes[i];
-			if (t.isUsed && !t.nativeGen && !t.isExtern && t.module != "gml.MetaType") break;
+			if (t.isUsed && !t.nativeGen && !t.isExtern && t.module != mtModule) break;
 		}
 		//
 		var fns = sfConfig.fieldNames;
-		i = -1; n = sfClasses.length;
-		while (++i < n) {
-			var c = sfClasses[i];
+		usesProto = false;
+		for (c in sfClasses) {
 			if (c.isHidden || c.constructor == null) continue;
 			if (!fns && c.nativeGen) continue;
 			if (c.module == "gml.MetaType") continue;
+			usesProto = true;
 			break;
-		};
-		usesProto = i < n;
-		//
-		if (i < n) {
-			usesType = true;
-			//
-			i = 0; n = sfClasses.length;
-			while (i < n) {
-				var c = sfClasses[i];
-				if (c.isUsed && !c.nativeGen && c.module != "gml.MetaType") break;
-				i += 1;
-			}
-			usesClass = i < n;
-			//
-			i = 0; n = sfEnums.length;
-			while (i < n) {
-				var e = sfEnums[i];
-				if (e.isUsed && !e.nativeGen && !e.isExtern && !e.isFake) break;
-				i += 1;
-			}
-			usesEnum = i < n;
 		}
 		//
-		if (!usesType) sfGenerator.typeMap.get(mtModule, "class").isHidden = true;
+		if (usesProto) {
+			usesType = true;
+			//
+			usesClass = false;
+			for (c in sfClasses) {
+				if (c.isUsed && !c.nativeGen && c.module != mtModule) {
+					usesClass = true;
+					break;
+				}
+			}
+			//
+			usesEnum = false;
+			for (e in sfEnums) {
+				if (e.isUsed && !e.nativeGen && !e.isExtern && !e.isFake) {
+					usesEnum = true;
+					break;
+				}
+			}
+		}
+		//
+		if (!usesClass) sfGenerator.typeMap.get(mtModule, "class").isHidden = true;
 		if (!usesEnum) sfGenerator.typeMap.get(mtModule, "enum").isHidden = true;
 	}
 	
@@ -161,6 +166,11 @@ class SfGmlType extends SfOptImpl {
 		#end
 	}
 	
+	/**
+	 * Linear constructors are structured like
+	 * function create() { var this = *; ...; return this; }
+	 * so we want `return` to become `return this`
+	 */
 	function procConstructorReturns() {
 		function iter(e:SfExpr, w, f) {
 			e.iter(w, f);
@@ -169,9 +179,10 @@ class SfGmlType extends SfOptImpl {
 				default:
 			}
 		}
-		forEachExpr(function(e:SfExpr, w, f) {
-			if (currentClass != null && currentField == currentClass.constructor) {
-				iter(e, w, iter);
+		forEachClassField(function(f:SfClassField) {
+			if (f.isStructField) return;
+			if (f == f.parentClass.constructor && f.expr != null) {
+				iter(f.expr, null, iter);
 			}
 		});
 	}
@@ -188,7 +199,12 @@ class SfGmlType extends SfOptImpl {
 								var e = sfGenerator.enumMap.baseGet(et);
 								e.ctrNames = true;
 							};
-							default:
+							default: { // it could be ANY enum
+								for (e in sfGenerator.enumList) {
+									if (e.isHidden) continue;
+									e.ctrNames = true;
+								}
+							};
 						}
 					};
 					default:
@@ -198,12 +214,45 @@ class SfGmlType extends SfOptImpl {
 		}
 	}
 	
+	function procTypeMap(isEnum:Bool) {
+		var rMap:SfClassField = sfGenerator.findRealClassField("js.Boot", 
+			isEnum ? "resolveEnumMap" : "resolveClassMap");
+		if (rMap == null) return;
+		var b = rMap.expr;
+		var init:Array<SfExpr> = [];
+		var v:SfVar = new SfVar("m", rMap.type);
+		var lv = b.mod(SfLocal(v));
+		var mapNew = b.mod(SfCall(b.mod(SfIdent("ds_map_create")), []));
+		init.push(b.mod(SfVarDecl(v, true, mapNew)));
+		var mapSet:SfExpr = b.mod(SfIdent("ds_map_set"));
+		//
+		function addType(c:SfType):Void {
+			if (!c.hasMetaType()) return;
+			var cb = new SfBuffer();
+			cb.addTypePath(c);
+			init.push(b.mod(SfCall(mapSet.clone(), [
+				lv.clone(),
+				b.mod(SfConst(TString(cb.toString()))),
+				b.mod(SfTypeExpr(c)),
+			])));
+		}
+		if (isEnum) {
+			for (c in sfGenerator.enumList) addType(c);
+		} else {
+			for (c in sfGenerator.classList) addType(c);
+		}
+		init.push(lv.clone());
+		rMap.expr = b.mod(SfBlock(init));
+	}
+	
 	override public function apply() {
 		procTypeRemap();
 		procMetaTypeUses();
 		procMetaTypeStatics();
 		procConstructorReturns();
 		procEnumConstructor();
+		procTypeMap(false);
+		procTypeMap(true);
 	}
 	
 }

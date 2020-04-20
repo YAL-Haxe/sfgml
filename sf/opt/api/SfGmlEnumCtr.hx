@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.api;
 
 import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;

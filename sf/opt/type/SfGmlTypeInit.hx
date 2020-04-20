@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.type;
 import sf.SfCore.*;
 import sf.type.SfBuffer;
 import sf.type.*;
@@ -11,6 +11,7 @@ class SfGmlTypeInit {
 	public static function printMeta(init:SfBuffer):Void {
 		var hasArrayDecl = sfConfig.hasArrayDecl;
 		var stdPack = sfConfig.stdPack;
+		var stdPre = stdPack != null ? stdPack + "_" : "";
 		//
 		if (sfConfig.hintFolds) printf(init, "//{ metatype\n");
 		var mtModule = SfGmlType.mtModule;
@@ -42,11 +43,10 @@ class SfGmlTypeInit {
 			var e:SfEnum = Std.is(t, SfEnum) ? cast t : null;
 			//
 			printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
-			if (stdPack != null) printf(init, "%s_", stdPack);
 			if (modern) {
-				printf(init, "new %s", e != null ? "haxe_enum" : "haxe_class");
+				printf(init, "new %s%s", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			} else {
-				printf(init, "%s_create", e != null ? "haxe_enum" : "haxe_class");
+				printf(init, "%s%s_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			}
 			printf(init, '(%d,`"%(type_auto)"', t.index, t);
 			if (e != null && e.ctrNames) {
@@ -79,21 +79,21 @@ class SfGmlTypeInit {
 		var hint = sfConfig.hint;
 		var stdPack = sfConfig.stdPack;
 		//
-		if (sfConfig.hintFolds) printf(init, "//{ prototypes\n");
 		var fns = sfConfig.fieldNames;
 		var next = sfConfig.next;
 		
 		// generate prototypes for linear classes:
+		var pbuf = new SfBuffer();
 		for (c in sfGenerator.classList) {
 			if (c.isHidden || c.constructor == null) continue;
 			if (c.nativeGen && !fns) continue;
 			if (c.isStruct) continue;
 			//
-			printf(init, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
+			printf(pbuf, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
 			if (!hasArrayDecl) {
-				if (stdPack != null) printf(init, "%s_", stdPack);
-				init.addString("haxe_type_proto(");
-			} else init.addChar("[".code);
+				if (stdPack != null) printf(pbuf, "%s_", stdPack);
+				pbuf.addString("haxe_type_proto(");
+			} else pbuf.addChar("[".code);
 			if (c.indexes > 0) {
 				var proto:Array<String> = [];
 				var cng = c.nativeGen;
@@ -118,13 +118,17 @@ class SfGmlTypeInit {
 					q = q.superClass;
 				} while (q != null);
 				
-				init.addString(proto[0]);
+				pbuf.addString(proto[0]);
 				for (i in 1 ... c.indexes) {
-					printf(init, ",`%s", proto[i]);
+					printf(pbuf, ",`%s", proto[i]);
 				}
 			}
-			printf(init, "%c;\n", hasArrayDecl ? "]".code : ")".code);
+			printf(pbuf, "%c;\n", hasArrayDecl ? "]".code : ")".code);
 		}
-		if (sfConfig.hintFolds) printf(init, "//}\n");
+		if (pbuf.length > 0) {
+			if (sfConfig.hintFolds) printf(init, "//{ prototypes\n");
+			init.addBuffer(pbuf);
+			if (sfConfig.hintFolds) printf(init, "//}\n");
+		}
 	}
 }

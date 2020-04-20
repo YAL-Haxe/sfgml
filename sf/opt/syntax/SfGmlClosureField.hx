@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.syntax;
 import sf.type.expr.SfExpr;
 import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;
@@ -8,7 +8,8 @@ import sf.SfCore.*;
 using sf.type.expr.SfExprTools;
 
 /**
- * ...
+ * Convert `inst.func` to either `method(inst, inst.func)` or
+ * `closurePost(closurePre(inst).func)` so that we bind it correctly.
  * @author YellowAfterlife
  */
 class SfGmlClosureField extends SfOptImpl {

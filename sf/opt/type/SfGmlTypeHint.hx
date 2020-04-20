@@ -1,9 +1,10 @@
-package sf.opt;
+package sf.opt.type;
 import haxe.macro.Type;
 import sf.type.SfTypeMap;
 
 /**
- * ...
+ * If -D sfgml-hint-var-types is set, we can include comments about what types
+ * the local variables are.
  * @author YellowAfterlife
  */
 class SfGmlTypeHint {

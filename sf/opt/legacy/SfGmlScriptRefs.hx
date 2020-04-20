@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.legacy;
 
 import haxe.ds.Map;
 import sf.opt.SfOptImpl;

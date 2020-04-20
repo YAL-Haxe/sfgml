@@ -4,6 +4,8 @@ import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;
 import sf.type.*;
 import sf.type.expr.*;
+import sf.opt.syntax.*;
+import sf.opt.legacy.*;
 using sf.type.expr.SfExprTools;
 
 /**

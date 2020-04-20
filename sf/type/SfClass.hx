@@ -158,7 +158,7 @@ class SfClass extends SfClassImpl {
 		}
 		else { // normal linear
 			inline function printMeta(r:SfBuffer):Void {
-				if (module == sf.opt.SfGmlType.mtModule) {
+				if (module == sf.opt.type.SfGmlType.mtModule) {
 					// if we are inside gml.MetaType.* constructors,
 					// we just embed the name because otherwise they are going to use themselves
 					printf(r, '"mt_%(type_auto)"', this);
@@ -222,7 +222,7 @@ class SfClass extends SfClassImpl {
 		else { // add dynamic functions
 			var dynFound = new Map();
 			var iterClass = this;
-			var refs = sf.opt.SfGmlScriptRefs.enabled;
+			var refs = sf.opt.legacy.SfGmlScriptRefs.enabled;
 			while (iterClass != null) {
 				for (iterField in iterClass.instList) {
 					if (!iterField.isDynFunc) continue;
@@ -306,7 +306,7 @@ class SfClass extends SfClassImpl {
 		//
 		if (isStruct) {
 			printf(r, "static __class__`=`");
-			if (module == sf.opt.SfGmlType.mtModule) {
+			if (module == sf.opt.type.SfGmlType.mtModule) {
 				printf(r, '"mt_%(type_auto)";', this);
 			} else printf(r, "mt_%(type_auto);", this);
 		} else {

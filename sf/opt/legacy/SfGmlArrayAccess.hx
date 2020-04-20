@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.legacy;
 
 import haxe.macro.Expr.Binop;
 import sf.opt.SfOptImpl;
@@ -11,7 +11,7 @@ import sf.SfCore.*;
 import haxe.macro.Expr.Binop.*;
 
 /**
- * GML is yet to allow chained array access (a[0][1] = x), therefore it can be necessary
+ * GML<2.3 does not allow chained array access (a[0][1] = x), therefore it can be necessary
  * to convert to array_wset(a[0], 1, x) instead.
  * @author YellowAfterlife
  */

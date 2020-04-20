@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.syntax;
 
 import sf.type.expr.SfExpr;
 import sf.SfCore.*;
@@ -206,9 +206,17 @@ class SfOptBinop extends SfOptImpl {
 		#end
 		forEachExpr(simplifyComparisonsWithConstants);
 		//
-		if (toString != null && !toStringUsed && !matchEachExpr(checkToString)) {
+		if (toString != null && !toStringUsed) do {
+			for (e in sfGenerator.enumList) {
+				if (e.isStruct && !e.isHidden) {
+					toStringUsed = true;
+					break;
+				}
+			}
+			if (toStringUsed) break;
+			if (matchEachExpr(checkToString)) break;
 			toString.isHidden = true;
-		}
+		} while (false);
 		//
 	}
 }

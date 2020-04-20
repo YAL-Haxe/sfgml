@@ -11,6 +11,10 @@ import haxe.macro.Type.TConstant;
 import haxe.macro.Type.TypedExpr;
 import sf.SfArgVars;
 import sf.opt.*;
+import sf.opt.api.*;
+import sf.opt.legacy.*;
+import sf.opt.syntax.*;
+import sf.opt.type.*;
 import sf.type.*;
 import sf.type.expr.*;
 import sf.type.expr.*;
@@ -38,6 +42,7 @@ class SfGenerator extends SfGeneratorImpl {
 	}
 	
 	private function printTypeGrid(init:SfBuffer) {
+		if (sfConfig.modern) return;
 		if (sfConfig.hintFolds) printf(init, "//{ g_haxe_type_is\n");
 		var grid = "haxe_type_is";
 		if (sfConfig.stdPack != null) grid = sfConfig.stdPack + "_" + grid;
@@ -139,17 +144,26 @@ class SfGenerator extends SfGeneratorImpl {
 		for (t in typeList) {
 			t.printTo(out, init);
 		}
-		if (mainExpr != null) {
-			init.addExpr(mainExpr, false);
-			init.addSemico();
-			init.addLine();
+		inline function addMainExpr(b:SfBuffer):Void {
+			if (mainExpr != null) {
+				b.addExpr(mainExpr, false);
+				b.addSemico();
+				b.addLine();
+			}
 		}
+		if (!sfConfig.modern) addMainExpr(init);
 		//if (cond != null) printf(init, "}\n");
 		// print header and save:
-		if (sfConfig.timestamp) printf(mixed, "// Generated at %s (%dms) for v%s+\n",
-			Date.now().toString(), Std.int((Sys.time() - startTime) * 1000), sfConfig.version);
+		if (sfConfig.timestamp) {
+			var now = Date.now().toString();
+			var ms = Std.int((Sys.time() - startTime) * 1000);
+			var ver = sfConfig.version;
+			printf(mixed, "// Generated at %s (%dms) for v%s+\n", now, ms, ver);
+		}
 		mixed.addBuffer(init);
 		mixed.addBuffer(out);
+		if (sfConfig.modern) addMainExpr(mixed);
+		//
 		var mixedStr = mixed.toString();
 		if (!sfConfig.timestamp && sfConfig.entrypoint == "" && mainExpr.isEmpty()) {
 			mixedStr = StringTools.ltrim(mixedStr);
@@ -330,6 +344,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case "field_auto": b.addFieldPathAuto(v);
 			case "base_type": b.addBaseTypeName(v);
 			case "hint": b.addHintString(v);
+			case "l_": b.addString(sfConfig.localPrefix); return false;
 			default: return null;
 		}
 		return true;
@@ -566,7 +581,7 @@ class SfGenerator extends SfGeneratorImpl {
 						}
 					}
 				} else {
-					r.addString("g_");
+					if (sfConfig.gmxMode) r.addString("g_");
 					r.addFieldPath(_ctr, "_".code, "_".code);
 				}
 			};

@@ -1,4 +1,4 @@
-package sf.opt;
+package sf.opt.legacy;
 
 import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;
@@ -9,8 +9,10 @@ import sf.SfCore.*;
 import haxe.macro.Expr.Binop.*;
 
 /**
- * GML does not have lightweight anonymous objects yet, so anonymous structures with known
- * fields are compiled into array-based structures. Unwrapping is also handled here.
+ * GML does not have lightweight anonymous objects in pre-2.3,
+ * so anonymous structures with known
+ * fields are compiled into array-based structures.
+ * Unwrapping is also handled here.
  * @author YellowAfterlife
  */
 class SfGmlObjectDecl extends SfOptImpl {
