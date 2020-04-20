@@ -382,7 +382,8 @@ class SfClass extends SfClassImpl {
 								if (sfConfig.modern) {
 									wx.push(fx.mod(SfReturn(true, w[wn - 1])));
 									fx = fx.mod(SfBlock(wx));
-									printf(init, "g_%(field_auto)`=`(function()`{", f);
+									if (!this.isStd) init.addString("g_");
+									printf(init, "%(field_auto)`=`(function()`{", f);
 									printf(init, "%(+\n)%(stat);%(-\n)})();\n", fx);
 								} else {
 									wx.push(fx.mod(SfBinop(OpAssign, fsf, w[wn - 1])));
