@@ -18,10 +18,6 @@ using sf.type.expr.SfExprTools;
  */
 class SfOptBinop extends SfOptImpl {
 	
-	var cStd:SfClass;
-	var toString:SfClassField;
-	var toStringUsed = false;
-	
 	/**
 	 * GML operator precedence doesn't accurately match that of Haxe,
 	 * so it's better to add a couple of parentheses here and there.
@@ -77,72 +73,6 @@ class SfOptBinop extends SfOptImpl {
 		}
 	}
 	
-	function wrapToString(x:SfExpr):SfExpr {
-		var needStd = true;
-		switch (x.getType().resolve()) {
-			case TInst(_.get() => c, _): {
-				if (c.module == "String") return x.clone();
-			}
-			case TAbstract(_.get() => a, _): {
-				if (a.module == "StdTypes") switch (a.name) {
-					case "Int", "Bool": needStd = false;
-				} else switch (a.module) {
-					case "haxe.Int64": needStd = false;
-				}
-			};
-			default:
-		}
-		//
-		var cx:SfExpr;
-		if (needStd && toString != null) {
-			toStringUsed = true;
-			cx = x.mod(SfStaticField(cStd, toString));
-		} else cx = x.mod(SfIdent("string"));
-		return x.mod(SfCall(cx, [x.clone()]));
-	}
-	
-	/**
-	 * Haxe-JS generates `(v == null ? "null" : "" + v)`, while GML has a separate function.
-	 */
-	function modifyExplicitStringCasts(e:SfExpr, w:SfExprList, f:SfExprIter) {
-		switch (e.def) {
-			case SfIf(
-				_.def => SfParenthesis(_.def => SfBinop(OpEq, val, _.def => SfConst(TNull))),
-				_.def => SfConst(TString("null")), true,
-				_.def => SfBinop(OpAdd, _.def => SfConst(TString("")), val1)
-			) if (val.equals(val1)): {
-				e.setTo(wrapToString(val).def);
-			};
-			default:
-		}
-		e.iter(w, f);
-	}
-	
-	function insertExplicitStringCasts(e:SfExpr, w:SfExprList, f:SfExprIter) {
-		e.iter(w, f);
-		var x:SfExpr;
-		switch (e.def) {
-			case SfBinop(o = OpAssignOp(OpAdd), a, b): { // `s += i` -> `s += string(i)`
-				if (a.isString() && !b.isString()) {
-					x = e.mod(SfCall(e.mod(SfIdent("string")), [b.unpack()]));
-					e.setTo(SfBinop(o, a, x));
-				}
-			};
-			case SfBinop(OpAdd, a, b): { // `s + i` -> `s + string(i)`
-				switch ([a.isString(), b.isString()]) {
-					case [true, false]: {
-						e.setTo(SfBinop(OpAdd, a, wrapToString(b.unpack())));
-					};
-					case [false, true]: {
-						e.setTo(SfBinop(OpAdd, wrapToString(a.unpack()), b));
-					};
-					default:
-				}
-			};
-			default:
-		}
-	}
-	
 	/**
 	 * Older versions of GMS had a thing where doing (array != null) could raise an error.
 	 */
@@ -182,41 +112,14 @@ class SfOptBinop extends SfOptImpl {
 		}
 	}
 	
-	function checkToString(e:SfExpr, w:SfExprList, f:SfExprMatchIter) {
-		switch (e.def) {
-			case SfStaticField({module:"Std"}, {name:"string"}): {
-				return true;
-			};
-			default:
-		}
-		return e.matchIter(w, f);
-	}
-	
 	override public function apply() {
 		ignoreHidden = true;
 		//
-		cStd = cast sfGenerator.realMap["Std"];
-		toString = cStd != null ? cStd.staticMap["string"] : null;
 		forEachExpr(wrapBitOperations, []);
 		forEachExpr(expandAssignmentShifts);
-		forEachExpr(modifyExplicitStringCasts);
-		forEachExpr(insertExplicitStringCasts);
 		#if (sfgml_version && sfgml_version <= "1.4.1763")
 		forEachExpr(wrapNullChecks);
 		#end
 		forEachExpr(simplifyComparisonsWithConstants);
-		//
-		if (toString != null && !toStringUsed) do {
-			for (e in sfGenerator.enumList) {
-				if (e.isStruct && !e.isHidden) {
-					toStringUsed = true;
-					break;
-				}
-			}
-			if (toStringUsed) break;
-			if (matchEachExpr(checkToString)) break;
-			toString.isHidden = true;
-		} while (false);
-		//
 	}
 }
