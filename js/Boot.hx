@@ -9,10 +9,10 @@ import gml.sys.System;
 import gml.ds.HashTable;
 
 /**
- * ...
+ * Just like the JS version, this class is a bit of a dump for various helper functions.
  * @author YellowAfterlife
  */
-@:native("haxe.boot") @:std @:snakeCase
+@:native("haxe.boot") @:std
 class Boot {
 	
 	/** Whether currently exported to JavaScript */
@@ -35,6 +35,7 @@ class Boot {
 		}
 		return null;
 	}
+	
 	private static function __string_rec(o:Dynamic, s:String):String {
 		return Std.string(o);
 	}

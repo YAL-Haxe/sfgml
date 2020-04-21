@@ -185,7 +185,7 @@ class SfGmxGen {
 					if (sfe.isFake) {
 						if (mcr) addMacro(path, "" + sfec.index, show, doc, sfec);
 					} else {
-						addFunc(path + "_new", null, sfec);
+						addFunc("mc_" + path, null, sfec);
 						if (mcr) addMacro(path, "g_" + path, show, doc, sfec);
 					}
 				}

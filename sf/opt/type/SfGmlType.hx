@@ -5,6 +5,7 @@ import sf.type.expr.SfExprDef.*;
 import sf.type.*;
 import sf.type.expr.*;
 using sf.type.expr.SfExprTools;
+import sf.opt.legacy.*;
 import sf.SfCore.*;
 import haxe.macro.Type;
 import haxe.macro.Type.TConstant.*;

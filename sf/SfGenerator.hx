@@ -526,8 +526,30 @@ class SfGenerator extends SfGeneratorImpl {
 			//}
 			
 			//{ array/field access
-			case SfArrayAccess(a, i) | SfEnumAccess(a, _, i): printf(r, "%x[%x]", a, i);
-			case SfEnumParameter(_expr, _, _index): printf(r, "%x[%d]", _expr, _index + 1);
+			case SfArrayAccess(a, i): printf(r, "%x[%x]", a, i);
+			case SfEnumAccess(a, e, i): {
+				if (e.isStruct) {
+					switch (i.def) {
+						case SfConst(TInt(0)): printf(r, "%x.__enumIndex__", a);
+						default: {
+							a.error("Can't array access non-index item of struct-enum");
+						};
+					}
+				} else {
+					printf(r, "%x[%x]", a, i);
+				}
+			};
+			case SfEnumParameter(_expr, _ctr, _index): {
+				if (_ctr.isStructField) {
+					if (_index >= 0) {
+						printf(r, "%x.%s", _expr, _ctr.args[_index].v.name);
+					} else {
+						printf(r, "%x.__enumIndex__", _expr);
+					}
+				} else {
+					printf(r, "%x[%d]", _expr, _index + 1);
+				}
+			};
 			case SfInstField(_inst, _field): {
 				if (_field.dotAccess) {
 					printf(r, "%x.%s", _inst, _field.name);
@@ -907,13 +929,20 @@ class SfGenerator extends SfGeneratorImpl {
 					};
 					case SfEnumField(_enum, _field): {
 						if (_enum.nativeGen && sfConfig.hasArrayDecl) {
-							printf(r, "[%d", _field.index);
-							if (sfConfig.hint) {
-								r.addHintOpen();
-								printf(r, "%s.%s", _enum.name, _field.name);
-								r.addHintClose();
+							printf(r, "[");
+							if (_enum.hasNativeEnum()) {
+								r.addFieldPath(_field, "_".code, ".".code);
+							} else {
+								printf(r, "%d", _field.index);
+								if (sfConfig.hint) {
+									r.addHintOpen();
+									printf(r, "%s.%s", _enum.name, _field.name);
+									r.addHintClose();
+								}
 							}
 							i = 0; while (i < n) printf(r, ",`%x", _args[i++]);
+							n = _field.args.length;
+							while (i++ < n) printf(r, ",`undefined");
 							printf(r, "]");
 							return;
 						}
@@ -1223,7 +1252,8 @@ class SfGenerator extends SfGeneratorImpl {
 		var z:Bool;
 		// enum data (if sf-hint is set):
 		var expru = expr.unpack();
-		var em = null, ng = false, e:SfEnum;
+		var em = null, e:SfEnum;
+		var nativeEnum = false;
 		switch (expru.def) {
 			case SfEnumAccess(_, et, _.def => SfConst(TInt(0))): e = et;
 			default: switch (expru.getType()) {
@@ -1233,12 +1263,12 @@ class SfGenerator extends SfGeneratorImpl {
 		};
 		if (e != null) {
 			em = e.indexMap;
-			ng = e.nativeGen && !sfConfig.gmxMode;
+			nativeEnum = e.hasNativeEnum();
 		}
 		//
 		var hint = sfConfig.hint;
 		printf(r, "switch`(%x", expru);
-		if (e != null && !ng && hint) {
+		if (e != null && !nativeEnum && hint) {
 			r.addHintOpen();
 			r.addTypePathAuto(e);
 			r.addHintClose();
@@ -1255,7 +1285,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (k > 0) r.addSep();
 				r.addString("case ");
 				var v = cv[k];
-				if (ng) switch (v.def) {
+				if (nativeEnum) switch (v.def) {
 					case SfConst(TInt(i)) if (em[i] != null): {
 						printf(r, "%(type_auto).%s", e, em[i].name);
 					};

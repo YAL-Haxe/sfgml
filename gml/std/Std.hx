@@ -2,6 +2,7 @@ package;
 
 import gml.MetaType;
 import SfTools.raw;
+import gml.NativeStruct;
 import gml.NativeType;
 import gml.NativeString;
 
@@ -23,9 +24,39 @@ class Std {
 	@:keep public static function string(value:Dynamic):String {
 		if (value == null) return "null";
 		if (NativeType.isString(value)) return value;
+		var n:Int, i:Int, s:String;
+		#if sfgml.modern
+		if (NativeType.isStruct(value)) {
+			var e:MetaEnum<Dynamic> = NativeStruct.getField(value, "__enum__");
+			if (e == null) return NativeType.toString(value);
+			var ects = e.constructors;
+			if (ects != null) {
+				i = untyped value.__enumIndex__;
+				if (i >= 0 && i < ects.length) {
+					s = ects[i];
+				} else s = "?";
+			} else {
+				s = raw("instanceof")(value);
+				if (NativeString.copy(s, 1, 3) == "mc_") {
+					s = NativeString.delete(s, 1, 3);
+				}
+				n = e.name.length;
+				if (NativeString.copy(s, 1, n) == e.name) {
+					s = NativeString.delete(s, 1, n + 1);
+				}
+			}
+			s += "(";
+			var fields:Array<String> = untyped value.__enumParams__;
+			n = fields.length;
+			i = -1; while (++i < n) {
+				if (i > 0) s += ", ";
+				s += Std.string(NativeStruct.getField(value, fields[i]));
+			}
+			return s + ")";
+		}
+		#end
 		if (NativeType.isReal(value)) {
-			var s = NativeString.format(value, 0, 16);
-			var n:Int, i:Int;
+			s = NativeString.format(value, 0, 16);
 			if (gml.sys.System.isBrowser) {
 				// it is obviously tempting to just ""+s but this could change in future.
 				n = s.length;
