@@ -19,4 +19,14 @@ package gml;
 	
 	@:expose("variable_struct_set")
 	static function setField(obj:Dynamic, fd:String, val:Dynamic):Void;
+	
+	/**
+	 * Returns the name of constructor function for the given struct object.
+	 * Can also return:
+	 * "instance": when passed an instance reference (via `self`)
+	 * "function": when passed a method-value from `method` call (see gml.NativeFunction)
+	 * undefined: anything else
+	 */
+	@:expose("instanceof")
+	static function instanceOf(obj:Dynamic):String;
 }

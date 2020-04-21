@@ -4,14 +4,14 @@ import SfTools.raw;
  * Provides access to GameMaker string function subset.
  * Indexes start at 1.
  */
-@:native("string") @:final @:std
+@:native("string") @:final @:std @:snakeCase
 extern class NativeString {
 	
-	@:native("byte_at") static function byteAt(str:String, pos:Int):Int;
+	static function byteAt(str:String, pos:Int):Int;
 	
-	@:native("byte_length") static function byteLength(str:String):Int;
+	static function byteLength(str:String):Int;
 	
-	@:native("char_at") static function charAt(str:String, pos:Int):String;
+	static function charAt(str:String, pos:Int):String;
 	
 	@:native("ord_at") static function charCodeAt(str:String, pos:Int):Int;
 	
@@ -34,14 +34,24 @@ extern class NativeString {
 	
 	static function letters(str:String):String;
 	
+	/** Filters out any characters outside of [a-zA-Z0-9] group */
 	@:native("lettersdigits") static function lettersDigits(str:String):String;
 	
 	static function lower(str:String):String;
 	
 	static function pos(sub:String, str:String):Int;
 	
+	/** >=2.3 */
+	static function posExt(sub:String, str:String, start:Int):Int;
+	
+	/** >=2.3 */
+	static function lastPos(sub:String, str:String):Int;
+	
+	/** >=2.3 */
+	static function lastPosExt(sub:String, str:String, start:Int):Int;
+	
 	static inline function contains(str:String, sub:String):Bool {
-		return cast pos(sub, str);
+		return pos(sub, str) != 0;
 	}
 	
 	static function repeat(str:String, times:Int):String;
@@ -52,7 +62,8 @@ extern class NativeString {
 	
 	static function upper(str:String):String;
 	
-	static inline function fromCharCode(i:Int):String return raw("chr")(i);
+	@:expose("chr")
+	static function fromCharCode(i:Int):String;
 	
 	static function format(val:Float, total:Int, decimal:Int):String;
 }
