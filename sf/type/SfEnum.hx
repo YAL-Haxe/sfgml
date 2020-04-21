@@ -40,6 +40,7 @@ class SfEnum extends SfEnumImpl {
 	}
 	
 	function printNativeEnum(out:SfBuffer):Void {
+		out = sfGenerator.declBuffer;
 		printf(out, "enum %(type_auto)`{`", this);
 		var sep = false;
 		for (f in ctrList) {
@@ -56,18 +57,19 @@ class SfEnum extends SfEnumImpl {
 		if (toStringPath == null) {
 			toStringPath = stdPre + "enum_toString";
 			//
-			printf(initb, "function %s()`{%(+\n)", toStringPath);
+			var decl = sfGenerator.declBuffer;
+			printf(decl, "function %s()`{%(+\n)", toStringPath);
 			var Std_string = sfGenerator.findRealClassField("Std", "string");
 			if (Std_string != null) {
-				printf(initb, "return %(field_auto)(self);", Std_string);
+				printf(decl, "return %(field_auto)(self);", Std_string);
 			} else {
-				printf(initb, "return string(self);");
+				printf(decl, "return string(self);");
 			}
-			printf(initb, "%(-\n)}\n");
+			printf(decl, "%(-\n)}\n");
 			//
-			printf(initb, "function %s%s()`{%(+\n)", stdPre, "enum_getIndex");
-			printf(initb, "return __enumIndex__;");
-			printf(initb, "%(-\n)}\n");
+			printf(decl, "function %s%s()`{%(+\n)", stdPre, "enum_getIndex");
+			printf(decl, "return __enumIndex__;");
+			printf(decl, "%(-\n)}\n");
 		}
 		//
 		var out = new SfBuffer(), init = new SfBuffer();

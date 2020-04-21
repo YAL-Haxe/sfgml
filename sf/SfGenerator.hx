@@ -30,7 +30,7 @@ using sf.type.expr.SfExprTools;
  * @author YellowAfterlife
  */
 class SfGenerator extends SfGeneratorImpl {
-	
+	public var declBuffer:SfBuffer;
 	public static function main() {
 		SfConfig.main();
 	}
@@ -94,6 +94,7 @@ class SfGenerator extends SfGeneratorImpl {
 		var mixed:SfBuffer = new SfBuffer();
 		var out:SfBuffer = new SfBuffer();
 		var init:SfBuffer = new SfBuffer();
+		var decl:SfBuffer = new SfBuffer(); declBuffer = decl;
 		// inline entry point, if needed:
 		if (mainExpr != null) switch (mainExpr.def) {
 			case SfCall(_.def => SfStaticField(_, f), []): {
@@ -119,16 +120,16 @@ class SfGenerator extends SfGeneratorImpl {
 		if (sfConfig.header != null) {
 			for (line in sfConfig.header.split("\\n")) printf(mixed, "// %s\n", line);
 		}
-		if (SfGmlInstanceOf.isUsed) printTypeGrid(init);
+		if (SfGmlInstanceOf.isUsed) printTypeGrid(decl);
 		if (SfGmlEnumCtr.code != "") {
-			if (hintFolds) printf(init, "//{ enum names\n");
-			init.addString(SfGmlEnumCtr.code);
-			if (hintFolds) printf(init, "//}\n");
+			if (hintFolds) printf(decl, "//{ enum names\n");
+			decl.addString(SfGmlEnumCtr.code);
+			if (hintFolds) printf(decl, "//}\n");
 		}
 		//
-		if (SfGmlType.usesProto) SfGmlTypeInit.printProto(init);
-		if (true) SfGmlScriptRefs.main(init);
-		if (SfGmlType.usesType) SfGmlTypeInit.printMeta(init);
+		if (SfGmlType.usesProto) SfGmlTypeInit.printProto(decl);
+		SfGmlScriptRefs.main(decl);
+		if (SfGmlType.usesType) SfGmlTypeInit.printMeta(decl);
 		
 		// generate class inits:
 		for (c in classList) if (!SfExprTools.isEmpty(c.init)) {
@@ -144,15 +145,7 @@ class SfGenerator extends SfGeneratorImpl {
 		for (t in typeList) {
 			t.printTo(out, init);
 		}
-		inline function addMainExpr(b:SfBuffer):Void {
-			if (mainExpr != null) {
-				b.addExpr(mainExpr, false);
-				b.addSemico();
-				b.addLine();
-			}
-		}
-		if (!sfConfig.modern) addMainExpr(init);
-		//if (cond != null) printf(init, "}\n");
+		
 		// print header and save:
 		if (sfConfig.timestamp) {
 			var now = Date.now().toString();
@@ -160,9 +153,27 @@ class SfGenerator extends SfGeneratorImpl {
 			var ver = sfConfig.version;
 			printf(mixed, "// Generated at %s (%dms) for v%s+\n", now, ms, ver);
 		}
-		mixed.addBuffer(init);
-		mixed.addBuffer(out);
-		if (sfConfig.modern) addMainExpr(mixed);
+		
+		//
+		inline function addMainExpr(b:SfBuffer):Void {
+			if (mainExpr != null) {
+				b.addExpr(mainExpr, false);
+				b.addSemico();
+				b.addLine();
+			}
+		}
+		mixed.addBuffer(decl);
+		if (sfConfig.modern) {
+			mixed.addBuffer(out);
+			mixed.addLine();
+			mixed.addBuffer(init);
+			mixed.addLine();
+			addMainExpr(mixed);
+		} else {
+			addMainExpr(init);
+			mixed.addBuffer(init);
+			mixed.addBuffer(out);
+		}
 		//
 		var mixedStr = mixed.toString();
 		if (!sfConfig.timestamp && sfConfig.entrypoint == "" && mainExpr.isEmpty()) {
