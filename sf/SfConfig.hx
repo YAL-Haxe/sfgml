@@ -186,8 +186,11 @@ class SfConfig extends SfConfigImpl {
 		};
 	}
 	public static function main() {
-		inline function def<T>(name:String, val:T):Void {
-			if (value(name) == null) Compiler.define(name, Std.string(val));
+		function def(name:String, val:Dynamic):Void {
+			if (value(name) != null) return;
+			if (val != null && val != 0 && val != false && val != "") {
+				Compiler.define(name, Std.string(val));
+			}
 		}
 		//
 		var vd = findVersion();
