@@ -404,6 +404,7 @@ class SfGenerator extends SfGeneratorImpl {
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());
 		r.push(new SfGmlInstanceOf());
+		r.unshift(new SfGml_ArrayImpl(false));
 		return r;
 	}
 	override function getOptimizers():Array<SfOptImpl> {
@@ -420,6 +421,7 @@ class SfGenerator extends SfGeneratorImpl {
 		r.push(new SfGmlArrayAccess());
 		r.push(new SfGmlCFor());
 		r.push(new SfGmlClosureField());
+		r.push(new SfGml_ArrayImpl(true));
 		return r;
 	}
 	

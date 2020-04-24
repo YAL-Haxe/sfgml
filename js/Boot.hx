@@ -7,6 +7,7 @@ import gml.NativeType;
 import gml.io.Buffer;
 import gml.sys.System;
 import gml.ds.HashTable;
+import gml.internal.ArrayImpl;
 
 /**
  * Just like the JS version, this class is a bit of a dump for various helper functions.

@@ -18,7 +18,7 @@ extern class NativeArray {
 	 * @see https://bugs.yoyogames.com/view.php?id=29362
 	 */
 	#if sfgml.modern
-	@:native("create") @:noUsing static inline function createEmpty<T>(size:Int):Array<T>;
+	@:native("create") @:noUsing static function createEmpty<T>(size:Int):Array<T>;
 	#else
 	@:noUsing static inline function createEmpty<T>(size:Int):Array<T> {
 		return create(size, cast 0);
@@ -26,7 +26,12 @@ extern class NativeArray {
 	#end
 	
 	/** Returns the number of items in the given array */
-	@:native("length_1d") static function length1d<T>(q:Array<T>):Int;
+	#if sfgml.modern
+	@:native("length")
+	#else
+	@:native("length_1d")
+	#end
+	static function length1d<T>(q:Array<T>):Int;
 	
 	/** Returns the number of items in given row of an array */
 	@:native("length_2d") static function cols2d<T>(q:Array<T>, row:Int):Int;
