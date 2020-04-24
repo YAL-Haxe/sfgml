@@ -90,7 +90,7 @@ class SfOptIndexes extends SfOptImpl {
 		autoMark(sfGenerator.typeArray);
 		//
 		for (t in sfGenerator.typeList) {
-			if (t.index >= 0) continue;
+			if (t.index >= 0 || t.isStruct) continue;
 			if (t.isHidden || t.nativeGen) continue;
 			if (Std.is(t, SfEnum)) {
 				if ((cast t:SfEnum).isFake) continue;

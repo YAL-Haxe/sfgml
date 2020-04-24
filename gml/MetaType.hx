@@ -104,24 +104,26 @@ class MetaType<T> {
 @:keep @:native("haxe.class") @:std
 class MetaClass<T> extends MetaType<T> {
 	public var superClass:MetaClass<Dynamic> = null;
-	public function new(id:Int, name:String) {
+	public var constructor:Dynamic;
+	public function new(id:Int, name:String, ?constructor:Dynamic) {
 		#if !sfgml_legacy_meta
 		marker = MetaType.markerValue;
 		#end
 		this.index = id;
 		this.name = name;
+		this.constructor = constructor;
 	}
 }
 
 @:keep @:native("haxe.enum") @:std
 class MetaEnum<T> extends MetaType<T> {
 	public var constructors:Array<String>;
-	public function new(id:Int, name:String, ?ctrs:Array<String>) {
+	public function new(id:Int, name:String, ?constructors:Array<String>) {
 		#if !sfgml_legacy_meta
 		marker = MetaType.markerValue;
 		#end
 		this.index = id;
 		this.name = name;
-		this.constructors = ctrs;
+		this.constructors = constructors;
 	}
 }

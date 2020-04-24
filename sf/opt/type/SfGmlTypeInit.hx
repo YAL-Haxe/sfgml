@@ -49,7 +49,8 @@ class SfGmlTypeInit {
 				printf(init, "%s%s_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			}
 			printf(init, '(%d,`"%(type_auto)"', t.index, t);
-			if (e != null && e.ctrNames) {
+			if (e != null) do {
+				if (!e.ctrNames) break;
 				if (hasArrayDecl) {
 					printf(init, ",`[");
 				} else {
@@ -65,6 +66,10 @@ class SfGmlTypeInit {
 				} else {
 					printf(init, ")");
 				}
+			} while (false);
+			else if (Std.is(t, SfClass)) {
+				var c:SfClass = cast t;
+				if (c.constructor != null && c.isStruct) printf(init, ",`%(type_auto)", t);
 			}
 			printf(init, ");\n");
 		}
