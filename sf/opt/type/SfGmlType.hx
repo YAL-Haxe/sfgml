@@ -124,11 +124,11 @@ class SfGmlType extends SfOptImpl {
 		if (sfConfig.hasArrayDecl || !usesProto) {
 			mtClass.staticMap.get("proto").isHidden = true;
 		}
-		#if sfgml_legacy_meta
 		var mtGet = mtClass.fieldMap.get("get");
-		var mtGetUsed = false;
+		var mtGetUsedBy = null;
 		var mtSet = mtClass.fieldMap.get("set");
-		var mtSetUsed = false;
+		var mtSetUsedBy = null;
+		#if sfgml_legacy_meta
 		var mtCopySet = mtClass.fieldMap.get("copyset");
 		var canCopySet = sfConfig.copyset;
 		forEachExpr(function(e:SfExpr, w, f) {
@@ -138,12 +138,12 @@ class SfGmlType extends SfOptImpl {
 					var x = m[0];
 					if (f == mtGet) {
 						if (SfGmlArrayAccess.needsWrapping(x)) {
-							mtGetUsed = true;
+							mtGetUsedBy = e;
 						} else e.def = SfDynamic("{0}[1,0]", [x]);
 					}
 					else if (f == mtSet) {
 						if (SfGmlArrayAccess.needsWrapping(x)) {
-							mtSetUsed = true;
+							mtSetUsedBy = e;
 						} else e.def = SfBinop(OpAssign, e.mod(SfDynamic("{0}[@1,0]", [x])), m[1]);
 					}
 					else if (f == mtCopySet) {
@@ -162,9 +162,23 @@ class SfGmlType extends SfOptImpl {
 				default:
 			}
 		});
-		if (!mtGetUsed) mtClass.removeField(mtGet);
-		if (!mtSetUsed) mtClass.removeField(mtSet);
+		#else
+		forEachExpr(function(e:SfExpr, w, f) {
+			e.iter(w, f);
+			switch (e.def) {
+				case SfCall(_.def => SfStaticField(c, f), m) if (c == mtClass): {
+					if (f == mtGet) {
+						mtGetUsedBy = e;
+					} else if (f == mtSet) {
+						mtSetUsedBy = e;
+					}
+				};
+				default:
+			};
+		});
 		#end
+		if (mtGetUsedBy == null) mtClass.removeField(mtGet);
+		if (mtSetUsedBy == null) mtClass.removeField(mtSet);
 	}
 	
 	/**
