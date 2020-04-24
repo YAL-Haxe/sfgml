@@ -87,6 +87,7 @@ class SfGml_Std_string extends SfOptImpl {
 	}
 	
 	function checkToString(e:SfExpr, w:SfExprList, f:SfExprMatchIter) {
+		if (currentField != null && currentField == toString) return false;
 		switch (e.def) {
 			case SfStaticField({module:"Std"}, {name:"string"}): {
 				return true;
