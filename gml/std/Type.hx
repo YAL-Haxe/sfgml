@@ -64,9 +64,17 @@ import gml.ds.HashTable;
 		return js.Boot.resolveEnumMap[name];
 	}
 	
-	public static inline function createInstance<T>(cl:Class<T>, args:Array<Dynamic>):T {
-		throw "Type.createInstance is not supported.";
-		return null;
+	public static function createInstance<T>(cl:Class<T>, args:Array<Dynamic>):T {
+		#if sfgml.modern
+		if ((cl:MetaClass<T>).index < 0) {
+			var ctr = (cl:MetaClass<T>).constructor;
+			if (ctr == null) throw "Class does not have a constructor";
+			return gml.internal.NativeConstructorInvoke.call(ctr, args);
+		}
+		throw structOnly;
+		#else
+		throw modernOnly;
+		#end
 	}
 	
 	public static inline function createEmptyInstance<T>(cl:Class<T>):T {
