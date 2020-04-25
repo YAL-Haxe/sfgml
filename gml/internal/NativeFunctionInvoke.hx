@@ -18,6 +18,7 @@ class NativeFunctionInvoke {
 		function with6(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5]),
 		function with7(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6]),
 		function with8(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7]),
+		#if (sfgml_native_invoke_args && sfgml_native_invoke_args > 8)
 		function with9(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8]),
 		function with10(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9]),
 		function with11(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10]),
@@ -26,6 +27,8 @@ class NativeFunctionInvoke {
 		function with14(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13]),
 		function with15(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14]),
 		function with16(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15]),
+		#end
+		#if (sfgml_native_invoke_args && sfgml_native_invoke_args > 16)
 		function with17(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15],w[16]),
 		function with18(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15],w[16],w[17]),
 		function with19(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15],w[16],w[17],w[18]),
@@ -42,6 +45,7 @@ class NativeFunctionInvoke {
 		function with30(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15],w[16],w[17],w[18],w[19],w[20],w[21],w[22],w[23],w[24],w[25],w[26],w[27],w[28],w[29]),
 		function with31(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15],w[16],w[17],w[18],w[19],w[20],w[21],w[22],w[23],w[24],w[25],w[26],w[27],w[28],w[29],w[30]),
 		function with32(fn:Dynamic, w:Array<Dynamic>) return fn(w[0],w[1],w[2],w[3],w[4],w[5],w[6],w[7],w[8],w[9],w[10],w[11],w[12],w[13],w[14],w[15],w[16],w[17],w[18],w[19],w[20],w[21],w[22],w[23],w[24],w[25],w[26],w[27],w[28],w[29],w[30],w[31]),
+		#end
 	];
 }
 /* autogen:
