@@ -19,6 +19,12 @@ class SfGml_ArrayImpl extends SfOptImpl {
 		this.isPost = isPost;
 		ignoreHidden = true;
 	}
+	static function exprIsArray(x:SfExpr):Bool {
+		return switch (x.getTypeNz()) {
+			case TInst(_.get() => {module:"Array", name:"Array"}, _): true;
+			default: false;
+		}
+	}
 	public function pre():Void {
 		var tArray = sfGenerator.typeArray;
 		var Array_length = tArray.realMap["length"];
@@ -32,9 +38,6 @@ class SfGml_ArrayImpl extends SfOptImpl {
 		var array_length = "array_length";
 		if (!modern) array_length += "_1d";
 		//
-		inline function isArrayField(fd:SfClassField):Bool {
-			return fd.parentClass == tArray;
-		}
 		function getImpl(name:String):SfClassField {
 			var fd = fieldMap[name];
 			if (fd == null) return null;
@@ -69,7 +72,7 @@ class SfGml_ArrayImpl extends SfOptImpl {
 				case SfInstField(inst, fd) if (fd == Array_length): {
 					x.def = SfCall(x.mod(SfIdent(array_length)), [inst]);
 				};
-				case SfCall(_.def => SfInstField(arr, fd), args) if (isArrayField(fd)): {
+				case SfCall(_.def => SfInstField(arr, fd), args) if (fd.parentClass == tArray): {
 					var fdi = fieldMap[fd.realName];
 					if (fdi != null) {
 						fieldMap.remove(fd.realName);
@@ -77,6 +80,17 @@ class SfGml_ArrayImpl extends SfOptImpl {
 						args.unshift(arr);
 						x.def = SfCall(x.mod(SfStaticField(tArrayImpl, fdi)), args);
 					}
+				};
+				case SfCall(
+					_.def => SfDynamicField(_.def => SfCast(arr, null), "slice"), []
+				) if (exprIsArray(arr)): {
+					// because copy() is implemented in JS as
+					// return (cast this).slice();
+					var fdi = getImpl("copy");
+					if (fdi != null) {
+						var fdx = x.mod(SfStaticField(tArrayImpl, fdi));
+						x.def = SfCall(fdx, [arr]);
+					} else arr.error("No ArrayImpl.copy?");
 				};
 				default: 
 			}
