@@ -16,6 +16,11 @@ extern class Lib {
 	/** Returns the number of milliseconds since sometime. */
 	static inline function getTimer():Int return currentTime;
 	
+	/**
+	 * However, GML's `undefined` is the same as `null` in Haxe,
+	 * and GML does not have an equivalent of JS `undefined`
+	 * (wrong field access throws errors)
+	 */
 	@:expose("undefined") static var undefined:Dynamic;
 	
 	//{ GML-specific features
@@ -57,15 +62,15 @@ extern class Lib {
 }
 @:object("global") private extern class GlobalScope implements Dynamic { }
 
-@:extern private abstract Arguments(Array<Dynamic>) {
-	@:extern @:arrayAccess inline function get(index:Int):Dynamic {
+private abstract Arguments(Array<Dynamic>) {
+	@:arrayAccess extern inline function get(index:Int):Dynamic {
 		return untyped __raw__("argument[{0}]", index);
 	}
-	@:extern @:arrayAccess inline function set(index:Int, value:Dynamic):Dynamic {
+	@:arrayAccess extern inline function set(index:Int, value:Dynamic):Dynamic {
 		return untyped __raw__("argument[{0}] = {1}]", index, value);
 	}
 	public var length(get, never):Int;
-	@:extern inline function get_length():Int {
+	extern private inline function get_length():Int {
 		return untyped __raw__("argument_count");
 	}
 }
