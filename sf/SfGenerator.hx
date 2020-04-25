@@ -397,9 +397,9 @@ class SfGenerator extends SfGeneratorImpl {
 			new SfGmlWith(),
 			new SfOptIndexes(),
 			new SfOptBinop(),
-			new SfGml_Std_string(),
 			new SfGmlObjectDecl(),
 			new SfGmlEnumCtr(),
+			new SfGml_Std_string(),
 		]; pre.reverse(); for (o in pre) r.unshift(o);
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());
