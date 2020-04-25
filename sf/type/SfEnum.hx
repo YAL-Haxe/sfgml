@@ -11,10 +11,13 @@ import sf.type.SfEnumCtr;
  * @author YellowAfterlife
  */
 class SfEnum extends SfEnumImpl {
+	
+	/** Whether constructor names should be included */
 	public var ctrNames:Bool = false;
+	
 	public function new(t) {
 		super(t);
-		if (sfConfig.modern && nativeGen) {
+		if (sfConfig.modern && (nativeGen || isFake)) {
 			isStruct = false;
 			dotAccess = false; // not that you can dot access anything on enums anyway
 		}
