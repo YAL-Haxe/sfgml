@@ -130,12 +130,19 @@ class SfEnum extends SfEnumImpl {
 		}
 	}
 	function printLinear(outb:SfBuffer, initb:SfBuffer):Void {
+		var init = new SfBuffer();
 		// if it's a fake enum, we'll stick to a native enum or macros (SfGmxGen)
-		if (isFake) return;
-		
 		var nativeEnum = hasNativeEnum();
-		var out = new SfBuffer(), init = new SfBuffer();
 		if (nativeEnum) printNativeEnum(init);
+		if (isFake) {
+			if (init.length > 0) {
+				if (sfConfig.hintFolds) printf(initb, "// %(type_dot):\n", this);
+				initb.addBuffer(init);
+			}
+			return;
+		}
+		
+		var out = new SfBuffer();
 		var debug = sfConfig.debug;
 		var canRef = !this.noRef;
 		var hasAC = sfConfig.hasArrayCreate;
