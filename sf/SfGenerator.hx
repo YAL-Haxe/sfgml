@@ -522,7 +522,7 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addTypePath(t, "_".code);
 			};
 			case SfFunction(fn): {
-				if (wrap == false) printf(r, "var %s`=`", fn.name);
+				if (wrap == false) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
 				printf(r, "function");
 				if (fn.name != null) printf(r, " %s", fn.name);
 				printf(r, "()`");
