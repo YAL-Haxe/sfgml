@@ -76,14 +76,19 @@ class SfGmlType extends SfOptImpl {
 		for (e in sfEnums) if (!e.isUsed) {
 			if (!e.isHidden && !e.nativeGen) e.isHidden = true;
 		}
-		//
-		var i:Int, n:Int;
-		//
-		i = -1; n = sfTypes.length;
-		while (++i < n) {
-			var t = sfTypes[i];
-			if (t.isUsed && !t.nativeGen && !t.isExtern && t.module != mtModule) break;
+		// we want mt_ if we have a struct-based enum:
+		for (e in sfEnums) {
+			if (e.isHidden) continue;
+			if (!e.isStruct) continue;
+			usesType = true;
+			usesEnum = true;
+			usesClass = true;
+			break;
 		}
+		//
+		// there was a type-loop here checking
+		// if (t.isUsed && !t.nativeGen && !t.isExtern && t.module != mtModule) break;
+		// but what for
 		//
 		var fns = sfConfig.fieldNames;
 		usesProto = false;
@@ -110,6 +115,7 @@ class SfGmlType extends SfOptImpl {
 			for (e in sfEnums) {
 				if (e.isUsed && !e.nativeGen && !e.isExtern && !e.isFake) {
 					usesEnum = true;
+					usesClass = true;
 					break;
 				}
 			}
@@ -202,33 +208,6 @@ class SfGmlType extends SfOptImpl {
 		});
 	}
 	
-	function procEnumConstructor() {
-		var rType:SfClass = cast sfGenerator.realMap.get("Type");
-		if (rType != null) {
-			var rEnumConstructor = rType.realMap.get("enumConstructor");
-			if (rEnumConstructor != null) forEachExpr(function(e:SfExpr, w, f) {
-				switch (e.def) {
-					case SfCall(_.def => SfStaticField(_, f), [x]) if (f == rEnumConstructor): {
-						switch (x.getType()) {
-							case TEnum(_.get() => et, _): {
-								var e = sfGenerator.enumMap.baseGet(et);
-								e.ctrNames = true;
-							};
-							default: { // it could be ANY enum
-								for (e in sfGenerator.enumList) {
-									if (e.isHidden) continue;
-									e.ctrNames = true;
-								}
-							};
-						}
-					};
-					default:
-				}
-				e.iter(w, f);
-			});
-		}
-	}
-	
 	function procTypeMap(isEnum:Bool) {
 		var rMap:SfClassField = sfGenerator.findRealClassField("js.Boot", 
 			isEnum ? "resolveEnumMap" : "resolveClassMap");
@@ -261,11 +240,11 @@ class SfGmlType extends SfOptImpl {
 	}
 	
 	override public function apply() {
+		ignoreHidden = true;
 		procTypeRemap();
 		procMetaTypeUses();
 		procMetaTypeStatics();
 		procConstructorReturns();
-		procEnumConstructor();
 		procTypeMap(false);
 		procTypeMap(true);
 	}

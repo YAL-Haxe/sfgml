@@ -36,7 +36,7 @@ class Std {
 					s = ects[i];
 				} else s = "?";
 			} else {
-				s = raw("instanceof")(value);
+				s = NativeStruct.instanceOf(value);
 				if (NativeString.copy(s, 1, 3) == "mc_") {
 					s = NativeString.delete(s, 1, 3);
 				}

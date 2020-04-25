@@ -8,7 +8,7 @@ import gml.ds.ArrayList;
  * Processed and DCE-d by SfGml_ArrayImpl.
  * @author YellowAfterlife
  */
-@:keep class ArrayImpl {
+@:std @:keep class ArrayImpl {
 	extern private static inline var modernOnly:String = "This method is only available in GMS>=2.3.";
 	
 	#if !sfgml.modern
@@ -120,7 +120,7 @@ import gml.ds.ArrayList;
 	//}
 	
 	//{
-	public static function indexOf<T>(arr:Array<T>, v:T, i:Int):Int {
+	public static function indexOf<T>(arr:Array<T>, v:T, i:Int = 0):Int {
 		var len:Int = arr.length;
 		if (i < 0) {
 			i += len;
@@ -169,6 +169,16 @@ import gml.ds.ArrayList;
 		} else out = [];
 		return out;
 	}
+	
+	public static function concatFront<T>(arr:Array<T>, item:T):Array<T> {
+		if (NativeType.isArray(arr)) return [item];
+		var n = NativeArray.length1d(arr);
+		var res = NativeArray.createEmpty(1 + n);
+		res[0] = item;
+		NativeArray.copyPart(res, 1, arr, 0, n);
+		return res;
+	}
+	
 	private static var join_buf:gml.io.Buffer = null;
 	public static function join<T>(arr:Array<T>, sep:String):String {
 		var len = arr.length;
