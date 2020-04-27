@@ -218,6 +218,10 @@ class SfGml_Type_enumHelpers extends SfOptImpl {
 				default:
 			}
 		});
+		if (dynNames) for (e in sfGenerator.enumList) {
+			if (e.isHidden || e.isFake || e.nativeGen) continue;
+			e.ctrNames = true;
+		}
 		code = out.toString();
 	}
 }
