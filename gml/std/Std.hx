@@ -5,6 +5,7 @@ import SfTools.raw;
 import gml.NativeStruct;
 import gml.NativeType;
 import gml.NativeString;
+import gml.internal.StdTypeImpl;
 
 /**
  * ...
@@ -14,7 +15,7 @@ import gml.NativeString;
 class Std {
 	
 	extern public static inline function is(value:Dynamic, type:Dynamic):Bool {
-		return StdImpl.is(value, type);
+		return StdTypeImpl.is(value, type);
 	}
 	
 	extern public static inline function int(float:Float):Int {
@@ -120,58 +121,4 @@ class Std {
 		return gml.Mathf.irandom(limit - 1);
 	}
 	
-}
-
-@:std @:keep
-private class StdImpl {
-	
-	/**
-	 * This function is used for Std.is(_, Float).
-	 * sf.opt.SfGmlInstanceOf decides whether to use it (or strip it from output).
-	 */
-	static function isNumber(v:Dynamic) {
-		return NativeType.isReal(v)
-			|| NativeType.isBool(v)
-			|| NativeType.isInt32(v)
-			|| NativeType.isInt64(v);
-	}
-	
-	/** Same as above, but for Std.is(_, Int) */
-	static function isIntNumber(value:Dynamic):Bool {
-		if (NativeType.isReal(value)) {
-			return (value | 0) == value;
-		}
-		return NativeType.isInt64(value)
-			|| NativeType.isInt32(value)
-			|| NativeType.isBool(value);
-	}
-	
-	/** Same as above, but for Std.is(_, _) */
-	public static function is<T>(value:Dynamic, type:Class<T>):Bool {
-		inline function isNumber(v:Dynamic) {
-			return inline NativeTypeHelper.isNumber(v);
-		}
-		if (type == null) return false;
-		if (Std.is(type, Array)) switch (type) {
-			case Float: return isNumber(value);
-			case Int: return inline NativeTypeHelper.isIntNumber(value);
-			case String: return Std.is(value, String);
-			default: {
-				var vt;
-				if (MetaType.has(value)) {
-					vt = MetaType.get(value);
-				} else if (isNumber(value)) {
-					vt = null;
-					for (q in gml.NativeScope.with(value, gml.Instance)) {
-						vt = q.getField("__class__");
-					}
-					if (vt == null) return false;
-				} else return false;
-				var vti:Int = isNumber(vt) ? cast vt : vt.index;
-				var tt:MetaType<T> = cast type;
-				return MetaType.is.get(vti, tt.index);
-			}
-		}
-		return false;
-	}
 }

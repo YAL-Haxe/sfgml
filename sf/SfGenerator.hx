@@ -120,7 +120,7 @@ class SfGenerator extends SfGeneratorImpl {
 		if (sfConfig.header != null) {
 			for (line in sfConfig.header.split("\\n")) printf(mixed, "// %s\n", line);
 		}
-		if (SfGmlInstanceOf.isUsed) printTypeGrid(decl);
+		if (SfGml_StdTypeImpl.isUsed) printTypeGrid(decl);
 		if (SfGml_Type_enumHelpers.code != "") {
 			if (hintFolds) printf(decl, "//{ enum names\n");
 			decl.addString(SfGml_Type_enumHelpers.code);
@@ -388,6 +388,7 @@ class SfGenerator extends SfGeneratorImpl {
 			if (a.meta.has(":std") && a.impl != null) a.impl.isStd = true;
 		}
 	}
+	
 	override function getPreproc():Array<SfOptImpl> {
 		var r = super.getPreproc();
 		var pre = [
@@ -403,7 +404,7 @@ class SfGenerator extends SfGeneratorImpl {
 		]; pre.reverse(); for (o in pre) r.unshift(o);
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());
-		r.push(new SfGmlInstanceOf());
+		r.push(new SfGml_StdTypeImpl(false));
 		r.unshift(new SfGml_ArrayImpl(false));
 		return r;
 	}
@@ -415,7 +416,6 @@ class SfGenerator extends SfGeneratorImpl {
 		r.push(new SfGmlNativeString());
 		r.push(new SfGmlArrayDecl());
 		r.push(new SfGmlType());
-		r.push(new SfGmlTypeSwitch());
 		r.push(new SfGmlRepeat());
 		r.push(new SfGmlArgs());
 		r.push(new SfGmlArrayAccess());
@@ -423,6 +423,7 @@ class SfGenerator extends SfGeneratorImpl {
 		r.push(new SfGmlClosureField());
 		r.push(new SfGml_ArrayImpl(true));
 		r.push(new SfGmlCullHelpers());
+		r.push(new SfGml_StdTypeImpl(true));
 		return r;
 	}
 	

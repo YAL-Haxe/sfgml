@@ -16,7 +16,11 @@ class SfType extends SfTypeImpl {
 	/** Whether the type is referenced anywhere */
 	public var isUsed:Bool = false;
 	
+	/** Whether the type is direcently referenced and we need to generate a mt_ for it */
+	public var hasTypeExpr:Bool = false;
+	
 	public function hasMetaType():Bool {
+		if (hasTypeExpr) return true;
 		if (isHidden || nativeGen) return false;
 		if (!isUsed) return false;
 		if (Std.is(this, SfEnum)) {

@@ -19,7 +19,7 @@ class SfGmlTypeInit {
 		#if !sfgml_legacy_meta
 		// we'll need markerValue defined before anything else
 		// since meta type constructors will reference it:
-		var qMetaType:SfClass = cast sfGenerator.realMap["gml.MetaType"];
+		var qMetaType = sfGenerator.findRealClass("gml.MetaType");
 		var qMetaMarker = qMetaType.realMap["markerValue"];
 		var qMetaMarkerText:String = null;
 		if (qMetaMarker != null) {
@@ -34,6 +34,9 @@ class SfGmlTypeInit {
 			printf(init, ";\n");
 		}
 		#end
+		//
+		var qMetaClass = sfGenerator.findRealClass("gml.MetaClass");
+		var qMetaClass_super = qMetaClass != null ? qMetaClass.realMap["superClass"] : null;
 		
 		//
 		var typeBoot = sfGenerator.typeBoot;
@@ -41,6 +44,7 @@ class SfGmlTypeInit {
 		for (t in sfGenerator.typeList) {
 			if (!t.hasMetaType()) continue;
 			var e:SfEnum = Std.is(t, SfEnum) ? cast t : null;
+			var c:SfClass = Std.is(t, SfClass) ? cast t : null;
 			//
 			printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
 			if (modern) {
@@ -67,11 +71,22 @@ class SfGmlTypeInit {
 					printf(init, ")");
 				}
 			} while (false);
-			else if (Std.is(t, SfClass)) {
+			else if (c != null) {
 				var c:SfClass = cast t;
 				if (c.constructor != null && c.isStruct) printf(init, ",`%(type_auto)", t);
 			}
 			printf(init, ");\n");
+			//
+			if (modern && c != null && c.superClass != null && c.module != SfGmlType.mtModule) {
+				if (qMetaClass_super != null) {
+					printf(init, "mt_%(type_auto).%s`=`mt_%(type_auto);\n",
+						c, qMetaClass_super.name, c.superClass);
+				} else {
+					haxe.macro.Context.warning(
+						"Can't print superClass - field missing",
+						c.classType.pos);
+				}
+			}
 		}
 		
 		//

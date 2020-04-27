@@ -307,7 +307,7 @@ class SfClass extends SfClassImpl {
 		if (isStruct) {
 			printf(r, "static __class__`=`");
 			if (module == sf.opt.type.SfGmlType.mtModule) {
-				printf(r, '"mt_%(type_auto)";', this);
+				printf(r, '"%s";', name);
 			} else printf(r, "mt_%(type_auto);", this);
 		} else {
 			printf(r, "return this;");

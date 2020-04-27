@@ -1,7 +1,8 @@
 package gml;
 
 /**
- * ...
+ * GML has a variety of helper functions for checking if a value is of one or other type
+ * and this class lets you use those quite pleasantly.
  * @author YellowAfterlife
  */
 @:std @:native("") @:snakeCase
@@ -57,10 +58,14 @@ extern class NativeType {
 }
 @:noCompletion @:std class NativeTypeHelper {
 	public static function isNumber(v:Dynamic) {
+		#if sfgml.modern
+		return NativeType.isNumber(v);
+		#else
 		return NativeType.isReal(v)
 			|| NativeType.isBool(v)
 			|| NativeType.isInt32(v)
 			|| NativeType.isInt64(v);
+		#end
 	}
 	public static function isIntNumber(value:Dynamic):Bool {
 		if (NativeType.isReal(value)) {

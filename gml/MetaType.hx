@@ -39,7 +39,7 @@ class MetaType<T> {
 		var meta:MetaType<Any> = obj[0];
 		#if sfgml.modern
 		return NativeType.isStruct(meta)
-			&& meta.marker == markerValue;
+			&& NativeStruct.getField(meta, "marker") == markerValue;
 		#else
 		return NativeArray.length1d(cast meta) >= 3
 			&& NativeType.isArray(meta.marker)

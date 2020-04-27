@@ -1,6 +1,7 @@
 package sf.opt.type;
 
 import sf.opt.SfOptImpl;
+import sf.opt.api.SfGml_StdTypeImpl;
 import sf.type.expr.SfExprDef.*;
 import sf.type.*;
 import sf.type.expr.*;
@@ -30,7 +31,37 @@ class SfGmlType extends SfOptImpl {
 	public static var usesEnum:Bool = false;
 	public static inline var mtModule:String = "gml.MetaType";
 	
+	function preproc() {
+		// mark types referenced in code as used:
+		function checkTypeExprs(e:SfExpr, w, f:SfExprIter) {
+			switch (e.def) {
+				case SfTypeExpr(t): {
+					t.isUsed = true;
+					t.hasTypeExpr = true;
+					usesType = true;
+					//e.warning("Uses " + t);
+					if (Std.is(t, SfClass)) {
+						usesClass = true;
+					} else if (Std.is(t, SfEnum)) {
+						usesEnum = true;
+					}
+				};
+				case SfEnumField(t, _): t.isUsed = true;
+				default: e.iter(w, f);
+			} // switch, can return
+		}
+		forEachExpr(function(e:SfExpr, w, f) {
+			var c = currentClass;
+			if (c != null) {
+				if (c.realPath == SfGml_StdTypeImpl.realPath) return;
+			}
+			checkTypeExprs(e, null, checkTypeExprs);
+		});
+	}
+	
 	function procTypeRemap() {
+		if (!sfConfig.modern) return;
+		var _ignoreHidden = ignoreHidden; ignoreHidden = false;
 		var mtClass = sfGenerator.classMap.safeGet(mtModule, "class");
 		var stdClass = sfGenerator.typeClass;
 		forEachExpr(function(e:SfExpr, w, f) {
@@ -48,6 +79,7 @@ class SfGmlType extends SfOptImpl {
 				default: 
 			}
 		});
+		ignoreHidden = _ignoreHidden;
 	}
 	
 	function procMetaTypeUses() {
@@ -55,15 +87,6 @@ class SfGmlType extends SfOptImpl {
 		var sfTypes = sfg.typeList;
 		var sfClasses:Array<SfClass> = sfg.classList;
 		var sfEnums = sfg.enumList;
-		// mark types referenced in code as used:
-		forEachExpr(function(e:SfExpr, w, f) {
-			e.iter(w, f);
-			switch (e.def) {
-				case SfTypeExpr(t): t.isUsed = true;
-				case SfEnumField(t, _): t.isUsed = true;
-				default:
-			}
-		});
 		// mark classes with constructors as used:
 		for (c in sfClasses) if (!c.isHidden) {
 			if (c.constructor != null) c.isUsed = true;
@@ -95,7 +118,7 @@ class SfGmlType extends SfOptImpl {
 		for (c in sfClasses) {
 			if (c.isHidden || c.constructor == null) continue;
 			if (!fns && c.nativeGen) continue;
-			if (c.module == "gml.MetaType") continue;
+			if (c.module == mtModule) continue;
 			usesProto = true;
 			break;
 		}
@@ -103,7 +126,6 @@ class SfGmlType extends SfOptImpl {
 		if (usesProto) {
 			usesType = true;
 			//
-			usesClass = false;
 			for (c in sfClasses) {
 				if (c.isUsed && !c.nativeGen && c.module != mtModule) {
 					usesClass = true;
@@ -111,7 +133,6 @@ class SfGmlType extends SfOptImpl {
 				}
 			}
 			//
-			usesEnum = false;
 			for (e in sfEnums) {
 				if (e.isUsed && !e.nativeGen && !e.isExtern && !e.isFake) {
 					usesEnum = true;
@@ -242,11 +263,11 @@ class SfGmlType extends SfOptImpl {
 	override public function apply() {
 		ignoreHidden = true;
 		procTypeRemap();
+		preproc();
 		procMetaTypeUses();
 		procMetaTypeStatics();
 		procConstructorReturns();
 		procTypeMap(false);
 		procTypeMap(true);
 	}
-	
 }
