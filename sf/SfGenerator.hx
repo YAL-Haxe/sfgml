@@ -515,7 +515,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (Std.is(t, SfEnum)) {
 					var e:SfEnum = cast t;
 					if (e.isFake) expr.error("Can't reference a fake enum.");
-				} else if (t.isExtern) {
+				} else if (t.isExtern && t != typeArray) {
 					expr.error("Can't reference an extern class.");
 				}
 				r.addString("mt_");
