@@ -204,6 +204,7 @@ class SfClass extends SfClassImpl {
 			var iterClass = this;
 			while (iterClass != null) {
 				for (iterField in iterClass.instList) {
+					if (iterField.isHidden) continue;
 					var iterName = iterField.name;
 					if (iterFound.exists(iterName)) continue;
 					iterFound[iterName] = true;
