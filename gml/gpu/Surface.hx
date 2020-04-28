@@ -1,4 +1,5 @@
 package gml.gpu;
+import gml.assets.Sprite;
 import gml.ds.Color;
 
 /**
@@ -62,4 +63,9 @@ extern class Surface {
 	//
 	function save(path:String):Void;
 	function savePart(path:String, left:Int, top:Int, width:Int, height:Int):Void;
+	
+	//
+	inline function toSprite(ox:Float, oy:Float):Sprite {
+		return Sprite.fromSurface(this, ox, oy);
+	}
 }

@@ -19,7 +19,6 @@ extern class Sprite extends Asset {
 		return loadRaw(path, frames, false, false, x, y);
 	}
 	
-	/*
 	@:native("create_from_surface") private static function fromSurfaceRaw(
 		sf:Surface, x:Float, y:Float, w:Float, h:Float, rb:Bool, smooth:Bool, ox:Float, oy:Float
 	):Sprite;
@@ -41,7 +40,6 @@ extern class Sprite extends Asset {
 	public inline function addSurface(sf:Surface):Void {
 		addSurfaceRaw(sf, 0, 0, sf.width, sf.height, false, false);
 	}
-	*/
 	
 	/** */
 	public function merge(spr:Sprite):Void;
