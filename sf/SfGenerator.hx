@@ -849,7 +849,7 @@ class SfGenerator extends SfGeneratorImpl {
 					default:
 				}
 				//
-				switch (x.def) {
+				switch (x.unpack().def) {
 					case SfIdent(name): r.addString(name);
 					case SfDynamic(code, []): { // arbitrary code
 						if (!sfConfig.modern && code.charCodeAt(code.length - 1) == "]".code) {
@@ -928,7 +928,7 @@ class SfGenerator extends SfGeneratorImpl {
 							if (k <= 0) {
 								//
 							} else if (sfConfig.hasChainedAccessors
-								|| _inst.def.match(SfLocal(_) | SfStaticField(_, _))
+								|| _inst.unpack().def.match(SfLocal(_) | SfStaticField(_, _))
 							) {
 								switch (k) {
 									case 1: printf(r, "%x[|%x]", _inst, _args[0]);
