@@ -147,10 +147,10 @@ import gml.ds.HashTable;
 	public static function createEnum<T>(e:Enum<T>, constr:String, ?params:Array<Dynamic>):T {
 		var n = params != null ? params.length : 0;
 		var r:Dynamic;
-		#if sfgml.modern
 		inline function me():MetaEnum<T> {
 			return cast e;
 		}
+		#if sfgml.modern
 		if (me().index < 0) {
 			r = NativeGlobal.getField(me().name + "_" + constr);
 			if (NativeType.isStruct(r)) return r;
@@ -160,8 +160,9 @@ import gml.ds.HashTable;
 		var ctrs = me().constructors;
 		if (ctrs == null) throw 'Enum ${me().name} does not have a constructor array.';
 		#if sfgml_legacy_meta
+		r = null;
 		MetaType.copyset(r, e);
-		NativeArray.set2d(r, 0, 0, index);
+		NativeArray.set2d(r, 0, 0, me().index);
 		if (js.Boot.isJS) {
 			var i = -1; while (++i < n) {
 				NativeArray.set2d(r, 0, i + 1, params[i]);
@@ -195,6 +196,7 @@ import gml.ds.HashTable;
 		}
 		#end
 		#if sfgml_legacy_meta
+		r = null;
 		MetaType.copyset(r, e);
 		NativeArray.set2d(r, 0, 0, index);
 		if (js.Boot.isJS) {
