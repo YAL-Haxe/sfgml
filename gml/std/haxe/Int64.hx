@@ -22,6 +22,14 @@ abstract Int64(__Int64) {
 		return Lib.div(untyped x >>> 0, 1);
 	}
 	
+	@:deprecated('haxe.Int64.is() is deprecated. Use haxe.Int64.isInt64() instead')
+	inline public static function is(val:Dynamic):Bool {
+		return isInt64(val);
+	}
+	inline public static function isInt64(val:Dynamic):Bool {
+		return gml.NativeType.isInt64(val);
+	}
+	
 	private var raw(get, never):Int;
 	private inline function get_raw():Int return this;
 	private static inline function mkr(v:Int):Int64 return cast v;
@@ -61,7 +69,13 @@ abstract Int64(__Int64) {
 		return SfTools.raw("int64")(f);
 	}
 	
-	// todo: divMod
+	public static function divMod(dividend:Int64, divisor:Int64):Int64_DivMod {
+		if (divisor.raw == 0) throw "divide by zero";
+		return {
+			quotient: untyped dividend.raw / divisor.raw,
+			modulus: dividend.raw % divisor.raw
+		}
+	}
 	
 	@:op(-A) public static inline function neg(x:Int64):Int64 {
 		return -x;
@@ -178,7 +192,7 @@ abstract Int64(__Int64) {
 		return mkr(a.raw | b.raw);
 	}
 	
-	@:op(A | B) public static inline function xor(a:Int64, b:Int64):Int64 {
+	@:op(A ^ B) public static inline function xor(a:Int64, b:Int64):Int64 {
 		return mkr(a.raw ^ b.raw);
 	}
 	
@@ -194,6 +208,19 @@ abstract Int64(__Int64) {
 		if (b == 0) return a;
 		if (b >= 32) return a.high >>> (b - 32);
 		return make(a.high >>> b, ((a.high << (32 - b)) >>> 0) | (a.low >>> b));
+	}
+	
+	@:op(++A) public inline function preInc():Int64 {
+		return mkr(cast ++this.raw);
+	}
+	@:op(--A) public inline function preDec():Int64 {
+		return mkr(cast --this.raw);
+	}
+	@:op(A++) public inline function postInc():Int64 {
+		return mkr(cast this.raw++);
+	}
+	@:op(A--) public inline function postDec():Int64 {
+		return mkr(cast this.raw--);
 	}
 	
 	public var high(get, set):Int;
@@ -212,3 +239,7 @@ abstract Int64(__Int64) {
 }
 
 private typedef __Int64 = Dynamic;
+typedef Int64_DivMod = {
+	quotient:Int64,
+	modulus:Int64
+}
