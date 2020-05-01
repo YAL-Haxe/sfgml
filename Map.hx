@@ -1,7 +1,7 @@
 package;
 
 /**
- * If situation permits, please prefer using -D sfgml_native_map or gml.ds.HashTable directly.
+ * This is the same as gml/std/haxe/ds/Map and I don't like the fact.
  * @author YellowAfterlife
  */
 #if (display||macro||eval)
@@ -24,9 +24,13 @@ abstract Map<K,V>(haxe.Constraints.IMap<K,V>) {
 	public inline function keys():Iterator<K> {
 		return this.keys();
 	}
-
+	
 	public inline function iterator():Iterator<V> {
 		return this.iterator();
+	}
+	
+	public inline function keyValueIterator():KeyValueIterator<K,V> {
+		return this.keyValueIterator();
 	}
 
 	public inline function copy():Map<K,V> {
