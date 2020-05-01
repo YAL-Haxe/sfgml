@@ -9,13 +9,13 @@ import haxe.ds.Vector;
  * ...
  * @author YellowAfterlife
  */
-@:native("string_hx") @:final @:std
+@:std @:coreApi
 class StringTools {
 	private static var urlEncode_in:Buffer = Buffer.defValue;
 	private static var urlEncode_out:Buffer = Buffer.defValue;
 	private static var urlEncode_esc:Array<Bool> = null;
 	private static var urlEncode_hex:Array<Int> = null;
-	private static function urlEncode_init() {
+	private static function urlEncode_init():Buffer {
 		//
 		var arr = NativeArray.create(256, true), i:Int;
 		i = "A".code; while (i <= "Z".code) arr[i++] = false;
@@ -68,8 +68,9 @@ class StringTools {
 		return outb.readString();
 	}
 	public static function urlDecode(s:String):String {
-		return null;
+		throw "Not implemented";
 	}
+	
 	public static function htmlEscape(s:String, quotes:Bool = false):String {
 		s = NativeString.replaceAll(s, "&", "&amp;");
 		s = NativeString.replaceAll(s, "<", "&lt;");
@@ -88,14 +89,19 @@ class StringTools {
 		s = NativeString.replaceAll(s, "&amp;", "&");
 		return s;
 	}
-	public static function startsWith(s:String, z:String):Bool {
-		var n:Int = z.length;
-		return s.length >= n && NativeString.copy(s, 1, n) == z;
+	
+	public inline static function contains(s:String, value:String):Bool {
+		return s.indexOf(value) != -1;
 	}
-	public static function endsWith(s:String, e:String):Bool {
+	
+	public static function startsWith(s:String, start:String):Bool {
+		var n:Int = start.length;
+		return s.length >= n && NativeString.copy(s, 1, n) == start;
+	}
+	public static function endsWith(s:String, end:String):Bool {
 		var n:Int = s.length;
-		var i:Int = e.length;
-		return n >= i && NativeString.copy(s, n + 1 - i, i) == e;
+		var i:Int = end.length;
+		return n >= i && NativeString.copy(s, n + 1 - i, i) == end;
 	}
 	public static function isSpace(s:String, pos:Int):Bool {
 		var c = s.charCodeAt(pos);
@@ -123,32 +129,29 @@ class StringTools {
 		}
 		return i < l ? NativeString.copy(s, 1, i) : s;
 	}
-	public static function trim(str:String):String {
+	public static function trim(s:String):String {
 		var char:Int;
 		//
-		var len = str.length;
+		var len = s.length;
 		var till = len;
 		while (till > 0) {
-			char = NativeString.charCodeAt(str, till);
+			char = NativeString.charCodeAt(s, till);
 			if (char == 32 || (char > 8 && char < 14)) {
 				till -= 1;
 			} else break;
 		}
-		if (till < len) str = NativeString.copy(str, 1, till);
+		if (till < len) s = NativeString.copy(s, 1, till);
 		//
 		var start = 1;
 		while (start <= till) {
-			char = NativeString.charCodeAt(str, start);
+			char = NativeString.charCodeAt(s, start);
 			if (char == 32 || (char > 8 && char < 14)) {
 				start += 1;
 			} else break;
 		}
-		if (start > 1) str = NativeString.delete(str, 1, start - 1);
+		if (start > 1) s = NativeString.delete(s, 1, start - 1);
 		//
-		return str;
-	}
-	@:extern public static inline function repeat(s:String, n:Int):String {
-		return NativeString.repeat(s, n);
+		return s;
 	}
 	public static function lpad(s:String, c:String, l:Int):String {
 		var cl = c.length;
@@ -163,29 +166,64 @@ class StringTools {
 	@:extern public static inline function replace(s:String, sub:String, by:String):String {
 		return NativeString.replaceAll(s, sub, by);
 	}
-	public static function hex(i:Int, d:Int = 1) {
+	public static function hex(n:Int, ?digits:Int):String {
 		var s = "";
 		var h = "0123456789ABCDEF";
-		if (i < 0) i += cast 4294967295;
-		while (i > 0) {
-			s = NativeString.charAt(h, 1 + (i & 15)) + s;
-			i >>= 4;
+		if (n < 0) n += cast 4294967295;
+		while (n > 0) {
+			s = NativeString.charAt(h, 1 + (n & 15)) + s;
+			n >>= 4;
 		}
-		d -= s.length;
-		if (d > 0) s = NativeString.repeat("0", d) + s;
+		if (digits != null) {
+			digits -= s.length;
+			if (digits > 0) s = NativeString.repeat("0", digits) + s;
+		}
 		return s;
 	}
 	public static inline function fastCodeAt(s:String, index:Int):Int {
 		return s.charCodeAt(index);
 	}
+	
+	#if (haxe >= "4.0.0")
+	public static inline function iterator(s:String):haxe.iterators.StringIterator {
+		return new haxe.iterators.StringIterator(s);
+	}
+
+	public static inline function keyValueIterator(s:String):haxe.iterators.StringKeyValueIterator {
+		return new haxe.iterators.StringKeyValueIterator(s);
+	}
+	#end
+	
 	@:noUsing public static inline function isEof(c:Int):Bool {
 		return c < 0;
 	}
-	//
-	public static function quoteWinArg(argument:String, escapeMetaCharacters:Bool):String {
-		throw "StringTools.quoteWinArg is not implemented.";
-	}
+	
+	
+	@:noCompletion
+	@:deprecated('StringTools.quoteUnixArg() is deprecated. Use haxe.SysTools.quoteUnixArg() instead.')
 	public static function quoteUnixArg(argument:String):String {
-		throw "StringTools.quoteUnixArg is not implemented.";
+		return inline haxe.SysTools.quoteUnixArg(argument);
 	}
+	
+	@:noCompletion
+	@:deprecated('StringTools.winMetaCharacters is deprecated. Use haxe.SysTools.winMetaCharacters instead.')
+	public static var winMetaCharacters:Array<Int> = cast haxe.SysTools.winMetaCharacters;
+	
+	@:noCompletion
+	@:deprecated('StringTools.quoteWinArg() is deprecated. Use haxe.SysTools.quoteWinArg() instead.')
+	public static function quoteWinArg(argument:String, escapeMetaCharacters:Bool):String {
+		return inline haxe.SysTools.quoteWinArg(argument, escapeMetaCharacters);
+	}
+	
+	#if utf16
+	static inline var MIN_SURROGATE_CODE_POINT = 65536;
+
+	static inline function utf16CodePointAt(s:String, index:Int):Int {
+		var c = StringTools.fastCodeAt(s, index);
+		if (c >= 0xD800 && c <= 0xDBFF) {
+			c = ((c - 0xD7C0) << 10) | (StringTools.fastCodeAt(s, index + 1) & 0x3FF);
+		}
+		return c;
+	}
+	#end
 }
