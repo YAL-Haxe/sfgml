@@ -10,7 +10,7 @@ import gml.MetaType;
 	
 	#if !sfgml.modern
 	/** Used for Std.is(v, Float) in pre-2.3 */
-	@:keep static function isNumber(value:Dynamic):Bool {
+	@:keep static function isNumber(v:Dynamic):Bool {
 		return NativeType.isReal(v)
 			|| NativeType.isBool(v)
 			|| NativeType.isInt32(v)
@@ -95,8 +95,8 @@ import gml.MetaType;
 				}
 				return false;
 				#else
-				var vti:Int = isNumber(vt) ? cast vt : vt.index;
-				var tt:MetaType<T> = cast type;
+				var vti:Int = isNumber(mt) ? cast mt : mt.index;
+				var tt:MetaType<Any> = cast type;
 				return MetaType.is.get(vti, tt.index);
 				#end
 			};
