@@ -28,6 +28,10 @@ abstract Map<K,V>(IMap<K,V>) {
 	public inline function iterator():Iterator<V> {
 		return this.iterator();
 	}
+	
+	public inline function keyValueIterator():KeyValueIterator {
+		return this.keyValueIterator();
+	}
 
 	public inline function copy():Map<K,V> {
 		return cast this.copy();
