@@ -90,9 +90,14 @@ class SfGml_StdTypeImpl extends SfOptImpl {
 							e.def = SfParenthesis(ex);
 						};
 						default: {
-							var fx = e.mod(SfStaticField(_StdTypeImpl, _isGeneric));
-							e.def = SfCall(fx, [x, tx]);
-							_isGeneric_usedBy = e;
+							if (_isGeneric != null) {
+								var fx = e.mod(SfStaticField(_StdTypeImpl, _isGeneric));
+								e.def = SfCall(fx, [x, tx]);
+								_isGeneric_usedBy = e;
+							} else {
+								e.error("StdTypeImpl.is was not compiled."
+									+ " Try referencing Std.is somewhere.");
+							}
 						};
 					}
 				};
