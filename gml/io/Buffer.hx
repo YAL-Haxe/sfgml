@@ -119,6 +119,7 @@ import haxe.Int64;
 	inline function peekIntSigned(pos:Int):Int return peek(pos, s32);
 	inline function peekIntUnsigned(pos:Int):Int return peek(pos, u32);
 	inline function peekInt(pos:Int):Int return peek(pos, s32);
+	inline function peekInt64(pos:Int):Int64 return peek(pos, u64);
 	//
 	inline function peekFloat(pos:Int):Float return peek(pos, f32);
 	inline function peekDouble(pos:Int):Float return peek(pos, f64);
@@ -141,6 +142,7 @@ import haxe.Int64;
 	inline function pokeIntSigned(pos:Int, int:Int):Void poke(pos, s32, int);
 	inline function pokeIntUnsigned(pos:Int, uint:Int):Void poke(pos, u32, uint);
 	inline function pokeInt(pos:Int, int:Int):Void poke(pos, s32, int);
+	inline function pokeInt64(pos:Int, long:Int64):Void poke(pos, u64, long);
 	//
 	inline function pokeFloat(pos:Int, float:Float):Void poke(pos, f32, float);
 	inline function pokeDouble(pos:Int, double:Float):Void poke(pos, f64, double);
@@ -165,6 +167,9 @@ import haxe.Int64;
 	public function md5(offset:Int, size:Int):String;
 	
 	public function sha1(offset:Int, size:Int):String;
+	
+	/** >= 2.3 */
+	public function crc32(offset:Int, size:Int):Int;
 	
 	@:native("base64_decode") public static function fromBase64(b64:String):Buffer;
 	
