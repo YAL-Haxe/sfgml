@@ -7,7 +7,11 @@ import gml.NativeArray;
  * ...
  * @author YellowAfterlife
  */
+//@:coreApi
 @:native("haxe_sys") class Sys {
+	public static inline function print(v:Dynamic):Void {
+		raw("show_debug_message")(v);
+	}
 	public static inline function println(v:Dynamic):Void {
 		raw("show_debug_message")(v);
 	}
@@ -22,8 +26,8 @@ import gml.NativeArray;
 	public static inline function getEnv(s:String):String {
 		return raw("environment_get_variable")(s);
 	}
-	public static function sleep(sec:Float):Void {
-		var t = Lib.getTimer() + sec * 1000;
+	public static function sleep(seconds:Float):Void {
+		var t = Lib.getTimer() + seconds * 1000;
 		while (Lib.getTimer() < t) { };
 	}
 	public static inline function getCwd():String {
@@ -56,5 +60,41 @@ import gml.NativeArray;
 	}
 	public static inline function programPath():String {
 		return raw("parameter_string")(0);
+	}
+	@:deprecated("Use programPath instead") public static function executablePath():String {
+		return programPath();
+	}
+	
+	//
+	static inline var notAvail:String = "Not available on this platform";
+	public static function command(cmd:String, ?args:Array<String>):Int {
+		throw notAvail;
+	}
+	public static function cpuTime():Float {
+		throw notAvail;
+	}
+	public static function environment():Map<String, String> {
+		throw notAvail;
+	}
+	public static function putEnv(s:String, v:String):Void {
+		throw notAvail;
+	}
+	public static function getChar(echo:Bool):Int {
+		throw notAvail;
+	}
+	public static function stdin():haxe.io.Input {
+		throw notAvail;
+	}
+	public static function stdout():haxe.io.Output {
+		throw notAvail;
+	}
+	public static function stderr():haxe.io.Output {
+		throw notAvail;
+	}
+	public static function setCwd(s:String):Void {
+		throw notAvail;
+	}
+	public static function setTimeLocale(loc:String):Bool {
+		return false;
 	}
 }
