@@ -25,6 +25,7 @@ class BasicMap<K, V> {
 		while (--i >= 0) pairs[i] = BasicMapPair.defValue;
 	}
 	
+	#if !sfgml.modern
 	private static var crc32tab = [ //{
 		0x00000000,0x77073096,0xee0e612c,0x990951ba,0x076dc419,0x706af48f,0xe963a535,0x9e6495a3,
 		0x0edb8832,0x79dcb8a4,0xe0d5e91e,0x97d2d988,0x09b64c2b,0x7eb17cbd,0xe7b82d07,0x90bf1d91,
@@ -70,6 +71,11 @@ class BasicMap<K, V> {
 		// todo: is hashmap_hash_int postfix worth it
 		return (val >>> 0);
 	}
+	#else
+	private static inline function crc32get(b:Buffer) {
+		return b.crc32(0, b.position);
+	}
+	#end
 	private inline function rawHash(fn:Buffer->Void):Int {
 		var b = buffer;
 		b.rewind();
