@@ -33,6 +33,13 @@ class SfGml_ArrayImpl extends SfOptImpl {
 		if (tArrayImpl != null) {
 			for (fd in tArrayImpl.fieldList) fd.isHidden = true;
 		}
+		
+		//
+		tArray.meta.add(":docName", [{
+			expr: EConst(CString("array")),
+			pos: tArray.baseType.pos
+		}], tArray.baseType.pos);
+		
 		//
 		var modern = sfConfig.modern;
 		var array_length = "array_length";
