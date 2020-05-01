@@ -413,7 +413,7 @@ class SfGenerator extends SfGeneratorImpl {
 		var c = sfConfig;
 		if (c.analyzer) r.replace(SfOptAutoVar, new SfGmlAutoVar());
 		r.push(new SfGmlRest());
-		r.push(new SfGmlNativeString());
+		r.push(new SfGml_NativeString());
 		r.push(new SfGmlArrayDecl());
 		r.push(new SfGmlType());
 		r.push(new SfGmlRepeat());

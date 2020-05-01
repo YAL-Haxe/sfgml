@@ -13,7 +13,7 @@ import haxe.macro.Type;
  * Unwraps simple string operations with predictable results.
  * @author YellowAfterlife
  */
-class SfGmlNativeString extends SfOptImpl {
+class SfGml_NativeString extends SfOptImpl {
 	override public function apply() {
 		var ns = sfGenerator.realMap["gml.NativeString"];
 		if (ns == null) return;
