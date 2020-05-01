@@ -9,103 +9,116 @@ import haxe.Int64;
  * @author YellowAfterlife
  */
 #if !sfgml_native_bytes
-@:std class Bytes {
-	public var length(get, null):Int;
+@:std @:coreApi
+class Bytes {
+	/** not coreApi:  */
+	public var length(default, null):Int;
 	inline function get_length():Int {
-		return data.length;
+		return b.length;
 	}
-	private var data:BytesData;
+	private var b:BytesData;
 	
-	public inline function new(data:BytesData) {
-		this.data = data;
+	public inline function new(b:BytesData) {
+		this.b = b;
 	}
 	
 	public inline function get(pos:Int):Int {
-		return data[pos];
+		return b[pos];
 	}
-	public inline function set(pos:Int, val:Int) {
-		data[pos] = val & 0xff;
+	public inline function set(pos:Int, v:Int):Void {
+		b[pos] = v & 0xff;
 	}
 	
-	public inline function blit(pos:Int, src:Bytes, srcPos:Int, len:Int):Void {
-		NativeArray.copyPart(data, pos, src.data, srcPos, len);
+	public inline function blit(pos:Int, src:Bytes, srcpos:Int, len:Int):Void {
+		NativeArray.copyPart(b, pos, src.b, srcpos, len);
 	}
-	public inline function fill(pos:Int, len:Int, val:Int) {
-		BytesImpl.fill(data, pos, len, val);
+	public inline function fill(pos:Int, len:Int, value:Int):Void {
+		BytesImpl.fill(b, pos, len, value);
 	}
 	
 	public inline function sub(pos:Int, len:Int):Bytes {
-		return new Bytes(data.slice(pos, len));
+		return new Bytes(b.slice(pos, len));
 	}
 	
 	public inline function compare(other:Bytes):Int {
-		return BytesImpl.compare(data, length, other.data, other.length);
+		return BytesImpl.compare(b, length, other.b, other.length);
 	}
 	
 	public inline function getUInt16(pos:Int):Int {
-		return BytesImpl.getUInt16(data, pos);
+		return BytesImpl.getUInt16(b, pos);
 	}
-	public inline function setUInt16(pos:Int, val:Int) {
-		BytesImpl.setUInt16(data, pos, val);
+	public inline function setUInt16(pos:Int, v:Int):Void {
+		BytesImpl.setUInt16(b, pos, v);
 	}
 	
 	public inline function getInt32(pos:Int):Int {
-		return BytesImpl.getInt32(data, pos);
+		return BytesImpl.getInt32(b, pos);
 	}
-	public inline function setInt32(pos:Int, val:Int) {
-		BytesImpl.setInt32(data, pos, val);
+	public inline function setInt32(pos:Int, v:Int):Void {
+		BytesImpl.setInt32(b, pos, v);
 	}
 	
 	public inline function getInt64(pos:Int):Int64 {
-		return BytesImpl.getInt64(data, pos);
+		return BytesImpl.getInt64(b, pos);
 	}
-	public inline function setInt64(pos:Int, val:Int64) {
-		BytesImpl.setInt64(data, pos, val);
+	public inline function setInt64(pos:Int, v:Int64):Void {
+		BytesImpl.setInt64(b, pos, v);
 	}
 	
 	public inline function getFloat(pos:Int):Float {
-		return BytesImpl.getFloat(data, pos);
+		return BytesImpl.getFloat(b, pos);
 	}
-	public inline function setFloat(pos:Int, val:Float) {
-		BytesImpl.setFloat(data, pos, val);
+	public inline function setFloat(pos:Int, v:Float):Void {
+		BytesImpl.setFloat(b, pos, v);
 	}
 	
 	public inline function getDouble(pos:Int):Float {
-		return BytesImpl.getDouble(data, pos);
+		return BytesImpl.getDouble(b, pos);
 	}
-	public inline function setDouble(pos:Int, val:Float) {
-		BytesImpl.setDouble(data, pos, val);
+	public inline function setDouble(pos:Int, v:Float):Void {
+		BytesImpl.setDouble(b, pos, v);
 	}
 	
-	public inline function getString(pos:Int, len:Int):String {
-		return BytesImpl.getString(data, pos, len);
+	public inline function getString(pos:Int, len:Int, ?encoding:Encoding):String {
+		return BytesImpl.getString(b, pos, len);
 	}
+	
+	@:deprecated("readString is deprecated, use getString instead")
+	@:noCompletion
+	public inline function readString(pos:Int, len:Int):String {
+		return getString(pos, len);
+	}
+	
 	public inline function toString():String {
-		return BytesImpl.getString(data, 0, length);
+		return BytesImpl.getString(b, 0, length);
 	}
 	
 	public inline function toHex():String {
-		return BytesImpl.toHex(data);
+		return BytesImpl.toHex(b);
 	}
 	
 	public inline function getData():BytesData {
-		return data;
+		return b;
 	}
 	
-	public static inline function alloc(size:Int):Bytes {
-		return new Bytes(NativeArray.create(size, 0));
+	public static inline function alloc(length:Int):Bytes {
+		return new Bytes(NativeArray.create(length, 0));
 	}
 	
-	public static inline function ofData(d:BytesData):Bytes {
-		return new Bytes(d);
+	public static inline function ofData(b:BytesData):Bytes {
+		return new Bytes(b);
 	}
 	
-	public static inline function ofString(s:String):Bytes {
+	public static inline function ofHex(s:String):Bytes {
+		return new Bytes(BytesImpl.ofHex(s));
+	}
+	
+	public static inline function ofString(s:String, ?encoding:Encoding):Bytes {
 		return new Bytes(BytesImpl.ofString(s));
 	}
 	
-	public static inline function fastGet(d:BytesData, pos:Int):Int {
-		return d[pos];
+	public static inline function fastGet(b:BytesData, pos:Int):Int {
+		return b[pos];
 	}
 }
 private class BytesImpl {
@@ -221,6 +234,40 @@ private class BytesImpl {
 		var out = NativeArray.createEmpty(size);
 		b.rewind();
 		for (i in 0 ... size) out[i] = b.readByte();
+		return out;
+	}
+	
+	private static var ofHex_mapper:Array<Int> = null;
+	public static function ofHex(s:String):BytesData {
+		var b = buffer;
+		b.rewind();
+		b.writeChars(s);
+		var n = b.position;
+		if ((n & 1) != 0) throw "Not a hex string (odd number of digits)";
+		n = n >> 1;
+		var b = buffer;
+		b.rewind();
+		//
+		var high:Int, i:Int;
+		var mapper = ofHex_mapper;
+		if (mapper == null) {
+			mapper = NativeArray.create(256, 0);
+			i = -1; while (++i < 10) {
+				mapper["0".code + i] = i;
+			}
+			i = -1; while (++i < 6) {
+				mapper["A".code + i] = 10 + i;
+				mapper["a".code + i] = 10 + i;
+			}
+			ofHex_mapper = mapper;
+		}
+		//
+		var out:BytesData = NativeArray.createEmpty(n);
+		i = -1; while (i < n) {
+			high = b.readByte();
+			out[i] = (mapper[high] << 4) | mapper[b.readByte()];
+		}
+		//
 		return out;
 	}
 }
