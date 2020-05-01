@@ -18,6 +18,16 @@ class Std {
 		return StdTypeImpl.is(value, type);
 	}
 	
+	#if (haxe >= "4.1.0")
+	extern public static inline function isOfType(value:Dynamic, type:Dynamic):Bool {
+		return StdTypeImpl.is(value, type);
+	}
+	#end
+	
+	public static inline function downcast<T:{}, S:T>(value:T, c:Class<S>):S @:privateAccess {
+		return if (StdTypeImpl.is(value, c)) cast value else null;
+	}
+	
 	extern public static inline function int(float:Float):Int {
 		return untyped (float | 0);
 	}

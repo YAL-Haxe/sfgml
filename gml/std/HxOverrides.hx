@@ -20,6 +20,10 @@ class HxOverrides {
 			+":"+(if( mi < 10 ) "0"+mi else ""+mi)
 			+":"+(if( s < 10 ) "0"+s else ""+s);*/
 	}
+	
+	static inline function now():Float {
+		return gml.Lib.currentTime;
+	}
 
 	/*static function strDate( s : String ) : Date {
 		switch( s.length ) {

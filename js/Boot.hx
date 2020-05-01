@@ -40,8 +40,11 @@ class Boot {
 	private static function __string_rec(o:Dynamic, s:String):String {
 		return Std.string(o);
 	}
-	private static function __interfLoop(cc:Dynamic, cl:Dynamic):Void {
-		
+	private static function __interfLoop(cc:Dynamic, cl:Dynamic):Bool {
+		throw "Can't do";
+	}
+	static function __implements(o:Dynamic, iface:Class<Dynamic>):Bool {
+		throw "Can't do";
 	}
 	@:ifFeature("typed_catch")
 	private static function __instanceof(o:Dynamic, c:Dynamic):Bool {
