@@ -392,6 +392,7 @@ class SfGenerator extends SfGeneratorImpl {
 	override function getPreproc():Array<SfOptImpl> {
 		var r = super.getPreproc();
 		var pre = [
+			new SfGml_String_new(),
 			#if sfgml_catch_error
 			new SfGmlCatchError(),
 			#end

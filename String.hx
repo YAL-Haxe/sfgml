@@ -1,17 +1,22 @@
 package ;
-import gml.Lib.raw;
-import gml.NativeString;
 /**
  * ...
  * @author YellowAfterlife
  */
 #if !macro
-@:std @:native("string") @:final
+import gml.Lib.raw;
+import gml.NativeString;
+
+@:std @:native("string") @:final @:gml.linear
 class String {
 	public var length(get, null):Int;
 	private inline function get_length():Int {
 		return NativeString.length(this);
 	}
+	
+	/** We'll get rid of the constructor in SfGml_String_new */
+	@:expose("string") @:remove public function new(s:String) {}
+	
 	public inline function charAt(i:Int):String {
 		return NativeString.charAt(this, i + 1);
 	}
