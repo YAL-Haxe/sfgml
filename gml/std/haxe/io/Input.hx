@@ -10,7 +10,12 @@ import gml.io.BufferKind;
  */
 #if !sfgml_native_bytes
 class Input {
+	/**
+	 * It is faster to write some bytes into a temp buffer and then read back
+	 * a value using a built-in function than do floating-point construction yourself.
+	 */
 	private static var buffer:Buffer = new Buffer(32, Grow, 1);
+	
 	private var data:BytesData;
 	private var dataPos:Int = 0;
 	private var dataLen:Int;
