@@ -16,7 +16,11 @@ package haxe;
 		return pstr+": "+str;
 	}
 	
-	public static function trace( v : Dynamic, ?infos : PosInfos ) : Void {
+	public static
+	#if sf_dynamic_trace
+	dynamic
+	#end
+	function trace( v : Dynamic, ?infos : PosInfos ) : Void {
 		SfTools.raw("show_debug_message")(formatOutput(v, infos));
 	}
 
