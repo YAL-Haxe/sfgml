@@ -1,5 +1,6 @@
 package gml;
 
+import gml.NativeArray;
 import gml.ds.Grid;
 import gml.MetaType.MetaClass;
 import SfTools.raw;
@@ -94,7 +95,11 @@ class MetaType<T> {
 		#end
 		var i = 0;
 		while (i < n) {
+			#if (sfgml_array_create)
 			out[i] = rest[i];
+			#else
+			NativeArray.copyset(out, i, rest[i]);
+			#end
 			i += 1;
 		}
 		return out;
