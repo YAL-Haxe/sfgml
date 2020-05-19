@@ -34,6 +34,10 @@ class SfEnum extends SfEnumImpl {
 		return nativeGen || docState > 0;
 	}
 	
+	public function isPureArray():Bool {
+		return !isStruct && sfConfig.hasArrayDecl && !(!nativeGen && sfConfig.legacyMeta);
+	}
+	
 	private function printCtrIndexLiteral(out:SfBuffer, ctr:SfEnumCtr):Void {
 		if (hasNativeEnum()) {
 			out.addFieldPath(ctr, "_".code, ".".code);
@@ -54,11 +58,13 @@ class SfEnum extends SfEnumImpl {
 	}
 	
 	static var toStringPath:String = null;
+	static var getIndexPath:String = null;
 	function printStruct(outb:SfBuffer, initb:SfBuffer):Void {
 		var stdPre = sfConfig.stdPack;
 		stdPre = stdPre != null ? stdPre + "_" : "";
 		if (toStringPath == null) {
 			toStringPath = stdPre + "enum_toString";
+			getIndexPath = stdPre + "enum_getIndex";
 			//
 			var decl = sfGenerator.declBuffer;
 			printf(decl, "function %s()`{%(+\n)", toStringPath);
@@ -78,7 +84,7 @@ class SfEnum extends SfEnumImpl {
 		var out = new SfBuffer(), init = new SfBuffer();
 		if (hasNativeEnum()) printNativeEnum(init);
 		printf(out, "\nfunction mc_%(type_auto)()`{%(+\n)", this);
-		printf(out, "static getIndex`=`method(undefined,`%s%s);\n", stdPre, "enum_getIndex");
+		printf(out, "static getIndex`=`method(undefined,`%s);\n", getIndexPath);
 		printf(out, "static toString`=`method(undefined,`%s);\n", toStringPath);
 		printf(out, "static __enum__`=`mt_%(type_auto);", this);
 		printf(out, "%(-\n)};\n");
@@ -147,7 +153,7 @@ class SfEnum extends SfEnumImpl {
 		var canRef = !this.noRef;
 		var hasAC = sfConfig.hasArrayCreate;
 		var hasLegacyMeta = !nativeGen && sfConfig.legacyMeta;
-		var pureArray = sfConfig.hasArrayDecl && !hasLegacyMeta;
+		var pureArray = isPureArray();
 		var noScripts = pureArray && docState <= 0;
 		var g_ = sfConfig.gmxMode ? "g_" : "";
 		for (ctr in ctrList) {

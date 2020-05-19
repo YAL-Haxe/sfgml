@@ -948,7 +948,7 @@ class SfGenerator extends SfGeneratorImpl {
 						}
 					};
 					case SfEnumField(_enum, _field): {
-						if (_enum.nativeGen && sfConfig.hasArrayDecl) {
+						if (_enum.isPureArray()) {
 							printf(r, "[");
 							if (_enum.hasNativeEnum()) {
 								r.addFieldPath(_field, "_".code, ".".code);
