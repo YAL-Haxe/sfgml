@@ -21,6 +21,17 @@ class SfEnum extends SfEnumImpl {
 			isStruct = false;
 			dotAccess = false; // not that you can dot access anything on enums anyway
 		}
+		
+		// for structs, rename arguments that clash with built-ins:
+		if (isStruct) for (ctr in ctrList) {
+			for (arg in ctr.args) {
+				var v0 = arg.v.name;
+				var v1 = sfGenerator.getFieldName(v0);
+				if (v1 != v0) {
+					arg.v.name = v1;
+				}
+			}
+		}
 	}
 	
 	/** Whether this enum will need a enum_toString generated */

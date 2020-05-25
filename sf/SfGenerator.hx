@@ -334,20 +334,31 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 	}
 	
-	private static var reserved:Map<String, String> = {
+	private static var makeReserved_kw = SfGmlBuiltin.keywords.split(" ");
+	private static var makeReserved_vars = SfGmlBuiltin.vars.split(" ");
+	private static var makeReserved_fns = SfGmlBuiltin.functions.split(" ");
+	private static function makeReserved(pre:String):Map<String, String> {
 		var out = new Map();
-		var pre = "l_";
-		for (s in SfGmlBuiltin.keywords.split(" ")) out[s] = pre + s;
-		for (s in SfGmlBuiltin.vars.split(" ")) out[s] = pre + s;
-		for (s in SfGmlBuiltin.functions.split(" ")) out[s] = pre + s;
-		out;
-	};
+		for (s in makeReserved_kw) out[s] = pre + s;
+		for (s in makeReserved_vars) out[s] = pre + s;
+		for (s in makeReserved_fns) out[s] = pre + s;
+		return out;
+	}
+	
+	private static var getVarName_map:Map<String, String> = makeReserved("l_");
 	override public function getVarName(name:String) {
 		if (sfConfig.localPrefix == "") {
-			var r = reserved[name];
+			var r = getVarName_map[name];
 			return r != null ? r : name;
 		} else return name;
 	}
+	
+	private static var getFieldName_map:Map<String, String> = makeReserved("i_");
+	public function getFieldName(name:String) {
+		var r = getFieldName_map[name];
+		return r != null ? r : name;
+	}
+	
 	override public function printFormat(b:SfBuffer, fmt:String, v:Dynamic):Bool {
 		switch (fmt) {
 			case "type_auto": b.addTypePathAuto(v);
