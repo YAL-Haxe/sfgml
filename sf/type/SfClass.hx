@@ -321,6 +321,7 @@ class SfClass extends SfClassImpl {
 		var hintFolds = sfConfig.hintFolds;
 		var r:SfBuffer = null;
 		var init:SfBuffer = null;
+		var modern = sfConfig.modern;
 		if (!isHidden) {
 			var nativeGen = this.nativeGen;
 			sfGenerator.currentClass = this;
@@ -347,8 +348,9 @@ class SfClass extends SfClassImpl {
 					};
 					var fbody = true;
 					if (f.isVar) { // dynamic fields get a variable
-						printf(init, "globalvar g_%s;`", path);
-						printf(init, "g_%s`=`", path);
+						var g_ = modern ? "" : "g_";
+						printf(init, "globalvar %s%s;`", g_, path);
+						printf(init, "%s%s`=`", g_, path);
 						if (f.expr == null || f.expr.def.match(SfConst(TNull))) {
 							init.addString("undefined");
 							fbody = false;
@@ -368,7 +370,7 @@ class SfClass extends SfClassImpl {
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
 					init.addString("globalvar ");
-					if (!this.isStd) init.addString("g_");
+					if (!this.isStd && !modern) init.addString("g_");
 					init.addFieldPathAuto(f);
 					init.addSemico();
 					var fx:SfExpr = f.expr;
@@ -380,7 +382,7 @@ class SfClass extends SfClassImpl {
 								init.addLine();
 								var wn = w.length;
 								var wx = w.slice(0, wn - 1);
-								if (sfConfig.modern) {
+								if (modern) {
 									wx.push(fx.mod(SfReturn(true, w[wn - 1])));
 									fx = fx.mod(SfBlock(wx));
 									if (!this.isStd) init.addString("g_");

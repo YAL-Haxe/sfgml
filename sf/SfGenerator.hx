@@ -584,7 +584,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (c.dotStatic) {
 					printf(r, "%(type_auto).%s", c, f.name);
 				} else if (f.isVar && !c.isStd) {
-					r.addString("g_");
+					if (!sfConfig.modern) r.addString("g_");
 					r.addFieldPathAuto(f);
 				} else {
 					#if (1) // assume extension script IDs cursed till further notice
