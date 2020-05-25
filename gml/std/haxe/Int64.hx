@@ -71,10 +71,11 @@ abstract Int64(__Int64) {
 	
 	public static function divMod(dividend:Int64, divisor:Int64):Int64_DivMod {
 		if (divisor.raw == 0) throw "divide by zero";
-		return {
+		var r:Int64_DivMod = {
 			quotient: untyped dividend.raw / divisor.raw,
 			modulus: dividend.raw % divisor.raw
-		}
+		};
+		return r;
 	}
 	
 	@:op(-A) public static inline function neg(x:Int64):Int64 {
@@ -211,16 +212,16 @@ abstract Int64(__Int64) {
 	}
 	
 	@:op(++A) public inline function preInc():Int64 {
-		return mkr(cast ++this.raw);
+		return mkr(untyped ++this);
 	}
 	@:op(--A) public inline function preDec():Int64 {
-		return mkr(cast --this.raw);
+		return mkr(untyped --this);
 	}
 	@:op(A++) public inline function postInc():Int64 {
-		return mkr(cast this.raw++);
+		return mkr(untyped this++);
 	}
 	@:op(A--) public inline function postDec():Int64 {
-		return mkr(cast this.raw--);
+		return mkr(untyped this--);
 	}
 	
 	public var high(get, set):Int;
