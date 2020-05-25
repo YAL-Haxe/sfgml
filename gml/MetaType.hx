@@ -11,6 +11,9 @@ import SfTools.raw;
  * @author YellowAfterlife
  */
 @:native("haxe.type") @:std
+#if sfgml.modern
+@:gml.struct
+#end
 class MetaType<T> {
 	#if !sfgml_legacy_meta
 	/** Is used to quickly tell that this is the right thing */
@@ -107,6 +110,9 @@ class MetaType<T> {
 }
 
 @:keep @:native("haxe.class") @:std
+#if sfgml.modern
+@:gml.struct
+#end
 class MetaClass<T> extends MetaType<T> {
 	public var superClass:MetaClass<Dynamic> = null;
 	public var constructor:Dynamic;
@@ -121,6 +127,9 @@ class MetaClass<T> extends MetaType<T> {
 }
 
 @:keep @:native("haxe.enum") @:std
+#if sfgml.modern
+@:gml.struct
+#end
 class MetaEnum<T> extends MetaType<T> {
 	public var constructors:Array<String>;
 	public function new(id:Int, name:String, ?constructors:Array<String>) {
