@@ -766,8 +766,9 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfBinop(o = OpAssign | OpAssignOp(_), _.def => SfArrayAccess(a, i), v): {
 				switch (a.def) {
-					case SfInstField(_, f) | SfStaticField(_, f)
-					if (f.noRefWrite): printf(r, "%x[%x]", a, i);
+					case SfInstField(_, f) | SfStaticField(_, f) if (f.noRefWrite): {
+						printf(r, "%x[%x]", a, i);
+					};
 					default: printf(r, "%x[@%x]", a, i);
 				}
 				printSetOp(r, o, expr);
@@ -777,6 +778,25 @@ class SfGenerator extends SfGeneratorImpl {
 				switch (b.def) {
 					case SfConst(TInt(0)): printf(r, "(%x & $FFFFFFFF)", a);
 					default: printf(r, "((%x & $FFFFFFFF) >> %x)", a, b);
+				}
+			};
+			case SfBinop(o = OpAssign | OpAssignOp(_), a, b): { // a @ b
+				if (flags.isInline()) {
+					switch (b.unpack().def) {
+						case SfConst(TInt(1)): {
+							switch (o) {
+								case OpAssignOp(OpAdd): printf(r, "++");
+								case OpAssignOp(OpSub): printf(r, "--");
+								default: expr.error("Inline assignment");
+							}
+							r.addExpr(a, SfPrintFlags.Inline);
+						};
+						default: expr.error("Inline assignment");
+					}
+				} else {
+					r.addExpr(a, SfPrintFlags.Inline);
+					printSetOp(r, o, expr);
+					r.addExpr(b, SfPrintFlags.Inline);
 				}
 			};
 			case SfBinop(o, a, b): { // a @ b
