@@ -72,8 +72,8 @@ abstract Int64(__Int64) {
 	public static function divMod(dividend:Int64, divisor:Int64):Int64_DivMod {
 		if (divisor.raw == 0) throw "divide by zero";
 		var r:Int64_DivMod = {
-			quotient: untyped dividend.raw / divisor.raw,
-			modulus: dividend.raw % divisor.raw
+			quotient: SfTools.raw("(({0}) | 0)", dividend.raw / divisor.raw),
+			modulus:  SfTools.raw("(({0}) | 0)", dividend.raw % divisor.raw)
 		};
 		return r;
 	}
@@ -240,7 +240,7 @@ abstract Int64(__Int64) {
 }
 
 private typedef __Int64 = Dynamic;
-typedef Int64_DivMod = {
+@:nativeGen typedef Int64_DivMod = {
 	quotient:Int64,
 	modulus:Int64
 }
