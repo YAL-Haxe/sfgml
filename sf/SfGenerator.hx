@@ -134,7 +134,7 @@ class SfGenerator extends SfGeneratorImpl {
 		// generate class inits:
 		for (c in classList) if (!SfExprTools.isEmpty(c.init)) {
 			var len = init.length;
-			init.addExpr(c.init, false);
+			init.addExpr(c.init, SfPrintFlags.StatWrap);
 			if (init.length > len) {
 				init.addSemico();
 				init.addLine();
@@ -157,7 +157,7 @@ class SfGenerator extends SfGeneratorImpl {
 		//
 		inline function addMainExpr(b:SfBuffer):Void {
 			if (mainExpr != null) {
-				b.addExpr(mainExpr, false);
+				b.addExpr(mainExpr, SfPrintFlags.StatWrap);
 				b.addSemico();
 				b.addLine();
 			}
@@ -439,18 +439,19 @@ class SfGenerator extends SfGeneratorImpl {
 		return r;
 	}
 	
-	override public function printExpr(r:SfBuffer, expr:SfExpr, ?wrap:Bool):Void {
-		inline function addExpr(e:SfExpr, w:Bool) printExpr(r, e, w);
-		inline function addExprs(e:Array<SfExpr>) {
-			for (i in 0 ... e.length) {
-				if (i > 0) r.addComma();
-				addExpr(e[i], true);
+	override public function printExpr(r:SfBuffer, expr:SfExpr, flags:SfPrintFlags):Void {
+		if (flags == null) throw "Flags is null";
+		inline function addExprs(_exprs:Array<SfExpr>, _flags:SfPrintFlags) {
+			var _sep = false;
+			for (_expr in _exprs) {
+				if (_sep) r.addComma(); else _sep = true;
+				printExpr(r, _expr, _flags);
 			}
 		}
-		inline function addBlock(e:SfExpr) {
+		inline function addBlock(_stat:SfExpr) {
 			r.addBlockOpen();
 			r.addLine(1);
-			addExpr(e, false);
+			r.addExpr(_stat, SfPrintFlags.StatWrap);
 			r.addSemico();
 			r.addLine( -1);
 			r.addBlockClose();
@@ -493,7 +494,7 @@ class SfGenerator extends SfGeneratorImpl {
 						k = StringTools.fastCodeAt(_code, i + 1) - "0".code;
 						if (k >= 0 && k < 10) {
 							r.addSub(_code, l, i - l);
-							addExpr(_args[k], null);
+							r.addExpr(_args[k], SfPrintFlags.ExprWrap);
 							i += 2;
 							l = i + 1;
 						}
@@ -506,7 +507,7 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addChar("[".code);
 				for (i in 0 ... vals.length) {
 					if (i > 0) r.addComma();
-					r.addExpr(vals[i], true);
+					r.addExpr(vals[i], SfPrintFlags.ExprWrap);
 				}
 				r.addChar("]".code);
 			};
@@ -516,7 +517,7 @@ class SfGenerator extends SfGeneratorImpl {
 					for (i in 0 ... pairs.length) {
 						if (i > 0) r.addComma();
 						printf(r, "%s:`", pairs[i].name);
-						r.addExpr(pairs[i].expr, true);
+						r.addExpr(pairs[i].expr, SfPrintFlags.ExprWrap);
 					}
 					r.addChar("}".code);
 				} else {
@@ -538,7 +539,7 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addTypePath(t, "_".code);
 			};
 			case SfFunction(fn): {
-				if (wrap == false) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
+				if (flags.isStat()) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
 				printf(r, "function");
 				if (fn.name != null) printf(r, " %s", fn.name);
 				printf(r, "()`");
@@ -550,7 +551,7 @@ class SfGenerator extends SfGeneratorImpl {
 						flags |= SfArgVarsExt.ThisSelf;
 					}
 					SfArgVars.printExt(r, fn.expr, fn.args, flags);
-					r.addExpr(fn.expr, false);
+					r.addExpr(fn.expr, SfPrintFlags.StatWrap);
 					printf(r, "%(-\n)}");
 				} else printf(r, "{}");
 			};
@@ -737,7 +738,7 @@ class SfGenerator extends SfGeneratorImpl {
 							}
 							if (!z) {
 								printSetOp(r, o, expr);
-								r.addExpr(v, true);
+								r.addExpr(v, SfPrintFlags.ExprWrap);
 							}
 						}
 					};
@@ -746,7 +747,7 @@ class SfGenerator extends SfGeneratorImpl {
 						if (ct != null && ct.dotAccess) {
 							printf(r, "%x.%s", q, f);
 							printSetOp(r, o, expr);
-							r.addExpr(v, true);
+							r.addExpr(v, SfPrintFlags.ExprWrap);
 							z = false;
 						}
 					};
@@ -756,7 +757,7 @@ class SfGenerator extends SfGeneratorImpl {
 					if (sfConfig.modern) {
 						printf(r, "%x.%s", q, f);
 						printSetOp(r, o, expr);
-						r.addExpr(v, true);
+						r.addExpr(v, SfPrintFlags.ExprWrap);
 					} else {
 						expr.error("[SfGenerator:printExpr] Can't do dynamic field write on "
 							+ SfExprTools.dump(expr) + " type " + q.getType());
@@ -779,13 +780,13 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 			};
 			case SfBinop(o, a, b): { // a @ b
-				addExpr(a, true);
+				r.addExpr(a, flags);
 				printBinOp(r, o, expr);
-				addExpr(b, true);
+				r.addExpr(b, flags);
 			};
 			case SfUnop(o = OpIncrement | OpDecrement, _postFix, x): { // ++\--
 				z = (o == OpIncrement);
-				if (!wrap) {
+				if (flags.isStat()) {
 					if (sfConfig.avoidPostfixStatements) {
 						_postFix = false;
 					} else if (sfConfig.avoidPrefixStatements) {
@@ -808,13 +809,13 @@ class SfGenerator extends SfGeneratorImpl {
 							default: printf(r, "%x[@%x]", a, i);
 						}
 					};
-					default: r.addExpr(x, true);
+					default: r.addExpr(x, SfPrintFlags.Inline);
 				}
 				if (_postFix) r.addString(z ? "++" : "--");
 			};
 			case SfUnop(_op, _postFix, _expr): {
-				if (wrap) {
-					if (_postFix) addExpr(_expr, true);
+				if (flags.isInline()) {
+					if (_postFix) r.addExpr(_expr, SfPrintFlags.Inline);
 					switch (_op) {
 						case OpIncrement: r.addChar2("+".code, "+".code);
 						case OpDecrement: r.addChar2("-".code, "-".code);
@@ -822,7 +823,7 @@ class SfGenerator extends SfGeneratorImpl {
 						case OpNeg: r.addChar("-".code);
 						case OpNegBits: r.addChar("~".code);
 					};
-					if (!_postFix) addExpr(_expr, true);
+					if (!_postFix) r.addExpr(_expr, SfPrintFlags.Inline);
 				} else {
 					expr.error("Can't apply " + _op.getName() + " here.");
 				}
@@ -1001,7 +1002,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (callFlags >= 0) {
 					i = 0; while (i < n) {
 						if (sep) r.addComma(); else sep = true;
-						addExpr(_args[i], true);
+						r.addExpr(_args[i], SfPrintFlags.ExprWrap);
 						i += 1;
 					}
 					r.addParClose();
@@ -1014,7 +1015,7 @@ class SfGenerator extends SfGeneratorImpl {
 				n = w.length;
 				i = 0; while (i < n) {
 					if (i > 0) r.addComma();
-					addExpr(w[i], true);
+					r.addExpr(w[i], SfPrintFlags.ExprWrap);
 					i += 1;
 				}
 				r.addParClose();
@@ -1042,7 +1043,7 @@ class SfGenerator extends SfGeneratorImpl {
 					}
 				}
 				r.addParOpen();
-				addExprs(m);
+				addExprs(m, SfPrintFlags.ExprWrap);
 				r.addParClose();
 			};
 			//}
@@ -1053,18 +1054,18 @@ class SfGenerator extends SfGeneratorImpl {
 				if (z) printf(r, "`=`%x", x);
 			};
 			case SfBlock(_exprs): { // { ...exprs }
-				if (wrap == true) {
+				if (flags.isInline()) {
 					error(expr, "Inline block: " + expr.dump());
-				} else if (wrap == null) {
+				} else if (flags.needsWrap()) {
 					if (_exprs.length != 1) {
 						r.addBlockOpen();
 						if (_exprs.length > 0) {
 							r.addLine(1);
-							addExpr(expr, false);
+							r.addExpr(expr, SfPrintFlags.StatWrap);
 							r.addLine( -1);
 						} else r.addSep();
 						r.addBlockClose();
-					} else addExpr(_exprs[0], null);
+					} else r.addExpr(_exprs[0], SfPrintFlags.Stat);
 				} else {
 					n = _exprs.length;
 					i = 0; while (i < n) {
@@ -1092,7 +1093,7 @@ class SfGenerator extends SfGeneratorImpl {
 										default: break;
 									}
 								};
-								default: addExpr(x, false);
+								default: r.addExpr(x, SfPrintFlags.StatWrap);
 							}
 							sep = r.length > l;
 							if (sep) r.addSemico();
@@ -1102,7 +1103,7 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			//{ branching
 			case SfIf(c, a, z, b): { // if (c) a else b
-				if (wrap) {
+				if (flags.isInline()) {
 					if (sfConfig.ternary) {
 						if (z) {
 							printf(r, "(%x`?`%x`:`%x)", c.unpack(), a, b);
@@ -1135,7 +1136,7 @@ class SfGenerator extends SfGeneratorImpl {
 				printf(r, 'tracecall("- %z",`', r.addFieldPathAuto(currentField));
 				#end
 				if (z) {
-					r.addExpr(x, true);
+					r.addExpr(x, SfPrintFlags.ExprWrap);
 				} else r.addString("0");
 				#if (sfgml_tracecall)
 				printf(r, ")");
@@ -1149,10 +1150,10 @@ class SfGenerator extends SfGeneratorImpl {
 						catches[1].expr.error("Only 1-catch blocks are supported at this time.");
 					}
 					printf(r, "try`{%(+\n)");
-					r.addExpr(block, false);
+					r.addExpr(block, SfPrintFlags.StatWrap);
 					var c = catches[0];
 					printf(r, "%(-\n)}`catch`(%s)`{%(+\n)", c.v.name);
-					r.addExpr(c.expr, false);
+					r.addExpr(c.expr, SfPrintFlags.StatWrap);
 					printf(r, "%(-\n)}");
 				} else expr.error("try-catch is only supported in GMS>=2.3");
 			};
@@ -1170,8 +1171,8 @@ class SfGenerator extends SfGeneratorImpl {
 			//}
 			//{ other wrappers
 			case SfParenthesis(x): printf(r, "(%x)", x);
-			case SfCast(x, _): addExpr(x, wrap);
-			case SfMeta(m, x): addExpr(x, wrap);
+			case SfCast(x, _): r.addExpr(x, flags);
+			case SfMeta(m, x): r.addExpr(x, flags);
 			//}
 			default: error(expr, "Can't print " + expr.getName());
 		} // switch (expr)
@@ -1254,7 +1255,7 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addTypePathAuto(e);
 				r.addHintClose();
 				printBinOp(r, o, c);
-				r.addExpr(b, true);
+				r.addExpr(b, SfPrintFlags.ExprWrap);
 				var sfc = e.indexMap[i];
 				if (sfc != null) r.addHintString(e.indexMap[i].name);
 				printf(r, ")`");
@@ -1269,12 +1270,12 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfIf(_, _, _): small = false;
 			default: if (!x.isSmall()) small = false;
 		}
-		if (small) r.addExpr(t, null); else r.addBlockExpr(t);
+		if (small) r.addExpr(t, SfPrintFlags.Stat); else r.addBlockExpr(t);
 		if (x != null) {
 			printf(r, "; else ");
 			switch (x.def) {
 				case SfIf(c, t, z, x): printIf(r, c, t, x, false);
-				default: r.addExpr(x, null);
+				default: r.addExpr(x, SfPrintFlags.Stat);
 			}
 		}
 	}
@@ -1320,9 +1321,9 @@ class SfGenerator extends SfGeneratorImpl {
 					case SfConst(TInt(i)) if (em[i] != null): {
 						printf(r, "%(type_auto).%s", e, em[i].name);
 					};
-					default: r.addExpr(v, true);
+					default: r.addExpr(v, SfPrintFlags.ExprWrap);
 				} else {
-					r.addExpr(v, true);
+					r.addExpr(v, SfPrintFlags.ExprWrap);
 					if (e != null) switch (v.def) {
 						case SfConst(TInt(i)): {
 							i |= 0; // neko bug?
@@ -1339,7 +1340,7 @@ class SfGenerator extends SfGeneratorImpl {
 			z = x.isEmpty() ? null : !x.isSmall();
 			if (z != null) {
 				if (z) r.addLine(1); else r.addSep();
-				r.addExpr(x, false);
+				r.addExpr(x, SfPrintFlags.StatWrap);
 				r.addSemico();
 			}
 			if (!x.endsWithExits()) {
@@ -1354,7 +1355,7 @@ class SfGenerator extends SfGeneratorImpl {
 				printf(r, "\ndefault:");
 				z = !cd.isSmall();
 				if (z) r.addLine(1); else r.addSep();
-				r.addExpr(cd, false);
+				r.addExpr(cd, SfPrintFlags.StatWrap);
 				r.addSemico();
 				if (z) r.indent -= 1;
 			}

@@ -202,7 +202,7 @@ class SfGmxGen {
 				if (!sff.checkDocState(sfad)) continue;
 				if (sff.expr == null) continue;
 				var b1 = new SfBuffer(); b1.addFieldPathAuto(sff);
-				var b2 = new SfBuffer(); b2.addExpr(sff.expr, false);
+				var b2 = new SfBuffer(); b2.addExpr(sff.expr, SfPrintFlags.ExprWrap);
 				addMacro(b1.toString(), b2.toString(), true, sff.doc, sff);
 			}
 		}
