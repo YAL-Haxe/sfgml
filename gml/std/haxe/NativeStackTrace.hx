@@ -12,7 +12,8 @@ import haxe.CallStack.StackItem;
 @:noCompletion
 @:allow(haxe.Exception)
 class NativeStackTrace {
-	public static function toHaxe(s:Array<String>, skip:Int = 0):Array<StackItem> {
+	// if I let this be Array<String>, I get "module String does not define type String"
+	public static function toHaxe(s:Array<Any>, skip:Int = 0):Array<StackItem> {
 		if (!NativeType.isArray(s)) return [];
 		var n = s.length;
 		var r:Array<StackItem> = NativeArray.createEmpty(n);
