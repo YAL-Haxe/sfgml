@@ -161,6 +161,7 @@ class SfGmlArrayAccess extends SfOptImpl {
 	
 	override public function apply() {
 		var atype = sfGenerator.typeBoot;
+		ignoreHidden = true;
 		// change array.length to array_length_1d(array) because Haxe doesn't:
 		var lenid = sfConfig.modern ? "array_length" : "array_length_1d";
 		var flen = sfGenerator.typeArray.fieldMap.get("length");
