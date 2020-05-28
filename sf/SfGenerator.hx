@@ -24,6 +24,7 @@ import sf.type.expr.SfExpr;
 import SfTools.*;
 import sf.SfCore.*;
 using sf.type.expr.SfExprTools;
+using StringTools;
 
 /**
  * ...
@@ -487,21 +488,29 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfDynamic(_code, []): r.addString(_code);
 			case SfDynamic(_code, _args): {
 				if (_args.length >= 10) error(expr, "Too many arguments");
-				n = _code.length - 2;
-				l = 0; i = 0; while (i < n) {
-					if (StringTools.fastCodeAt(_code, i) == "{".code
-					&& StringTools.fastCodeAt(_code, i + 2) == "}".code) {
-						k = StringTools.fastCodeAt(_code, i + 1) - "0".code;
-						if (k >= 0 && k < 10) {
-							r.addSub(_code, l, i - l);
-							r.addExpr(_args[k], SfPrintFlags.ExprWrap);
-							i += 2;
-							l = i + 1;
-						}
+				var start = 0;
+				var cubAt = _code.indexOf("{");
+				while (cubAt >= 0) {
+					i = cubAt;
+					k = _code.fastCodeAt(++i);
+					var flags:SfPrintFlags = -1;
+					if (k == "x".code) {
+						flags = SfPrintFlags.ExprWrap;
+						k = _code.fastCodeAt(++i);
+					} else if (k == "s".code) {
+						flags = SfPrintFlags.Stat;
+						k = _code.fastCodeAt(++i);
 					}
-					i += 1;
+					if (k >= "0".code && k <= "9".code && _code.fastCodeAt(++i) == "}".code) {
+						if (flags == -1) flags = sf.gml.SfGmlTools.isInline(_code, cubAt)
+							? SfPrintFlags.ExprWrap : SfPrintFlags.StatWrap;
+						r.addSub(_code, start, cubAt - start);
+						r.addExpr(_args[k - "0".code], flags);
+						start = ++i;
+					}
+					cubAt = _code.indexOf("{", i);
 				}
-				r.addSub(_code, l, n + 2 - l);
+				r.addSub(_code, start);
 			};
 			case SfArrayDecl(vals): {
 				r.addChar("[".code);
