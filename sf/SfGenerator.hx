@@ -796,11 +796,11 @@ class SfGenerator extends SfGeneratorImpl {
 							switch (o) {
 								case OpAssignOp(OpAdd): printf(r, "++");
 								case OpAssignOp(OpSub): printf(r, "--");
-								default: expr.error("Inline assignment");
+								default: expr.error("Inline assignment: " + expr.def);
 							}
 							r.addExpr(a, SfPrintFlags.Inline);
 						};
-						default: expr.error("Inline assignment");
+						default: expr.error("Inline assignment: " + expr.def);
 					}
 				} else {
 					r.addExpr(a, SfPrintFlags.Inline);
@@ -901,7 +901,7 @@ class SfGenerator extends SfGeneratorImpl {
 					};
 					case SfConst(TSuper): { // super(...constructor args)
 						if (currentClass == null) {
-							expr.error("Trying to call super outside a class");
+							expr.error("Trying to call super outside of a class");
 						}
 						var superClass = this.currentClass.superClass;
 						printf(r, "%(field_auto)(this", superClass.constructor);
