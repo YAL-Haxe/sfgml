@@ -266,7 +266,7 @@ class SfClass extends SfClassImpl {
 				var arc = areq;
 				while (arc <= argc) {
 					var asep:Bool;
-					printf(r, "\ncase %d:`");
+					printf(r, "\ncase %d:`", arc);
 					if (isStruct) {
 						printf(r, "method(this, %s)(", ctr_path);
 						asep = false;
