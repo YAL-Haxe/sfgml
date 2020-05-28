@@ -904,13 +904,16 @@ class SfGenerator extends SfGeneratorImpl {
 							expr.error("Trying to call super outside of a class");
 						}
 						var superClass = this.currentClass.superClass;
-						printf(r, "%(field_auto)(this", superClass.constructor);
-						callFlags = 0; sep = true;
+						if (superClass.isStruct) {
+							printf(r, "method(this, %(field_auto))", superClass.constructor);
+						} else {
+							printf(r, "%(field_auto)(this", superClass.constructor);
+							callFlags = 0; sep = true;
+						}
 					};
 					case SfInstField(_.def => SfConst(TSuper), _field): { // super.method(...)
-						if (_field.parentClass.dotAccess) {
-							printf(r, "method(this, %(field_auto))(", _field);
-							callFlags = 0;
+						if (_field.parentClass.dotAccess && sfConfig.modern) {
+							printf(r, "method(this, %(field_auto))", _field);
 						} else {
 							printf(r, "%(field_auto)(this", _field);
 							callFlags = 0; sep = true;
