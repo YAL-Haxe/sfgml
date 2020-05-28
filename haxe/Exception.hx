@@ -1,8 +1,9 @@
 package haxe;
-import gml.internal.StdTypeImpl;
 
 /**
- * ...
+ * This looks like heck because this class is included before the macros run
+ * AND including anything from it causes that to be cursed as well
+ * https://github.com/HaxeFoundation/haxe/issues/9346
  * @author YellowAfterlife
  */
 #if (macro || display || eval)
@@ -101,15 +102,20 @@ class Exception {
 		return "???";
 	}
 	
-	#if sfgml.modern
+	#if (sfgml.modern || sfgml_version >= "2.3")
 	public static function thrown(value:Any):Any {
-		if (StdTypeImpl.is(value, Exception)) {
-			return (value:Exception).native;
-		} else {
-			var e = new ValueException(value);
-			untyped __feature__("haxe.Exception.get_stack", e.__shiftStack());
-			return e;
-		}
+		if (untyped __raw__("is_struct")(value)) do {
+			var c:Dynamic = untyped __raw__("variable_struct_get")(value, "__class__");
+			if (c == null) break;
+			if (c == Exception) return (value:Exception).native;
+			if (!untyped __raw__("variable_struct_exists")(value, "superClass")) break;
+			c = c.superClass;
+			while (untyped __raw__("is_struct")(c)) {
+				if (c == Exception) return (value:Exception).native;
+				c = c.superClass;
+			}
+		} while (false);
+		return new ValueException(value);
 	}
 	#else
 	public static inline function thrown(value:Any):Any {
