@@ -502,10 +502,13 @@ class SfGenerator extends SfGeneratorImpl {
 					} else if (k == "s".code) {
 						flags = SfPrintFlags.Stat;
 						k = _code.fastCodeAt(++i);
-					}
+					} else if (k == "b".code) {
+						flags = SfPrintFlags.StatWrap;
+						k = _code.fastCodeAt(++i);
+					} 
 					if (k >= "0".code && k <= "9".code && _code.fastCodeAt(++i) == "}".code) {
 						if (flags == -1) flags = sf.gml.SfGmlTools.isInline(_code, cubAt)
-							? SfPrintFlags.ExprWrap : SfPrintFlags.StatWrap;
+							? SfPrintFlags.ExprWrap : SfPrintFlags.Stat;
 						r.addSub(_code, start, cubAt - start);
 						r.addExpr(_args[k - "0".code], flags);
 						start = ++i;
