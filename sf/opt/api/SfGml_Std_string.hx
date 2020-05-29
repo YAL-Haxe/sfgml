@@ -89,32 +89,33 @@ class SfGml_Std_string extends SfOptImpl {
 	function checkToString(e:SfExpr, w:SfExprList, f:SfExprMatchIter) {
 		if (currentField != null && currentField == toString) return false;
 		switch (e.def) {
-			case SfStaticField({module:"Std"}, {name:"string"}): {
-				return true;
-			};
+			case SfStaticField(_, f) if (f == toString): return true;
 			default:
 		}
 		return e.matchIter(w, f);
 	}
 	
+	var pass = 0;
 	override public function apply():Void {
 		ignoreHidden = true;
-		cStd = cast sfGenerator.realMap["Std"];
-		toString = cStd != null ? cStd.staticMap["string"] : null;
-		//
-		forEachExpr(modifyExplicitStringCasts);
-		forEachExpr(insertExplicitStringCasts);
-		//
-		if (toString != null && !toStringUsed) do {
-			for (e in sfGenerator.enumList) {
-				if (e.needsToString()) {
-					toStringUsed = true;
-					break;
+		if (pass++ == 0) {
+			cStd = cast sfGenerator.realMap["Std"];
+			toString = cStd != null ? cStd.staticMap["string"] : null;
+			//
+			forEachExpr(modifyExplicitStringCasts);
+			forEachExpr(insertExplicitStringCasts);
+		} else {
+			if (toString != null && !toStringUsed) do {
+				for (e in sfGenerator.enumList) {
+					if (e.needsToString()) {
+						toStringUsed = true;
+						break;
+					}
 				}
-			}
-			if (toStringUsed) break;
-			if (matchEachExpr(checkToString)) break;
-			toString.isHidden = true;
-		} while (false);
+				if (toStringUsed) break;
+				if (matchEachExpr(checkToString)) break;
+				toString.isHidden = true;
+			} while (false);
+		}
 	}
 }

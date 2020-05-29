@@ -6,7 +6,13 @@ package haxe;
 	public var value(default,null):Any;
 
 	public function new(value:Any, ?previous:Exception, ?native:Any):Void {
-		super(Std.string(value), previous, native);
+		super(
+			#if (gml && !macro && !eval)
+			gml.Syntax.code("string")(value)
+			#else
+			Std.string(value)
+			#end
+		, previous, native);
 		this.value = value;
 	}
 

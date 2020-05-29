@@ -2,6 +2,7 @@ package sf.opt.api;
 
 import sf.SfCore.*;
 import sf.opt.SfOptImpl;
+import sf.type.SfClass;
 import sf.type.expr.SfExpr;
 import sf.type.expr.SfExprDef.*;
 using sf.type.expr.SfExprTools;
@@ -11,9 +12,13 @@ using sf.type.expr.SfExprTools;
  * @author YellowAfterlife
  */
 class SfGmlCullHelpers extends SfOptImpl {
-	function checkClass(realPath:String):Void {
+	/**
+	 * 
+	 * @return Class if it was culled, null otherwise
+	 */
+	function cullClass(realPath:String):SfClass {
 		var c = sfGenerator.findRealClass(realPath);
-		if (c == null) return;
+		if (c == null) return null;
 		function matcher(x:SfExpr, st, it) {
 			switch (x.def) {
 				case SfStaticField(c1, _) if (c1 == c): return true;
@@ -26,13 +31,20 @@ class SfGmlCullHelpers extends SfOptImpl {
 			if (currentClass != null && currentClass == c) return;
 			if (!used && matcher(x, null, matcher)) used = true;
 		});
-		if (!used) {
-			c.isHidden = true;
-		}
+		if (used) return null;
+		c.isHidden = true;
+		return c;
 	}
 	override public function apply():Void {
 		ignoreHidden = true;
-		checkClass("gml.internal.NativeFunctionInvoke");
-		checkClass("gml.internal.NativeConstructorInvoke");
+		cullClass("gml.internal.NativeFunctionInvoke");
+		cullClass("gml.internal.NativeConstructorInvoke");
+		//
+		var _Exception = cullClass("haxe.Exception");
+		if (_Exception != null) {
+			_Exception.hasTypeExpr = false;
+			var vx = sfGenerator.findRealClass("haxe.ValueException");
+			if (vx != null) vx.isHidden = true;
+		}
 	}
 }

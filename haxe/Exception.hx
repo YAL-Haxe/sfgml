@@ -1,4 +1,5 @@
 package haxe;
+import gml.Syntax;
 
 /**
  * This looks like heck because this class is included before the macros run
@@ -104,13 +105,13 @@ class Exception {
 	
 	#if (sfgml.modern || sfgml_version >= "2.3")
 	public static function thrown(value:Any):Any {
-		if (untyped __raw__("is_struct")(value)) do {
-			var c:Dynamic = untyped __raw__("variable_struct_get")(value, "__class__");
+		if (Syntax.code("is_struct")(value)) do {
+			var c:Dynamic = Syntax.code("variable_struct_get")(value, "__class__");
 			if (c == null) break;
 			if (c == Exception) return (value:Exception).native;
-			if (!untyped __raw__("variable_struct_exists")(value, "superClass")) break;
+			if (!Syntax.code("variable_struct_exists")(value, "superClass")) break;
 			c = c.superClass;
-			while (untyped __raw__("is_struct")(c)) {
+			while (Syntax.code("is_struct")(c)) {
 				if (c == Exception) return (value:Exception).native;
 				c = c.superClass;
 			}
@@ -119,7 +120,7 @@ class Exception {
 	}
 	#else
 	public static inline function thrown(value:Any):Any {
-		return Std.string(value);
+		return Syntax.code("string")(value);
 	}
 	#end
 	

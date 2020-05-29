@@ -60,11 +60,24 @@ class SfGml_ArrayImpl extends SfOptImpl {
 			return fd;
 		}
 		//
+		var ih = ignoreHidden;
+		ignoreHidden = false;
 		forEachExpr(function(x:SfExpr, st, it) {
 			switch (x.def) {
 				case SfNew(c, _, []) if (c == tArray): {
 					x.def = SfArrayDecl([]);
 				};
+				case SfInstField(inst, fd) if (fd == Array_length): {
+					x.def = SfCall(x.mod(SfIdent(array_length)), [inst]);
+				};
+				default:
+			}
+			x.iter(st, it);
+		});
+		ignoreHidden = ih;
+		//
+		forEachExpr(function(x:SfExpr, st, it) {
+			switch (x.def) {
 				case SfBinop(OpAssign, _.def => SfInstField(inst, fd), v) if (fd == Array_length): {
 					if (modern) {
 						x.def = SfCall(x.mod(SfIdent("array_resize")), [inst, v]);
@@ -75,9 +88,6 @@ class SfGml_ArrayImpl extends SfOptImpl {
 							x.def = SfCall(fdx, [inst, v]);
 						} else x.error("No ArrayImpl.resize?");
 					}
-				};
-				case SfInstField(inst, fd) if (fd == Array_length): {
-					x.def = SfCall(x.mod(SfIdent(array_length)), [inst]);
 				};
 				case SfCall(_.def => SfInstField(arr, fd), args) if (fd.parentClass == tArray): {
 					var fdi = fieldMap[fd.realName];

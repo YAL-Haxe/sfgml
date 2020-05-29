@@ -401,6 +401,7 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 	}
 	
+	private var opt_Std_String:SfGml_Std_string = null;
 	override function getPreproc():Array<SfOptImpl> {
 		var r = super.getPreproc();
 		var pre = [
@@ -413,7 +414,7 @@ class SfGenerator extends SfGeneratorImpl {
 			new SfOptBinop(),
 			new SfGmlObjectDecl(),
 			new SfGml_Type_enumHelpers(),
-			new SfGml_Std_string(),
+			(opt_Std_String = new SfGml_Std_string()),
 		]; pre.reverse(); for (o in pre) r.unshift(o);
 		r.moveToFront(SfOptInstanceOf);
 		r.insertAfter(SfOptFunc, new SfGmlLocalFunc());
@@ -436,6 +437,7 @@ class SfGenerator extends SfGeneratorImpl {
 		r.push(new SfGmlClosureField());
 		r.push(new SfGml_ArrayImpl(true));
 		r.push(new SfGmlCullHelpers());
+		r.push(opt_Std_String);
 		r.push(new SfGml_StdTypeImpl(true));
 		return r;
 	}

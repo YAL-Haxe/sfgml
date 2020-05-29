@@ -9,12 +9,28 @@ import sf.type.expr.*;
  */
 class SfGmlTypeInit {
 	public static function printMeta(init:SfBuffer):Void {
+		var mtModule = SfGmlType.mtModule;
+		var foundMTs = false;
+		for (t in sfGenerator.typeList) {
+			if (t.module == mtModule) continue;
+			if (!t.hasMetaType()) continue;
+			foundMTs = true;
+			break;
+		}
+		if (!foundMTs) {
+			// if there are no actual meta-types at all, hide gml.MetaType.*:
+			for (t in sfGenerator.typeList) {
+				if (t.module != mtModule) continue;
+				t.isHidden = true;
+			}
+			return;
+		}
+		//
 		var hasArrayDecl = sfConfig.hasArrayDecl;
 		var stdPack = sfConfig.stdPack;
 		var stdPre = stdPack != null ? stdPack + "_" : "";
 		//
 		if (sfConfig.hintFolds) printf(init, "//{ metatype\n");
-		var mtModule = SfGmlType.mtModule;
 		
 		#if !sfgml_legacy_meta
 		// we'll need markerValue defined before anything else
