@@ -306,9 +306,8 @@ import gml.ds.HashTable;
 	}
 	#end
 	
-	public static inline function allEnums<T>(e:Enum<T>):Array<T> {
-		throw "Type.allEnums is not supported.";
-		return null;
+	public static function allEnums<T>(e:Enum<T>):Array<T> {
+		return { gml.Lib.error("Type.allEnums is not supported.", true); null; }
 	}
 }
 

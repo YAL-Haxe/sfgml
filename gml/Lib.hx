@@ -10,6 +10,9 @@ extern class Lib {
 	/** Outputs the value to stdout and/or the IDE "dock" */
 	@:native("show_debug_message") static function trace(value:Dynamic):Void;
 	
+	/** Emits a native show_error without using Haxe exceptions */
+	@:expose("show_error") static function error(text:String, fatal:Bool):Void;
+	
 	/** A of milliseconds since sometime. Same as getTimer. */
 	@:native("current_time") static var currentTime:Int;
 	
