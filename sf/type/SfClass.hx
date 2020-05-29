@@ -323,6 +323,7 @@ class SfClass extends SfClassImpl {
 		var init:SfBuffer = null;
 		var modern = sfConfig.modern;
 		if (!isHidden) {
+			var g_ = modern ? "" : "g_";
 			var nativeGen = this.nativeGen;
 			sfGenerator.currentClass = this;
 			r = new SfBuffer();
@@ -348,7 +349,6 @@ class SfClass extends SfClassImpl {
 					};
 					var fbody = true;
 					if (f.isVar) { // dynamic fields get a variable
-						var g_ = modern ? "" : "g_";
 						printf(init, "globalvar %s%s;`", g_, path);
 						printf(init, "%s%s`=`", g_, path);
 						if (f.expr == null || f.expr.def.match(SfConst(TNull))) {
@@ -369,10 +369,7 @@ class SfClass extends SfClassImpl {
 				}; // static function
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
-					init.addString("globalvar ");
-					if (!this.isStd && !modern) init.addString("g_");
-					init.addFieldPathAuto(f);
-					init.addSemico();
+					printf(init, "globalvar %s%(field_auto);`", g_, f);
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
 						var fd = fx.getData();
@@ -385,8 +382,7 @@ class SfClass extends SfClassImpl {
 								if (modern) {
 									wx.push(fx.mod(SfReturn(true, w[wn - 1])));
 									fx = fx.mod(SfBlock(wx));
-									if (!this.isStd) init.addString("g_");
-									printf(init, "%(field_auto)`=`(function()`{", f);
+									printf(init, "%s%(field_auto)`=`(function()`{", g_, f);
 									printf(init, "%(+\n)%(stat);%(-\n)})();\n", fx);
 								} else {
 									wx.push(fx.mod(SfBinop(OpAssign, fsf, w[wn - 1])));
