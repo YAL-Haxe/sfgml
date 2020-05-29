@@ -369,7 +369,7 @@ class SfClass extends SfClassImpl {
 				}; // static function
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
-					printf(init, "globalvar %s%(field_auto);`", g_, f);
+					printf(init, "globalvar %s%(field_auto);", g_, f);
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
 						var fd = fx.getData();
