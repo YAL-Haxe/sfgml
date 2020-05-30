@@ -104,21 +104,32 @@ class Exception {
 	}
 	
 	#if (sfgml.modern || sfgml_version >= "2.3")
-	public static function thrown(value:Any):Any {
-		if (Syntax.code("is_struct")(value)) do {
+	private static function isNativeException(value:Any):Bool {
+		if (Syntax.code("is_struct")(value)) {
 			var c:Dynamic = Syntax.code("variable_struct_get")(value, "__class__");
-			if (c == null) break;
-			if (c == Exception) return (value:Exception).native;
-			if (!Syntax.code("variable_struct_exists")(value, "superClass")) break;
+			if (c == null) return false;
+			if (c == Exception) return true;
+			if (!Syntax.code("variable_struct_exists")(value, "superClass")) return false;
 			c = c.superClass;
 			while (Syntax.code("is_struct")(c)) {
-				if (c == Exception) return (value:Exception).native;
+				if (c == Exception) return true;
 				c = c.superClass;
 			}
-		} while (false);
+		}
+		return false;
+	}
+	public static function caught(value:Any):Any {
+		if (isNativeException(value)) return value;
+		return new ValueException(value);
+	}
+	public static function thrown(value:Any):Any {
+		if (isNativeException(value)) return (value:Exception).native;
 		return new ValueException(value);
 	}
 	#else
+	public static inline function caught(value:Any):Any {
+		return value;
+	}
 	public static inline function thrown(value:Any):Any {
 		return Syntax.code("string")(value);
 	}
