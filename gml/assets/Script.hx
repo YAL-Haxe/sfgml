@@ -8,7 +8,7 @@ import haxe.Constraints.Function;
  * @author YellowAfterlife
  */
 @:std @:native("script")
-extern class Script {
+extern class Script extends Asset {
 	public static inline var defValue:Script = cast -1;
 	
 	/** Returns whether the given script index exists */

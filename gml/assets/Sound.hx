@@ -10,7 +10,7 @@ package gml.assets;
 @:native("sound")
 #end
 @:final @:std
-extern class Sound {
+extern class Sound extends Asset {
 	static inline var defValue:Sound = cast -1;
 	
 	@:native("exists") static function isValid(q:Sound):Bool;
