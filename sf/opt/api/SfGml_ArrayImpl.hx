@@ -92,7 +92,6 @@ class SfGml_ArrayImpl extends SfOptImpl {
 				case SfCall(_.def => SfInstField(arr, fd), args) if (fd.parentClass == tArray): {
 					var fdi = fieldMap[fd.realName];
 					if (fdi != null) {
-						fieldMap.remove(fd.realName);
 						fdi.isHidden = false;
 						args.unshift(arr);
 						x.def = SfCall(x.mod(SfStaticField(tArrayImpl, fdi)), args);
