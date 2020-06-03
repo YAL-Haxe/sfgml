@@ -1,6 +1,7 @@
 package sf.type;
 import haxe.macro.Type;
 import sf.SfCore.*;
+import sf.type.SfArgument;
 import sf.type.SfClassField;
 import sf.type.SfTypeMap;
 
@@ -34,20 +35,43 @@ class SfBuffer extends SfBufferImpl {
 		addFieldPath(f, "_".code, "_".code);
 	}
 	
-	public function addTopLevelFuncOpen(name:String) {
+	public function addTopLevelFuncOpen(name:String, ?args:Array<SfArgument>) {
 		if (sfConfig.topLevelFuncs) {
-			printf(this, "\nfunction %s()`{%(+\n)", name);
+			printf(this, "\nfunction %s(", name);
+			if (args != null) addArguments(args);
+			printf(this, ")`{%(+\n)");
 		} else printf(this, "\n#define %s\n", name);
 	}
 	public function addTopLevelFuncOpenField(fd:SfField) {
 		if (sfConfig.topLevelFuncs) {
-			printf(this, "\nfunction %(field_auto)()`{%(+\n)", fd);
+			printf(this, "\nfunction %(field_auto)(", fd);
+			var thisArg = Std.is(fd, SfClassField) ? (cast fd:SfClassField).needsThisArg() : false;
+			addThisArguments(thisArg, fd.args);
+			printf(this, ")`{%(+\n)");
 		} else printf(this, "\n#define %(field_auto)\n", fd);
 	}
 	public function addTopLevelFuncClose() {
 		if (sfConfig.topLevelFuncs) {
 			printf(this, "%(-\n)}\n");
 		} else this.addLine();
+	}
+	override public function addArguments(args:Array<SfArgument>):Void {
+		var l = sfConfig.localPrefix;
+		for (i in 0 ... args.length) {
+			if (i > 0) addComma();
+			addString(l);
+			addString(args[i].v.name);
+		}
+	}
+	public function addThisArguments(thisArg:Bool, args:Array<SfArgument>):Void {
+		var l = sfConfig.localPrefix;
+		var sep = thisArg;
+		if (thisArg) addString("this");
+		for (i in 0 ... args.length) {
+			if (sep) addComma(); else sep = true;
+			addString(l);
+			addString(args[i].v.name);
+		}
 	}
 	
 	private static var docNameFieldsCache:SfTypeMap<String> = new SfTypeMap();

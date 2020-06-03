@@ -119,20 +119,15 @@ class SfEnum extends SfEnumImpl {
 				printf(out, "globalvar %(field_auto);`", ctr);
 				printf(out, "%(field_auto)`=`new mc_%(field_auto)();\n", ctr, ctr);
 			} else {
-				printf(out, "function %(field_auto)()`{%(+\n)", ctr);
+				out.addTopLevelFuncOpenField(ctr);
 				SfArgVars.doc(out, ctr);
 				printf(out, "var this`=`new mc_%(field_auto)();\n", ctr);
 				for (i in 0 ... ctr.args.length) {
 					var arg = ctr.args[i];
-					printf(out, "this.%s`=`", arg.v.name);
-					if (arg.value != null) {
-						printf(out, "argument_count`>`%d`?`argument[%d]`:`", i, i);
-						sfGenerator.printConst(out, arg.value, null);
-					} else printf(out, "argument[%d]", i);
-					printf(out, ";\n");
+					printf(out, "this.%s`=`%(var);\n", arg.v.name, arg.v.name);
 				}
 				printf(out, "return this");
-				printf(out, "%(-\n)};\n");
+				out.addTopLevelFuncClose();
 			}
 		}
 		//

@@ -152,7 +152,7 @@ class SfGenerator extends SfGeneratorImpl {
 			var now = Date.now().toString();
 			var ms = Std.int((Sys.time() - startTime) * 1000);
 			var ver = sfConfig.version;
-			printf(mixed, "// Generated at %s (%dms) for v%s+\n", now, ms, ver);
+			printf(mixed, "// Generated at %s (%(d)ms) for v%s+\n", now, ms, ver);
 		}
 		
 		//
@@ -368,6 +368,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case "base_type": b.addBaseTypeName(v);
 			case "hint": b.addHintString(v);
 			case "l_": b.addString(sfConfig.localPrefix); return false;
+			case "var": b.addString(sfConfig.localPrefix); b.addString(v);
 			default: return null;
 		}
 		return true;
@@ -556,7 +557,9 @@ class SfGenerator extends SfGeneratorImpl {
 				if (flags.isStat()) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
 				printf(r, "function");
 				if (fn.name != null) printf(r, " %s", fn.name);
-				printf(r, "()`");
+				printf(r, "(");
+				r.addArguments(fn.args);
+				printf(r, ")`");
 				if (!fn.expr.isEmpty()) {
 					printf(r, "{%(+\n)");
 					var flags:SfArgVarsExt = 0;
@@ -1159,9 +1162,9 @@ class SfGenerator extends SfGeneratorImpl {
 				printf(r, "for`(");
 				switch (q.def) {
 					case SfBlock([]): r.addString(";");
-					default: printf(r, "%(block);", q);
+					default: printf(r, "%sx;", q);
 				}
-				printf(r, "`%x;`%(block))`", c.unpack(), p);
+				printf(r, "`%x;`%sx)`", c.unpack(), p);
 				addBlock(x);
 			};
 			case SfSwitch(_expr, _cases, _, _default): {

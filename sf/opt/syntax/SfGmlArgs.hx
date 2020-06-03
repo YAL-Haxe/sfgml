@@ -80,6 +80,7 @@ class SfGmlArgs extends SfOptImpl {
 		}
 	}
 	override public function apply():Void {
+		if (sfConfig.modern) return; // we can just use named arguments now
 		forEachClassField(function(fd:SfClassField) {
 			switch (fd.kind) {
 				case FMethod(_): {};

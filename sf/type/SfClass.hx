@@ -59,6 +59,16 @@ class SfClass extends SfClassImpl {
 				default:
 			}
 		}
+		// if we do .field, we do not want them named same as built-in variables:
+		if (dotAccess) for (fd in instList) switch (fd.kind) {
+			case FVar(_, _): {
+				var s0 = fd.name;
+				var s1 = sfGenerator.getFieldName(s0);
+				if (s0 != s1) fd.name = s1;
+			};
+			default:
+		}
+		//
 		if (t.meta.has(":noRefWrite")) for (fd in fieldList) fd.noRefWrite = true;
 	}
 	
@@ -75,7 +85,7 @@ class SfClass extends SfClassImpl {
 		printf(r, 'tracecall("+ %(field_auto)");\n', f);
 		#end
 		var x = f.expr;
-		printf(r, "%;%(stat);", x);
+		printf(r, "%;%sw;", x);
 		#if (sfgml_tracecall)
 		if (!x.endsWithExits()) printf(r, '\ntracecall("- %(field_auto)",`0);', f);
 		#end
@@ -110,7 +120,7 @@ class SfClass extends SfClassImpl {
 		var sepNew = needsSeparateNewFunc();
 		if (sepNew) {
 			ctr.isInst = true; ctr.name = "new";
-			r.addTopLevelFuncOpen(ctr_path);
+			r.addTopLevelFuncOpen(ctr_path, ctr.args);
 			SfArgVars.doc(r, ctr);
 			SfArgVars.print(r, ctr);
 			printFieldExpr(r, ctr);
@@ -121,7 +131,9 @@ class SfClass extends SfClassImpl {
 		ctr.isInst = false;
 		var ctr_exposePath:String;
 		if (isStruct) {
-			printf(r, "\nfunction %(type_auto)()`constructor`{%(+\n)", this);
+			printf(r, "\nfunction %(type_auto)(", this);
+			r.addArguments(ctr.args);
+			printf(r, ")`constructor`{%(+\n)", this);
 			ctr_exposePath = ctr.exposePath;
 			ctr.exposePath = {
 				var b = new SfBuffer();
@@ -359,7 +371,7 @@ class SfClass extends SfClassImpl {
 					}
 					// function cc_yal_Some_field(...) { ... }
 					if (fbody) {
-						r.addTopLevelFuncOpen(path);
+						r.addTopLevelFuncOpenField(f);
 						SfArgVars.doc(r, f);
 						SfArgVars.print(r, f);
 						printFieldExpr(r, f);
@@ -383,17 +395,17 @@ class SfClass extends SfClassImpl {
 									wx.push(fx.mod(SfReturn(true, w[wn - 1])));
 									fx = fx.mod(SfBlock(wx));
 									printf(init, "%s%(field_auto)`=`(function()`{", g_, f);
-									printf(init, "%(+\n)%(stat);%(-\n)})();\n", fx);
+									printf(init, "%(+\n)%sw;%(-\n)})();\n", fx);
 								} else {
 									wx.push(fx.mod(SfBinop(OpAssign, fsf, w[wn - 1])));
 									fx = fx.mod(SfBlock(wx));
-									printf(init, "%(stat);\n", fx);
+									printf(init, "%sw;\n", fx);
 								}
 							};
 							default: {
 								init.addSep();
 								fx = fx.mod(SfBinop(OpAssign, fsf, fx));
-								printf(init, "%(stat);\n", fx);
+								printf(init, "%sw;\n", fx);
 							};
 						}
 					} else init.addLine();

@@ -33,26 +33,41 @@ class SfArgVars {
 				showThis = expr.countThis() > 0;
 			}
 		} else showThis = false;
+		
+		//
+		var lp = sfConfig.localPrefix;
+		if (sfConfig.modern) {
+			if (showThis && flags.has(SfArgVarsExt.ThisSelf)) {
+				printf(r, "var this`=`self;\n");
+			}
+			for (arg in args) {
+				var v = arg.value;
+				if (v == null || v == TNull) continue;
+				var s = arg.v.name;
+				printf(r, "if`(%(var)`==`undefined)`%(var)`=`%(const);\n", s, s, v);
+			}
+			return;
+		}
+		
 		//
 		var ropt:SfBuffer = null;
-		var lp = sfConfig.localPrefix;
-		if (showThis || showArgs) {
-			//
-			var found:Int = 0;
-			var arid:Int = 0;
-			if (showThis) {
-				if (flags.has(SfArgVarsExt.ThisSelf)) {
-					printf(r, "var this`=`self");
-					found += 1;
-				} else {
-					printf(r, "var this`=`argument[%d]", arid);
-					found += 1;
-					arid += 1;
-				}
-			} else if (checkThis) {
-				// "this" argument is not needed but we'll keep it in mind
+		var found:Int = 0;
+		var arid:Int = 0;
+		if (showThis) {
+			if (flags.has(SfArgVarsExt.ThisSelf)) {
+				printf(r, "var this`=`self");
+				found += 1;
+			} else {
+				printf(r, "var this`=`argument[%d]", arid);
+				found += 1;
 				arid += 1;
 			}
+		} else if (checkThis) {
+			// "this" argument is not needed but we'll keep it in mind
+			arid += 1;
+		}
+		//
+		if (showArgs) {
 			var ternary = sfConfig.ternary && !sfConfig.avoidTernaries;
 			i = -1; while (++i < argc) {
 				arg = args[i];
