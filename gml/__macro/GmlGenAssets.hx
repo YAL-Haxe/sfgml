@@ -34,7 +34,45 @@ class GmlGenAssets {
 		addAssets("object",     AssetType.AObject);
 		addAssets("room",       AssetType.ARoom);
 	}
-	static function indexYyp(path:String, pairs:Array<GmlGenAssetsPair>) {
+	/**
+		Parses and loads based on the project file format for GMS2.3+
+	**/
+	static function indexYypV2(path:String, pairs:Array<GmlGenAssetsPair>) {
+		var data = File.getContent(path);
+		var resourceIndex = data.indexOf('"resources": [') + '"resources": ['.length;
+		var resourceContents = data.substring(resourceIndex, data.indexOf("]", resourceIndex));
+		// assumed structure -> {"id":{"name":"....","path":"...",},...}, ...
+		var assets = resourceContents.split('{"id":{');
+		assets.shift();
+		//
+		for (assetObject in assets) {
+			// inverse regex of the below is (~/"((?!").)*"/g) - it captures everything between quotes
+			var meta = (~/[,{}:]/g).split(assetObject);
+			// expected order [name, name_val, path, path_val ...
+			var name = meta[1].substring(1, meta[1].length-1);
+			var objpath = meta[3].substring(1, meta[3].length-1);
+			inline function addAsset(type:AssetType) {
+				pairs.push({ name: name, type: type });
+			}
+			switch (objpath.substring(0, objpath.indexOf("/"))) {
+				case "sprites":   	addAsset(AssetType.ASprite);
+				case "sounds":    	addAsset(AssetType.ASound);
+				case "paths":     	addAsset(AssetType.APath);
+				case "fonts":     	addAsset(AssetType.AFont);
+				case "scripts":   	addAsset(AssetType.AScript);
+				case "shaders":   	addAsset(AssetType.AShader);
+				case "timelines": 	addAsset(AssetType.ATimeline);
+				case "objects":   	addAsset(AssetType.AObject);
+				case "rooms":     	addAsset(AssetType.ARoom);
+				// case "animcurves":  addAsset(AssetType.AAnimationCurves);
+				// case "sequences": 	addAsset(AssetType.ASequences);
+				// case "notes":  	  	addAsset(AssetType.ANote);
+				// case "tilesets":  	addAsset(AssetType.ATileset);
+				// case "extensions":  	addAsset(AssetType.ATileset);
+			}
+		}
+	}
+	static function indexYypV1(path:String, pairs:Array<GmlGenAssetsPair>) {
 		var yy = Json.parse(File.getContent(path));
 		var resources:Array<Dynamic> = yy.resources;
 		for (pair in resources) {
@@ -54,6 +92,13 @@ class GmlGenAssets {
 				case "GMRoom":     addAsset(AssetType.ARoom);
 			}
 		}
+	}
+	static function indexYyp(path:String, pairs:Array<GmlGenAssetsPair>) {
+#if (sfgml_version && sfgml_version >= "2.3")
+		indexYypV2(path, pairs);
+#else
+		indexYypV1(path, pairs);
+#end
 	}
 	public static macro function build(?path:String):Array<Field> {
 		if (path == null) path = GmlGenTools.projectPath();
