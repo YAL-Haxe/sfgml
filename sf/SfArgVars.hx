@@ -40,12 +40,17 @@ class SfArgVars {
 			if (showThis && flags.has(SfArgVarsExt.ThisSelf)) {
 				printf(r, "var this`=`self;\n");
 			}
+			var hasOpt = false;
 			for (arg in args) {
 				var v = arg.value;
-				if (v == null || v == TNull) continue;
+				if (v == null) continue;
+				hasOpt = true;
+				if (v == TNull) continue;
 				var s = arg.v.name;
 				printf(r, "if`(%(var)`==`undefined)`%(var)`=`%(const);\n", s, s, v);
 			}
+			// this is purely a countermeasure for IDE not shutting up about "extra arguments"
+			if (hasOpt) printf(r, "if`(false)`throw argument[%d];\n", args.length - 1);
 			return;
 		}
 		
@@ -106,6 +111,8 @@ class SfArgVars {
 			if (found > 0) printf(r, ";\n");
 			if (ropt != null) r.addBuffer(ropt);
 		}
+		if (found > 0) printf(r, ";\n");
+		if (ropt != null) r.addBuffer(ropt);
 	}
 	/**
 	 * Generates code to copy GML arguments into actual named local variables.
