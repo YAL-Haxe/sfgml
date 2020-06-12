@@ -35,17 +35,21 @@ class SfBuffer extends SfBufferImpl {
 		addFieldPath(f, "_".code, "_".code);
 	}
 	
-	public function addTopLevelFuncOpen(name:String, ?args:Array<SfArgument>) {
+	public function addTopLevelFuncOpen(name:String, ?args:Array<SfArgument>, thisArg:Bool = false) {
 		if (sfConfig.topLevelFuncs) {
 			printf(this, "\nfunction %s(", name);
-			if (args != null) addArguments(args);
+			if (args != null) {
+				addThisArguments(thisArg, args);
+			} else if (thisArg) addThisArguments(true, []);
 			printf(this, ")`{%(+\n)");
 		} else printf(this, "\n#define %s\n", name);
 	}
-	public function addTopLevelFuncOpenField(fd:SfField) {
+	public function addTopLevelFuncOpenField(fd:SfField, ?thisArg:Bool) {
 		if (sfConfig.topLevelFuncs) {
 			printf(this, "\nfunction %(field_auto)(", fd);
-			var thisArg = Std.is(fd, SfClassField) ? (cast fd:SfClassField).needsThisArg() : false;
+			if (thisArg == null) {
+				thisArg = Std.is(fd, SfClassField) ? (cast fd:SfClassField).needsThisArg() : false;
+			}
 			addThisArguments(thisArg, fd.args);
 			printf(this, ")`{%(+\n)");
 		} else printf(this, "\n#define %(field_auto)\n", fd);
