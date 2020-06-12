@@ -66,7 +66,7 @@ class SfGmlTypeInit {
 			if (modern) {
 				printf(init, "new %s%s", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			} else {
-				printf(init, "%s%s_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
+				printf(init, "%s%(s)_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			}
 			printf(init, '(%d,`"%(type_auto)"', t.index, t);
 			if (e != null) do {
