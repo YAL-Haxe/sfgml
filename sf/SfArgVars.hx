@@ -140,7 +140,26 @@ class SfArgVars {
 		var jsdoc:SfBuffer = null;
 		var ext = sfConfig.gmxMode;
 		var next = sfConfig.next;
+		var modern = sfConfig.modern;
 		var showDoc = f.checkDocState(f.parentType.docState);
+		//
+		var arg:SfArgument;
+		var args = f.args;
+		var argc = args.length;
+		// collapse trailing same-type optional arguments into "...:T":
+		var emStart = argc;
+		var emType:Type = null;
+		var emName:String = "";
+		// catch the actual rest-argument:
+		if (argc > 0) {
+			arg = args[argc - 1];
+			emType = sf.opt.syntax.SfGmlRest.getRestType(arg.v.type);
+			if (emType != null) {
+				emName = arg.v.name;
+				emStart = argc - 1;
+			}
+		}
+		//
 		if (flags & 3 == 3) {
 			if (sfConfig.noCodeDoc) return;
 			if (next && !ext && showDoc) {
@@ -173,22 +192,6 @@ class SfArgVars {
 				printf(jsdoc, "/// @param this:%s\n", f.parentType.name);
 			}
 			comma = true;
-		}
-		var arg:SfArgument;
-		var args = f.args;
-		var argc = args.length;
-		// collapse trailing same-type optional arguments into "...:T":
-		var emStart = argc;
-		var emType = null;
-		var emName:String = "";
-		// catch the actual rest-argument:
-		if (argc > 0) {
-			arg = args[argc - 1];
-			emType = sf.opt.syntax.SfGmlRest.getRestType(arg.v.type);
-			if (emType != null) {
-				emName = arg.v.name;
-				emStart = argc - 1;
-			}
 		}
 		// otherwise see if there are trailing optionals that are all the same:
 		if (emStart >= argc && argc >= 4) {
@@ -258,11 +261,11 @@ class SfArgVars {
 			//
 			if (jsdoc != null) {
 				jsdoc.addString("/// @param ");
-				//if (argTypes) printf(r2, "{%(base_type)} ", avt);
-				if (opt) jsdoc.addChar("?".code);
+				if (argTypes) printf(jsdoc, "{%(base_type)} ", avt);
+				if (opt) jsdoc.addChar("[".code);
 				jsdoc.addString(avn);
-				if (argTypes) printf(jsdoc, ":%(base_type)", avt);
 				if (def != null) printf(jsdoc, "=%(const)", def);
+				if (opt) jsdoc.addChar("]".code);
 				jsdoc.addLine();
 			}
 		}
