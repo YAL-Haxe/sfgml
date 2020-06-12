@@ -83,7 +83,7 @@ extern class Exception {
 	// @:noCompletion @:ifFeature("haxe.Exception.stack") private function __shiftStack():Void;
 }
 #else
-class Exception {
+@:std class Exception {
 	public var message:String;
 	
 	// Haxe:

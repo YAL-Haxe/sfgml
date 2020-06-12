@@ -1,5 +1,5 @@
 package haxe;
-@:coreApi class ValueException extends Exception {
+@:std @:coreApi class ValueException extends Exception {
 	/**
 		Thrown value.
 	**/
