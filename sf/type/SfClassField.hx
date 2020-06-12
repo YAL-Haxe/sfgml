@@ -17,6 +17,7 @@ class SfClassField extends SfClassFieldImpl {
 			default:
 		}
 	}
+	
 	public function getArgDoc(parState:Int):String {
 		if (checkDocState(parState)) {
 			var sfb = new SfBuffer();
@@ -24,15 +25,21 @@ class SfClassField extends SfClassFieldImpl {
 			return sfb.toString();
 		} else return null;
 	}
+	
 	/** Whether `this` prefix-argument should be included. */
 	public function needsThisArg():Bool {
 		if (isStructField) return false;
 		var fdc = parentClass;
 		if (fdc != null) {
-			if (this == fdc.constructor && fdc.needsSeparateNewFunc()) {
+			if (isInst && this == fdc.constructor && fdc.needsSeparateNewFunc()) {
 				return true;
 			}
 		}
 		return isInst;
+	}
+	
+	/** Whether GML `self` is used as `this` */
+	public inline function isSelfCall():Bool {
+		return (isInst || this == parentClass.constructor) && parentClass.isStruct;
 	}
 }

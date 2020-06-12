@@ -330,7 +330,13 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case TBool(b): if (b) r.addString("true"); else r.addString("false");
 			case TNull: r.addString("undefined");
-			case TThis: r.addString("this");
+			case TThis: {
+				switch (selfLevel) {
+					case 0: r.addString("self");
+					case 1: r.addString("other");
+					default: r.addString("this");
+				}
+			};
 			default: Context.error("Can't print " + value.getName(), pos);
 		}
 	}
@@ -443,6 +449,14 @@ class SfGenerator extends SfGeneratorImpl {
 		return r;
 	}
 	
+	/**
+	 * -1: always use `this` local variable
+	 * 0: `this` is `self`
+	 * 1: `this` is `other`
+	 * 2+: `this` is `this` local variable
+	 */
+	public var selfLevel:Int = -1;
+	
 	override public function printExpr(r:SfBuffer, expr:SfExpr, flags:SfPrintFlags):Void {
 		if (flags == null) throw "Flags is null";
 		inline function addExprs(_exprs:Array<SfExpr>, _flags:SfPrintFlags) {
@@ -491,6 +505,8 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfDynamic(_code, []): r.addString(_code);
 			case SfDynamic(_code, _args): {
 				if (_args.length >= 10) error(expr, "Too many arguments");
+				var incWith = selfLevel >= 0 && _code == SfGmlWith.withCode;
+				if (incWith) selfLevel++;
 				var start = 0;
 				var cubAt = _code.indexOf("{");
 				while (cubAt >= 0) {
@@ -517,6 +533,7 @@ class SfGenerator extends SfGeneratorImpl {
 					cubAt = _code.indexOf("{", i);
 				}
 				r.addSub(_code, start);
+				if (incWith) selfLevel--;
 			};
 			case SfArrayDecl(vals): {
 				r.addChar("[".code);
@@ -913,7 +930,7 @@ class SfGenerator extends SfGeneratorImpl {
 						}
 						var superClass = this.currentClass.superClass;
 						if (superClass.isStruct) {
-							printf(r, "method(this, %(field_auto))", superClass.constructor);
+							printf(r, "method(%const, %(field_auto))", TThis, superClass.constructor);
 						} else {
 							printf(r, "%(field_auto)(this", superClass.constructor);
 							callFlags = 0; sep = true;
@@ -921,7 +938,7 @@ class SfGenerator extends SfGeneratorImpl {
 					};
 					case SfInstField(_.def => SfConst(TSuper), _field): { // super.method(...)
 						if (_field.parentClass.dotAccess && sfConfig.modern) {
-							printf(r, "method(this, %(field_auto))", _field);
+							printf(r, "method(%const, %(field_auto))", TThis, _field);
 						} else {
 							printf(r, "%(field_auto)(this", _field);
 							callFlags = 0; sep = true;

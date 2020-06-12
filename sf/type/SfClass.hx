@@ -2,6 +2,7 @@ package sf.type;
 
 import haxe.macro.Type.ClassType;
 import sf.SfCore.*;
+import sf.opt.syntax.SfGmlWith;
 import sf.type.SfBuffer;
 import sf.type.SfClass;
 import sf.type.SfClassField;
@@ -85,7 +86,12 @@ class SfClass extends SfClassImpl {
 		printf(r, 'tracecall("+ %(field_auto)");\n', f);
 		#end
 		var x = f.expr;
+		
+		var oldSelfLevel = sfGenerator.selfLevel;
+		sfGenerator.selfLevel = f.isSelfCall() ? 0 : -1;
 		printf(r, "%;%sw;", x);
+		sfGenerator.selfLevel = oldSelfLevel;
+		
 		#if (sfgml_tracecall)
 		if (!x.endsWithExits()) printf(r, '\ntracecall("- %(field_auto)",`0);', f);
 		#end
@@ -120,7 +126,7 @@ class SfClass extends SfClassImpl {
 		var sepNew = needsSeparateNewFunc();
 		if (sepNew) {
 			ctr.isInst = true; ctr.name = "new";
-			r.addTopLevelFuncOpen(ctr_path, ctr.args);
+			r.addTopLevelFuncOpenField(ctr);
 			SfArgVars.doc(r, ctr);
 			SfArgVars.print(r, ctr);
 			printFieldExpr(r, ctr);
@@ -150,7 +156,7 @@ class SfClass extends SfClassImpl {
 		
 		// generate initalizer:
 		if (isStruct) {
-			printf(r, "var this`=`self;\n");
+			if (SfGmlWith.needsThisSelf(ctr.expr)) printf(r, "var this`=`self;\n");
 		} else if (objName != null) {
 			// it's instance-based
 			if (sfConfig.next) {
@@ -280,10 +286,10 @@ class SfClass extends SfClassImpl {
 					var asep:Bool;
 					printf(r, "\ncase %d:`", arc);
 					if (isStruct) {
-						printf(r, "method(this, %s)(", ctr_path);
+						printf(r, "method(self, %s)(", ctr_path);
 						asep = false;
 					} else {
-						printf(r, "%s(this", arc, ctr_path);
+						printf(r, "%s(this", ctr_path);
 						asep = true;
 					}
 					ai = 0;
@@ -301,7 +307,7 @@ class SfClass extends SfClassImpl {
 			} else {
 				var asep:Bool;
 				if (isStruct) {
-					printf(r, "method(this, %s)(", ctr_path);
+					printf(r, "method(self, %s)(", ctr_path);
 					asep = false;
 				} else {
 					printf(r, "%s(this", ctr_path);

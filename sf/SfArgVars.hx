@@ -8,6 +8,7 @@ import sf.type.SfVar;
 import SfTools.*;
 import sf.SfCore.*;
 import sf.type.expr.SfExpr;
+import sf.opt.syntax.SfGmlWith;
 using sf.type.expr.SfExprTools;
 
 class SfArgVars {
@@ -25,12 +26,12 @@ class SfArgVars {
 		var checkThis = flags.hasAny(SfArgVarsExt.ThisArg | SfArgVarsExt.ThisSelf);
 		var showThis:Bool;
 		if (checkThis) {
-			if (argc == 0 && flags.has(SfArgVarsExt.ThisArg)) {
-				// if it's the only argument, let it be
-				// - less confusing than warnings.
-				showThis = true;
+			if (flags.has(SfArgVarsExt.ThisSelf)) {
+				showThis = SfGmlWith.needsThisSelf(expr);
 			} else {
-				showThis = expr.countThis() > 0;
+				// leave `this` in if it's the only argument - else GM will be upset about us
+				// calling a function that takes no arguments.
+				showThis = argc == 0 || expr.countThis() > 0;
 			}
 		} else showThis = false;
 		
@@ -108,8 +109,6 @@ class SfArgVars {
 				}
 				arid += 1;
 			};
-			if (found > 0) printf(r, ";\n");
-			if (ropt != null) r.addBuffer(ropt);
 		}
 		if (found > 0) printf(r, ";\n");
 		if (ropt != null) r.addBuffer(ropt);
@@ -121,7 +120,7 @@ class SfArgVars {
 	 */
 	public static function print(r:SfBuffer, f:SfClassField) {
 		var flags:SfArgVarsExt = 0;
-		if (f.isInst && f.parentClass.isStruct) {
+		if (f.isSelfCall()) {
 			flags |= SfArgVarsExt.ThisSelf;
 		} else if (f.needsThisArg()) {
 			flags |= SfArgVarsExt.ThisArg;

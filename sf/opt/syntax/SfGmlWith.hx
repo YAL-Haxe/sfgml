@@ -15,6 +15,29 @@ import haxe.macro.Expr.Binop.*;
  */
 class SfGmlWith extends SfOptImpl {
 	public static inline var withCode = "with ({0}) {1}";
+	/**
+	 * Returns whether the expression (generally top-level of a function)
+	 * needs a `var this = self;` (read: if we have loops preventing us from just using self/other)
+	 */
+	public static function needsThisSelf(expr:SfExpr):Bool {
+		var withDepth = 0;
+		function check(x:SfExpr, st, it) {
+			switch (x.def) {
+				case SfConst(TThis): {
+					return withDepth > 1;
+				};
+				case SfDynamic(code, args) if (code == withCode): {
+					withDepth++;
+					var result = x.matchIter(st, it);
+					withDepth--;
+					return result;
+				};
+				default: return x.matchIter(st, it);
+			}
+		}
+		return check(expr, null, check);
+	}
+	
 	static function replaceWithIter(expr:SfExpr, local:SfVar, c:SfClass) {
 		var depth = 0;
 		var keep = false;
