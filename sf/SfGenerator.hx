@@ -556,7 +556,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfFunction(fn): {
 				if (flags.isStat()) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
 				printf(r, "function");
-				if (fn.name != null) printf(r, " %s", fn.name);
+				// if (fn.name != null) printf(r, " %s", fn.name); // assigns into self, very bad
 				printf(r, "(");
 				r.addArguments(fn.args);
 				printf(r, ")`");
