@@ -113,7 +113,7 @@ class SfClass extends SfClassImpl {
 		return children.length > 0 || meta.has(":gml.keep.new");
 	}
 	
-	private function printConstructor(r:SfBuffer, ctr:SfClassField):Void {
+	private function printConstructor(r:SfBuffer, ctr:SfClassField, ignoreFields:Map<String, Bool>):Void {
 		var ctr_isInst = ctr.isInst;
 		var ctr_name = ctr.name;
 		var ctr_path = {
@@ -220,6 +220,8 @@ class SfClass extends SfClassImpl {
 		if (isStruct) { // add prototype fields
 			var iterFound = new Map();
 			var iterClass = this;
+			var checkInsert = children.length == 0;
+			var iterLayer = 0;
 			while (iterClass != null) {
 				for (iterField in iterClass.instList) {
 					if (iterField.isHidden) continue;
@@ -229,13 +231,22 @@ class SfClass extends SfClassImpl {
 					//
 					printf(r, "static %s`=`", iterName);
 					if (iterField.isCallable) {
-						printf(r, "method(undefined,`%(field_auto))", iterField);
+						if (checkInsert) {
+							printf(r, "function(");
+							r.addThisArguments(false, iterField.args);
+							printf(r, ")`{%(+\n)");
+							SfArgVars.print(r, iterField);
+							printFieldExpr(r, iterField);
+							printf(r, "%(-\n)}");
+							ignoreFields[iterField.realName] = true;
+						} else printf(r, "method(undefined,`%(field_auto))", iterField);
 					} else {
 						printf(r, "undefined");
 					}
 					printf(r, ";\n");
 				}
 				iterClass = iterClass.superClass;
+				checkInsert = false;
 			}
 		}
 		else { // add dynamic functions
@@ -344,6 +355,7 @@ class SfClass extends SfClassImpl {
 		var r:SfBuffer = null;
 		var init:SfBuffer = null;
 		var modern = sfConfig.modern;
+		var ignoreFields = new Map<String, Bool>();
 		if (!isHidden) {
 			var g_ = modern ? "" : "g_";
 			var nativeGen = this.nativeGen;
@@ -424,11 +436,12 @@ class SfClass extends SfClassImpl {
 			// constructor:
 			var ctr = constructor;
 			if (ctr != null && !ctr.isHidden) {
-				printConstructor(r, ctr);
+				printConstructor(r, ctr, ignoreFields);
 			}; // constructor
 			
 			// instance functions:
 			for (fd in instList) if (!fd.isHidden && fd.isCallable && fd.expr != null) {
+				if (ignoreFields[fd.realName]) continue;
 				r.addTopLevelFuncOpenField(fd);
 				SfArgVars.doc(r, fd);
 				SfArgVars.print(r, fd);
