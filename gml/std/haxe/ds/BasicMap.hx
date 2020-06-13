@@ -23,6 +23,7 @@ class BasicMap<K, V> {
 	public function clear() {
 		var i = tableSize;
 		while (--i >= 0) pairs[i] = BasicMapPair.defValue;
+		size = 0;
 	}
 	
 	#if !sfgml.modern
@@ -127,6 +128,7 @@ class BasicMap<K, V> {
 		var next:Array<BasicMapPair<K, V>>;
 		next = NativeArray.create(nextSize, BasicMapPair.defValue);
 		tableSize = nextSize;
+		size = 0;
 		pairs = next;
 		for (i in 0 ... currSize) {
 			var item = curr[i];
