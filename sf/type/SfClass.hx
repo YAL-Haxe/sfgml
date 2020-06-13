@@ -227,13 +227,10 @@ class SfClass extends SfClassImpl {
 					if (iterFound.exists(iterName)) continue;
 					iterFound[iterName] = true;
 					//
-					printf(r, "static %s`=`", iterName);
 					if (iterField.isCallable) {
-						printf(r, "method(undefined,`%(field_auto))", iterField);
-					} else {
-						printf(r, "undefined");
-					}
-					printf(r, ";\n");
+						printf(r, "static %s`=`", iterName);
+						printf(r, "method(undefined,`%(field_auto));\n", iterField);
+					} 
 				}
 				iterClass = iterClass.superClass;
 			}
