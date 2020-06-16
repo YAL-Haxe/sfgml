@@ -42,4 +42,9 @@ class SfClassField extends SfClassFieldImpl {
 	public inline function isSelfCall():Bool {
 		return (isInst || this == parentClass.constructor) && parentClass.isStruct;
 	}
+	
+	/** Whether this field will have a function generated for method body */
+	public inline function needsFunction():Bool {
+		return !isHidden && isCallable && expr != null;
+	}
 }

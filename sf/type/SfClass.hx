@@ -230,7 +230,7 @@ class SfClass extends SfClassImpl {
 					iterFound[iterName] = true;
 					//
 					printf(r, "static %s`=`", iterName);
-					if (iterField.isCallable) {
+					if (iterField.needsFunction()) {
 						if (checkInsert) {
 							printf(r, "function(");
 							r.addThisArguments(false, iterField.args);
@@ -440,7 +440,7 @@ class SfClass extends SfClassImpl {
 			}; // constructor
 			
 			// instance functions:
-			for (fd in instList) if (!fd.isHidden && fd.isCallable && fd.expr != null) {
+			for (fd in instList) if (fd.needsFunction()) {
 				if (ignoreFields[fd.realName]) continue;
 				r.addTopLevelFuncOpenField(fd);
 				SfArgVars.doc(r, fd);
