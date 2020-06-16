@@ -75,17 +75,14 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		// Extension generation (which will execute printTo for actual extension path):
 		if (StringTools.endsWith(path.toLowerCase(), ".extension.gmx")) {
-			sfConfig.gmxMode = true;
-			sfConfig.update();
 			SfGmxGen.run(path);
 			return;
 		}
 		if (StringTools.endsWith(path.toLowerCase(), ".yy")) {
-			sfConfig.next = true;
-			sfConfig.gmxMode = true;
-			sfConfig.update();
-			SfYyGen.run(path);
-			return;
+			if (sfConfig.gmxMode) {
+				SfYyGen.run(path);
+				return;
+			} else path = Path.withExtension(path, "gml");
 		}
 		//
 		var next = sfConfig.next;
@@ -181,28 +178,6 @@ class SfGenerator extends SfGeneratorImpl {
 			mixedStr = StringTools.ltrim(mixedStr);
 		}
 		sys.io.File.saveContent(path, mixedStr);
-	}
-	
-	override public function compile(apiTypes:Array<haxe.macro.Type>, apiMain:Null<TypedExpr>, outputPath:String) {
-		//
-		var op = outputPath;
-		inline function extLq(path:String):String {
-			return Path.extension(path).toLowerCase();
-		}
-		if (extLq(op) == "_") op = Path.withoutExtension(op);
-		switch (extLq(op)) {
-			case "gmx" if (extLq(Path.withoutExtension(op)) == "extension"): {
-				sfConfig.gmxMode = true;
-				sfConfig.update();
-			};
-			case "yy": {
-				sfConfig.next = true;
-				sfConfig.gmxMode = true;
-				sfConfig.update();
-			};
-		}
-		//
-		super.compile(apiTypes, apiMain, outputPath);
 	}
 	
 	private static var identRx:EReg = ~/[A-Za-z_]/g;
@@ -571,23 +546,27 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addTypePath(t, "_".code);
 			};
 			case SfFunction(fn): {
-				if (flags.isStat()) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
-				printf(r, "function");
-				// if (fn.name != null) printf(r, " %s", fn.name); // assigns into self, very bad
-				printf(r, "(");
-				r.addArguments(fn.args);
-				printf(r, ")`");
-				if (!fn.expr.isEmpty()) {
-					printf(r, "{%(+\n)");
-					var flags:SfArgVarsExt = 0;
-					var cf = currentField;
-					if (cf != null && cf.isInst && cf.isStructField) {
-						flags |= SfArgVarsExt.ThisSelf;
-					}
-					SfArgVars.printExt(r, fn.expr, fn.args, flags);
-					r.addExpr(fn.expr, SfPrintFlags.StatWrap);
-					printf(r, "%(-\n)}");
-				} else printf(r, "{}");
+				if (sfConfig.modern) {
+					if (flags.isStat()) printf(r, "var %s%s`=`", sfConfig.localPrefix, fn.name);
+					printf(r, "function");
+					// if (fn.name != null) printf(r, " %s", fn.name); // assigns into self, very bad
+					printf(r, "(");
+					r.addArguments(fn.args);
+					printf(r, ")`");
+					if (!fn.expr.isEmpty()) {
+						printf(r, "{%(+\n)");
+						var flags:SfArgVarsExt = 0;
+						var cf = currentField;
+						if (cf != null && cf.isInst && cf.isStructField) {
+							flags |= SfArgVarsExt.ThisSelf;
+						}
+						SfArgVars.printExt(r, fn.expr, fn.args, flags);
+						r.addExpr(fn.expr, SfPrintFlags.StatWrap);
+						printf(r, "%(-\n)}");
+					} else printf(r, "{}");
+				} else {
+					expr.error("Can't print function literals pre-2.3");
+				}
 			};
 			//}
 			

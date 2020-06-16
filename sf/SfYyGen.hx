@@ -37,10 +37,19 @@ class SfYyGen {
 		trace(text);
 		#end
 	}
-	public static function run(path:String) {
+	static var getText_path:String = null;
+	static var getText_text:String = null;
+	public static function getText(path:String) {
+		if (path == getText_path && getText_text != null) return getText_text;
 		var path_in = path;
 		if (!FileSystem.exists(path) && FileSystem.exists(path + ".base")) path_in += ".base";
-		var json:String = File.getContent(path_in);
+		var text:String = File.getContent(path_in);
+		getText_path = path;
+		getText_text = text;
+		return text;
+	}
+	public static function run(path:String) {
+		var json = getText(path);
 		// GMS2 uses non-spec int64s in extensions JSON
 		json = ~/("(?:copyToTargets|supportedTargets)":\s*)(\d{12,32})/g.replace(json, '$1"$2"');
 		//

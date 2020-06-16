@@ -46,7 +46,7 @@ class SfConfig extends SfConfigImpl {
 	public var noCodeDoc = bool("sfgml-no-code-doc", false);
 	
 	/** Whether compiled to an extension (can output macros) */
-	public var gmxMode = false;
+	public var gmxMode = bool("sfgml-extension");
 	
 	/** Whether to use GMS2-specific syntax */
 	public var next:Bool = bool("sfgml-next");
@@ -135,6 +135,7 @@ class SfConfig extends SfConfigImpl {
 		ternary = d.ternary;
 		copyset = d.copyset;
 		avoidPostfixStatements = compare(d.version, "2.2.3") < 0;
+		//
 		var v23 = compare(d.version, "2.3") >= 0;
 		avoidPrefixStatements = v23;
 		modern = v23;
@@ -142,7 +143,19 @@ class SfConfig extends SfConfigImpl {
 		hasFunctionLiterals = v23;
 		hasChainedAccessors = v23;
 		topLevelFuncs = v23 && !gmxMode;
+		//
+		#if (sf_debug_config)
+		var fields = Reflect.fields(this);
+		fields.sort((a, b) -> a < b ? -1 : 1);
+		for (f in fields) {
+			var v = Reflect.field(this, f);
+			if (Std.is(v, Bool) || v == null) {
+				trace(f + ": " + v);
+			}
+		}
+		#end
 	}
+	
 	static var findVersion_1:SfGmlVersion = null;
 	static function findVersion():SfGmlVersion {
 		var d = findVersion_1;
@@ -153,17 +166,36 @@ class SfConfig extends SfConfigImpl {
 		//
 		var path = Compiler.getOutput();
 		if (Path.extension(path) == "_") path = Path.withoutExtension(path);
-		var ext:Bool;
+		//
+		var isExtension:Bool;
 		switch (Path.extension(path).toLowerCase()) {
-			case "gmx": ext =  true; next = false;
-			case "yy":  ext =  true; next = true;
-			default:    ext = false;
+			case "gmx": {
+				isExtension = true;
+				next = false;
+				if (v == null) v = defVersion1;
+			};
+			case "yy": {
+				var yy = SfYyGen.getText(path);
+				next = true;
+				if (yy.indexOf('"resourceType": "GMScript"') >= 0) { // 2.3 script
+					isExtension = false;
+					modern = true;
+					if (v == null) v = "2.3";
+				} // todo: 2.3 extension... when constructors in extensions are allowed
+				else {
+					isExtension = true;
+					if (v == null) v = "2.2.5";
+				}
+			};
+			default: {
+				isExtension = false;
+			};
 		}
 		//
 		if (next == null && v != null) next = compare(v, "2") >= 0;
 		if (modern == null && v != null) modern = compare(v, "2.3") >= 0;
 		//
-		return { version: v, next: next, extension: ext, modern: modern };
+		return { version: v, next: next, extension: isExtension, modern: modern };
 	}
 	static function findData(?vd:SfGmlVersion):SfGmlFeatures {
 		if (vd == null) vd = findVersion();
