@@ -176,7 +176,11 @@ class SfGmlLocalFunc extends SfOptImpl {
 		}
 	}
 	override public function apply() {
-		if (sfConfig.hasFunctionLiterals) {
+		var verifyOnly = sfConfig.hasFunctionLiterals;
+		#if sfgml_keep_local_functions
+		verifyOnly = false;
+		#end
+		if (verifyOnly) {
 			forEachExpr(verifyOuter);
 		} else {
 			forEachExpr(proc, []);
