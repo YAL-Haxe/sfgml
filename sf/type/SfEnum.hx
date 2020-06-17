@@ -42,7 +42,7 @@ class SfEnum extends SfEnumImpl {
 	/** Will this enum have a GML enum to go along with it? */
 	public function hasNativeEnum():Bool {
 		if (sfConfig.gmxMode) return false;
-		return nativeGen || docState > 0;
+		return nativeGen;
 	}
 	
 	public function isPureArray():Bool {
@@ -261,6 +261,13 @@ class SfEnum extends SfEnumImpl {
 	}
 	override public function printTo(outb:SfBuffer, initb:SfBuffer):Void {
 		if (isHidden) return;
+		//
+		if (isFake && docState >= 0 && !sfConfig.gmxMode && !hasNativeEnum()) {
+			for (ctr in ctrList) {
+				if (!ctr.checkDocState(docState)) continue;
+				printf(sfGenerator.declBuffer, "#macro %field_auto %d\n", ctr, ctr.index);
+			}
+		}
 		//
 		if (isStruct) {
 			printStruct(outb, initb);
