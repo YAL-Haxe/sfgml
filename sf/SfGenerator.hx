@@ -319,15 +319,15 @@ class SfGenerator extends SfGeneratorImpl {
 	private static var makeReserved_kw = SfGmlBuiltin.keywords.split(" ");
 	private static var makeReserved_vars = SfGmlBuiltin.vars.split(" ");
 	private static var makeReserved_fns = SfGmlBuiltin.functions.split(" ");
-	private static function makeReserved(pre:String):Map<String, String> {
+	private static function makeReserved(pre:String, isInst:Bool):Map<String, String> {
 		var out = new Map();
 		for (s in makeReserved_kw) out[s] = pre + s;
-		for (s in makeReserved_vars) out[s] = pre + s;
+		if (!isInst) for (s in makeReserved_vars) out[s] = pre + s;
 		for (s in makeReserved_fns) out[s] = pre + s;
 		return out;
 	}
 	
-	private static var getVarName_map:Map<String, String> = makeReserved("l_");
+	private static var getVarName_map:Map<String, String> = makeReserved("l_", false);
 	override public function getVarName(name:String) {
 		if (sfConfig.localPrefix == "") {
 			var r = getVarName_map[name];
@@ -335,7 +335,7 @@ class SfGenerator extends SfGeneratorImpl {
 		} else return name;
 	}
 	
-	private static var getFieldName_map:Map<String, String> = makeReserved("i_");
+	private static var getFieldName_map:Map<String, String> = makeReserved("i_", true);
 	public function getFieldName(name:String) {
 		var r = getFieldName_map[name];
 		return r != null ? r : name;
