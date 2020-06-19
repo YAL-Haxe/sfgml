@@ -31,7 +31,10 @@ class Std {
 	extern public static inline function int(float:Float):Int {
 		return untyped (float | 0);
 	}
-	
+
+	#if sfgml.modern
+	@:native("stringify")
+	#end
 	@:keep public static function string(value:Dynamic):String {
 		if (value == null) return "null";
 		if (NativeType.isString(value)) return value;

@@ -100,7 +100,7 @@ class SfGml_Std_string extends SfOptImpl {
 		ignoreHidden = true;
 		if (pass++ == 0) {
 			cStd = cast sfGenerator.realMap["Std"];
-			toString = cStd != null ? cStd.staticMap["string"] : null;
+			toString = cStd != null ? cStd.realMap["string"] : null;
 			//
 			forEachExpr(modifyExplicitStringCasts);
 			forEachExpr(insertExplicitStringCasts);
