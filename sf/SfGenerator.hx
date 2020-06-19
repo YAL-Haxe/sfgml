@@ -480,8 +480,8 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfDynamic(_code, []): r.addString(_code);
 			case SfDynamic(_code, _args): {
 				if (_args.length >= 10) error(expr, "Too many arguments");
-				var incWith = selfLevel >= 0 && _code == SfGmlWith.withCode;
-				if (incWith) selfLevel++;
+				var modWith = _code == SfGmlWith.withCode;
+				if (modWith) if (selfLevel >= 0) selfLevel++; else selfLevel--;
 				var start = 0;
 				var cubAt = _code.indexOf("{");
 				while (cubAt >= 0) {
@@ -508,7 +508,7 @@ class SfGenerator extends SfGeneratorImpl {
 					cubAt = _code.indexOf("{", i);
 				}
 				r.addSub(_code, start);
-				if (incWith) selfLevel--;
+				if (modWith) if (selfLevel >= 0) selfLevel--; else selfLevel++;
 			};
 			case SfArrayDecl(vals): {
 				r.addChar("[".code);
@@ -607,7 +607,19 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfStaticField(c, f): {
 				if (c.dotStatic) {
-					printf(r, "%(type_auto).%s", c, f.name);
+					if (currentClass == c
+						&& currentField != null
+						&& currentField.needsMethodClosure()
+					) {
+						switch (selfLevel) {
+							case -1: r.addString("self");
+							case -2: r.addString("other");
+							default: r.addTypePathAuto(c);
+						}
+						printf(r, ".%s", f.name);
+					} else {
+						printf(r, "%(type_auto).%s", c, f.name);
+					}
 				} else if (f.isVar && !c.isStd) {
 					if (!sfConfig.modern) r.addString("g_");
 					r.addFieldPathAuto(f);

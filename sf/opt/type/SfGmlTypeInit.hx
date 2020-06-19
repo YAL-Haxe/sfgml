@@ -87,10 +87,6 @@ class SfGmlTypeInit {
 					printf(init, ")");
 				}
 			} while (false);
-			else if (c != null) {
-				var c:SfClass = cast t;
-				if (c.constructor != null && c.isStruct) printf(init, ",`%(type_auto)", t);
-			}
 			printf(init, ");\n");
 			//
 			if (modern && c != null && c.superClass != null && c.module != SfGmlType.mtModule) {

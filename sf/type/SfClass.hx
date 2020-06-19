@@ -27,15 +27,6 @@ class SfClass extends SfClassImpl {
 	/** If this is based on an object instance, indicates object to create */
 	public var objName:String = null;
 	
-	/**
-	 * Whether dotAccess should apply to static fields.
-	 * As of 2.3, sfgml does not make use of this for generated code
-	 * (since flat_paths are preferred for auto-completion),
-	 * but this could come in handy for interfacing with extern code
-	 * that does store functions in global structs.
-	 */
-	public var dotStatic:Bool = false;
-	
 	public function new(t:ClassType) {
 		super(t);
 		isStd = t.meta.has(":std");
@@ -61,13 +52,16 @@ class SfClass extends SfClassImpl {
 			}
 		}
 		// if we do .field, we do not want them named same as built-in variables:
-		if (dotAccess) for (fd in instList) switch (fd.kind) {
-			case FVar(_, _): {
-				var s0 = fd.name;
-				var s1 = sfGenerator.getFieldName(s0);
-				if (s0 != s1) fd.name = s1;
-			};
-			default:
+		if (dotAccess) for (fd in instList) {
+			var s0 = fd.name;
+			var s1 = sfGenerator.getFieldName(s0);
+			if (s0 != s1) fd.name = s1;
+		}
+		// ditto for statics if we dot .static:
+		if (dotStatic) for (fd in staticList) {
+			var s0 = fd.name;
+			var s1 = sfGenerator.getFieldName(s0);
+			if (s0 != s1) fd.name = s1;
 		}
 		//
 		if (t.meta.has(":noRefWrite")) for (fd in fieldList) fd.noRefWrite = true;
@@ -137,7 +131,12 @@ class SfClass extends SfClassImpl {
 		ctr.isInst = false;
 		var ctr_exposePath:String;
 		if (isStruct) {
-			printf(r, "\nfunction %(type_auto)(", this);
+			if (dotStatic) {
+				printf(r, "\nglobalvar %type_auto;", this);
+				printf(r, "`%type_auto = method(undefined,`function(", this);
+			} else {
+				printf(r, "\nfunction %(type_auto)(", this);
+			}
 			r.addArguments(ctr.args);
 			printf(r, ")`constructor`{%(+\n)", this);
 			ctr_exposePath = ctr.exposePath;
@@ -157,8 +156,8 @@ class SfClass extends SfClassImpl {
 		// generate initalizer:
 		if (isStruct) {
 			if (SfGmlWith.needsThisSelf(ctr.expr)) printf(r, "var this`=`self;\n");
-		} else if (objName != null) {
-			// it's instance-based
+		}
+		else if (objName != null) { // it's instance-based
 			if (sfConfig.next) {
 				printf(r, "var this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
 			} else {
@@ -346,7 +345,13 @@ class SfClass extends SfClassImpl {
 		} else {
 			printf(r, "return this;");
 		}
-		r.addTopLevelFuncClose();
+		r.addTopLevelFuncCloseField(ctr, dotStatic);
+		if (isStruct && !nativeGen) {
+			var mtc = sfGenerator.findRealClassField("gml.MetaClass", "constructor");
+			if (mtc != null) {
+				printf(r, "mt_%type_auto.%s`=`%type_auto;\n", this, mtc.name, this);
+			}
+		}
 		ctr.isInst = ctr_isInst; ctr.name = ctr_name;
 	}
 	
@@ -363,7 +368,7 @@ class SfClass extends SfClassImpl {
 			r = new SfBuffer();
 			init = new SfBuffer();
 			// hint-enum:
-			if (docState > 0 && !sfConfig.gmxMode) {
+			if (docState > 0 && !dotAccess && !sfConfig.gmxMode) {
 				var fb = new SfBuffer();
 				var fn = 0;
 				for (f in instList) if (f.index >= 0) {
@@ -373,6 +378,19 @@ class SfClass extends SfClassImpl {
 				}
 				if (fn > 0) printf(init, "enum %(type_auto)`{`%s`};\n", this, fb.toString());
 			}
+			
+			// constructor:
+			var ctr = constructor;
+			if (ctr != null && !ctr.isHidden) {
+				printConstructor(r, ctr, ignoreFields);
+			} else if (dotStatic) {
+				var hasStatics = false;
+				for (f in staticList) {
+					if (!f.isHidden) { hasStatics = true; break; }
+				}
+				if (hasStatics) printf(r, "globalvar %type_auto;`%type_auto`=`{};\n", this, this);
+			}
+			
 			// static fields:
 			for (f in staticList) if (!f.isHidden) switch (f.kind) {
 				case FMethod(_): { // static function
@@ -397,13 +415,13 @@ class SfClass extends SfClassImpl {
 						SfArgVars.doc(r, f);
 						SfArgVars.print(r, f);
 						printFieldExpr(r, f);
-						r.addTopLevelFuncClose();
+						r.addTopLevelFuncCloseField(f);
 					}
 					//
 				}; // static function
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
-					printf(init, "globalvar %s%(field_auto);", g_, f);
+					if (!dotStatic) printf(init, "globalvar %s%(field_auto);", g_, f);
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
 						var fd = fx.getData();
@@ -433,11 +451,6 @@ class SfClass extends SfClassImpl {
 					} else init.addLine();
 				};
 			}
-			// constructor:
-			var ctr = constructor;
-			if (ctr != null && !ctr.isHidden) {
-				printConstructor(r, ctr, ignoreFields);
-			}; // constructor
 			
 			// instance functions:
 			for (fd in instList) if (fd.needsFunction()) {

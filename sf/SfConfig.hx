@@ -99,6 +99,9 @@ class SfConfig extends SfConfigImpl {
 	/** >=2.3 */
 	public var modern:Bool;
 	
+	/** Whether we want Class.static instead of slightly faster Class_static */
+	public var dotStatic:Bool;
+	
 	/** Whether to use function(){} at top-level */
 	public var topLevelFuncs:Bool;
 	
@@ -139,6 +142,7 @@ class SfConfig extends SfConfigImpl {
 		var v23 = compare(d.version, "2.3") >= 0;
 		avoidPrefixStatements = v23;
 		modern = v23;
+		dotStatic = bool("sfgml-dot-static", v23);
 		hasTryCatch = v23;
 		hasFunctionLiterals = v23;
 		hasChainedAccessors = v23;

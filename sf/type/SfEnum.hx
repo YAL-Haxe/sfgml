@@ -130,7 +130,7 @@ class SfEnum extends SfEnumImpl {
 				}
 				if (hasOpt) printf(out, "if`(false)`throw argument[%d];\n", ctr.args.length - 1);
 				printf(out, "return this");
-				out.addTopLevelFuncClose();
+				out.addTopLevelFuncCloseField(ctr);
 			}
 		}
 		//

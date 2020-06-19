@@ -46,6 +46,12 @@ class SfType extends SfTypeImpl {
 	 */
 	public var dotAccess:Bool = false;
 	
+	/**
+	 * Whether dotAccess should apply to static fields.
+	 * This is controlled via -D sfgml_dot_static in 2.3, default is true.
+	 */
+	public var dotStatic:Bool = false;
+	
 	public function new(t:BaseType) {
 		super(t);
 		if (SfCore.sfConfig.modern) {
@@ -54,7 +60,14 @@ class SfType extends SfTypeImpl {
 			#else
 			isStruct = !isExtern && !t.meta.has(":gml.linear");
 			#end
-			if (isStruct) dotAccess = true;
+			if (isStruct) {
+				dotAccess = true;
+				if (SfCore.sfConfig.dotStatic) {
+					if (!meta.has(":gml.flat_static")) dotStatic = true;
+				} else {
+					if (!meta.has(":gml.dot_static")) dotStatic = true;
+				}
+			}
 		}
 	}
 }

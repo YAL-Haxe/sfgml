@@ -39,4 +39,13 @@ class SfField extends SfFieldImpl {
 		b.addFieldPathAuto(this);
 		return b.toString();
 	}
+	
+	/** Whether this field should be assigned a function via = method(type, func) */
+	public function needsMethodClosure():Bool {
+		if (!parentType.dotStatic) return false;
+		if (!Std.is(this, SfClassField)) return false;
+		var cf:SfClassField = cast this;
+		if (cf.isInst || cf == cf.parentClass.constructor) return false;
+		return true;
+	}
 }

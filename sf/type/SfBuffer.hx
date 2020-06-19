@@ -27,7 +27,7 @@ class SfBuffer extends SfBufferImpl {
 	public function addFieldPathAuto(f:SfField) {
 		if (Std.is(f, SfClassField)) {
 			var cf:SfClassField = cast f;
-			if (!cf.isInst && cf.parentClass.dotStatic) {
+			if (!cf.isInst && cf.parentClass.dotStatic && cf != cf.parentClass.constructor) {
 				addFieldPath(f, "_".code, ".".code);
 				return;
 			}
@@ -46,7 +46,11 @@ class SfBuffer extends SfBufferImpl {
 	}
 	public function addTopLevelFuncOpenField(fd:SfField, ?thisArg:Bool) {
 		if (sfConfig.topLevelFuncs) {
-			printf(this, "\nfunction %(field_auto)(", fd);
+			if (fd.needsMethodClosure()) {
+				printf(this, "%(field_auto)`=`method(%type_auto, function(", fd, fd.parentType);
+			} else {
+				printf(this, "\nfunction %(field_auto)(", fd);
+			}
 			if (thisArg == null) {
 				thisArg = Std.is(fd, SfClassField) ? (cast fd:SfClassField).needsThisArg() : false;
 			}
@@ -54,11 +58,24 @@ class SfBuffer extends SfBufferImpl {
 			printf(this, ")`{%(+\n)");
 		} else printf(this, "\n#define %(field_auto)\n", fd);
 	}
-	public function addTopLevelFuncClose() {
+	public function addTopLevelFuncClose(?closeMethod:Bool) {
 		if (sfConfig.topLevelFuncs) {
-			printf(this, "%(-\n)}\n");
+			printf(this, "%(-\n)}");
+			if (closeMethod) printf(this, ");");
+			addLine();
 		} else this.addLine();
 	}
+	public function addTopLevelFuncCloseField(fd:SfField, ?closeMethod:Bool) {
+		if (sfConfig.topLevelFuncs) {
+			printf(this, "%(-\n)}");
+			if (closeMethod == null) {
+				closeMethod = fd.needsMethodClosure();
+			}
+			if (closeMethod) printf(this, ");");
+			printf(this, "\n");
+		} else this.addLine();
+	}
+	
 	override public function addArguments(args:Array<SfArgument>):Void {
 		var l = sfConfig.localPrefix;
 		for (i in 0 ... args.length) {

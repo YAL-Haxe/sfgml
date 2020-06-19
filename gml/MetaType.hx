@@ -12,7 +12,7 @@ import SfTools.raw;
  */
 @:native("haxe.type") @:std
 #if sfgml.modern
-@:gml.struct
+@:gml.struct @:gml.flat_static
 #end
 class MetaType<T> {
 	#if !sfgml_legacy_meta
@@ -111,24 +111,23 @@ class MetaType<T> {
 
 @:keep @:native("haxe.class") @:std
 #if sfgml.modern
-@:gml.struct
+@:gml.struct @:gml.flat_static
 #end
 class MetaClass<T> extends MetaType<T> {
 	public var superClass:MetaClass<Dynamic> = null;
 	public var constructor:Dynamic;
-	public function new(id:Int, name:String, ?constructor:Dynamic) {
+	public function new(id:Int, name:String) {
 		#if !sfgml_legacy_meta
 		marker = MetaType.markerValue;
 		#end
 		this.index = id;
 		this.name = name;
-		this.constructor = constructor;
 	}
 }
 
 @:keep @:native("haxe.enum") @:std
 #if sfgml.modern
-@:gml.struct
+@:gml.struct @:gml.flat_static
 #end
 class MetaEnum<T> extends MetaType<T> {
 	public var constructors:Array<String>;
