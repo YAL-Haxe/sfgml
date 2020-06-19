@@ -1,5 +1,6 @@
 package haxe;
 import gml.Lib;
+import gml.Syntax;
 import haxe.Int32;
 
 /**
@@ -19,7 +20,7 @@ abstract Int64(__Int64) {
 	}
 	
 	public static inline function toInt(x:Int64):Int {
-		return Lib.div(untyped x >>> 0, 1);
+		return Syntax.div(untyped x >>> 0, 1);
 	}
 	
 	@:deprecated('haxe.Int64.is() is deprecated. Use haxe.Int64.isInt64() instead')
@@ -232,7 +233,7 @@ abstract Int64(__Int64) {
 	}
 	
 	public var low(get, set):Int;
-	inline function get_low() return Lib.div((this >>> 0), 1);
+	inline function get_low() return Syntax.div((this >>> 0), 1);
 	inline function set_low(v:Int) {
 		this = (this & ~(cast 4294967295)) | (v >>> 0);
 		return v;

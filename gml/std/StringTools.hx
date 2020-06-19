@@ -2,7 +2,7 @@ package;
 import gml.NativeArray;
 import gml.NativeString;
 import gml.Lib.raw;
-import gml.Lib.div;
+import gml.Syntax.div;
 import gml.io.Buffer;
 import haxe.ds.Vector;
 /**

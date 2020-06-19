@@ -28,7 +28,7 @@ extern class Lib {
 	
 	//{ GML-specific features
 	
-	/** A quick and generally-alright integer division. Result is int32 */
+	@:noCompletion @:deprecated("Use Syntax.div instead")
 	static inline function div(a:Float, b:Float):Int {
 		return untyped __raw__("({0} div {1})", a, b);
 	}
@@ -37,26 +37,19 @@ extern class Lib {
 	
 	/**
 	 * Represents the raw array of GML arguments passed to the current function.
-	 * Please note that instance functions will contain the applicable instance
-	 * as the first argument.
+	 * Please note that non-static functions may take `this` as a prefix-argument.
+	 * Consider using SfRest for this to be handled automatically.
 	 */
 	static var args(default, never):Arguments;
 	
 	/**
 	 * Indicates the raw number of arguments passed to the current function.
-	 * Please note that instance functions will contain the applicable instance
-	 * as the first argument.
+	 * Please note that non-static functions may take `this` as a prefix-argument.
 	 * Equivalent to Lib.args.length
 	 */
 	@:native("argument_count") static var argc(default, never):Int;
 	
-	/**
-	 * Generates a `untyped __gml__("")` expression in a convenient format.
-	 * Intended for referencing built-in functions and variables.
-	 * @param	gml
-	 * @return
-	 */
-	@:extern static inline function raw(gml:String):Dynamic {
+	@:noCompletion @:extern static inline function raw(gml:String):Dynamic {
 		return untyped __raw__(gml);
 	}
 	
