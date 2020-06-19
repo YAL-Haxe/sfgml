@@ -65,7 +65,7 @@ class SfType extends SfTypeImpl {
 				if (SfCore.sfConfig.dotStatic) {
 					if (!meta.has(":gml.flat_static")) dotStatic = true;
 				} else {
-					if (!meta.has(":gml.dot_static")) dotStatic = true;
+					if (meta.has(":gml.dot_static")) dotStatic = true;
 				}
 			}
 		}
