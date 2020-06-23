@@ -31,7 +31,7 @@ class SfConfig extends SfConfigImpl {
 	public var traceFunc = string("sfgml-trace", "trace");
 	
 	/** Prefix for local variables (for max compatibility) */
-	public var localPrefix = string("sfgml-local", "");
+	public var localPrefix = string("sfgml-local", "_");
 	
 	/** File to modify in the extension */
 	public var gmxFile = string("sfgml-ext-file", string("sfgml-gmx-file", null));
