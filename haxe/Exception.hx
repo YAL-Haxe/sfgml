@@ -1,5 +1,6 @@
 package haxe;
 import gml.Syntax;
+import gml.Syntax.code;
 
 /**
  * This looks like heck because this class is included before the macros run
@@ -104,14 +105,37 @@ extern class Exception {
 	}
 	
 	#if (sfgml.modern || sfgml_version >= "2.3")
+	#if sgml_simple_exceptions
+	private static inline function wrapValue(val:Any):Any {
+		return {
+			value: val,
+			message: code("string")(val),
+			longMessage: "",
+			script: "",
+			stacktrace: code("debug_get_callstack")(),
+			__exception__: true
+		};
+	}
+	private static inline function isNativeException(value:Any):Bool {
+		return code("is_struct")(value) && code("variable_struct_get")(value, "__exception__") == true;
+	}
+	public static function caught(value:Any):Any {
+		if (isNativeException(value)) return value;
+		return wrapValue(value);
+	}
+	public static function thrown(value:Any):Any {
+		if (isNativeException(value)) return value;
+		return wrapValue(value);
+	}
+	#else
 	private static function isNativeException(value:Any):Bool {
-		if (Syntax.code("is_struct")(value)) {
-			var c:Dynamic = Syntax.code("variable_struct_get")(value, "__class__");
+		if (code("is_struct")(value)) {
+			var c:Dynamic = code("variable_struct_get")(value, "__class__");
 			if (c == null) return false;
 			if (c == Exception) return true;
-			if (!Syntax.code("variable_struct_exists")(value, "superClass")) return false;
+			if (!code("variable_struct_exists")(value, "superClass")) return false;
 			c = c.superClass;
-			while (Syntax.code("is_struct")(c)) {
+			while (code("is_struct")(c)) {
 				if (c == Exception) return true;
 				c = c.superClass;
 			}
@@ -126,12 +150,13 @@ extern class Exception {
 		if (isNativeException(value)) return (value:Exception).native;
 		return new ValueException(value);
 	}
+	#end
 	#else
 	public static inline function caught(value:Any):Any {
 		return value;
 	}
 	public static inline function thrown(value:Any):Any {
-		return Syntax.code("string")(value);
+		return code("string")(value);
 	}
 	#end
 	
