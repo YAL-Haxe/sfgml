@@ -982,7 +982,10 @@ class SfGenerator extends SfGeneratorImpl {
 							} else printf(r, "script_execute(%x", x);
 							sep = true;
 							callFlags = 0;
-						} else if (sfConfig.modern && _field.parentClass.dotAccess) {
+						} else if (sfConfig.modern
+							&& _field.parentClass.dotAccess
+							&& !(_field.parentClass.isExtern && _field.exposePath != null)
+						) {
 							printf(r, "%x.%s", _inst, _field.name);
 						} else {
 							k = 0;

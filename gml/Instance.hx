@@ -24,19 +24,26 @@ extern class Instance {
 	#end
 	
 	#if (sfgml_version && sfgml_version < "1.4.1763")
-	inline function destroy():Void raw("with ({0}) instance_destroy()", this);
+	inline function destroy():Void {
+		Syntax.code("with ({0}) instance_destroy()", this);
+	}
 	#else
+	@:expose("instance_destroy")
 	function destroy(?performDestroyEvent:Bool):Void;
 	#end
+	
 	//
 	static function exists(inst:Instance):Bool;
 	@:native("number") static function count(type:EitherType<Object, Class<Instance>>):Int;
 	static inline function fromId(id:Int):Instance return cast id;
+	
 	//
-	function copy(performCreate:Bool):Instance;
-	@:native("change") inline function changeType(newType:Object, performEvents:Bool):Void {
+	@:expose("instance_copy") function copy(performCreate:Bool):Instance;
+	
+	inline function changeType(newType:Object, performEvents:Bool):Void {
 		raw("with ({0}) instance_change({1}, {2})", this, newType, performEvents);
 	}
+	
 	//
 	var id(default, never):Int;
 	var object_index(default, set):Object;

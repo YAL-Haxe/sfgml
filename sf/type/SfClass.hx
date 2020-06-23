@@ -21,15 +21,11 @@ class SfClass extends SfClassImpl {
 	
 	public var fieldsByIndex:Array<SfClassField> = [];
 	
-	/** Classes marked `@:std` get unprefixed variable access. */
-	public var isStd:Bool;
-	
 	/** If this is based on an object instance, indicates object to create */
 	public var objName:String = null;
 	
 	public function new(t:ClassType) {
 		super(t);
-		isStd = t.meta.has(":std");
 		//
 		objName = metaGetText(t.meta, ":object", 2);
 		if (objName == "") {

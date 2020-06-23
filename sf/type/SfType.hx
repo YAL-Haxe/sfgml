@@ -31,6 +31,9 @@ class SfType extends SfTypeImpl {
 		} else return false;
 	}
 	
+	/** Classes marked `@:std` get unprefixed variable access. */
+	public var isStd:Bool;
+	
 	/**
 	 * Uses 2.3 structs as an underlying type.
 	 * If false, instance functions shall take "this" as the first argument,
@@ -54,12 +57,17 @@ class SfType extends SfTypeImpl {
 	
 	public function new(t:BaseType) {
 		super(t);
+		isStd = t.meta.has(":std");
 		if (SfCore.sfConfig.modern) {
+			var preferLinear = isStd;
 			#if sfgml_linear
-			isStruct = t.meta.has(":gml.struct");
-			#else
-			isStruct = !isExtern && !t.meta.has(":gml.linear");
+			preferLinear = true;
 			#end
+			if (preferLinear) {
+				isStruct = t.meta.has(":gml.struct");
+			} else {
+				isStruct = !isExtern && !t.meta.has(":gml.linear");
+			}
 			if (isStruct) {
 				dotAccess = true;
 				if (SfCore.sfConfig.dotStatic) {
