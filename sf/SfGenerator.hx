@@ -520,13 +520,28 @@ class SfGenerator extends SfGeneratorImpl {
 			};
 			case SfObjectDecl(pairs): {
 				if (sfConfig.modern) {
-					r.addChar("{".code);
+					var lineSep = pairs.length > 3;
+					if (lineSep) {
+						printf(r, "{%(+\n)");
+					} else {
+						printf(r, "{`");
+						r.indent++;
+					}
 					for (i in 0 ... pairs.length) {
-						if (i > 0) r.addComma();
+						if (i > 0) {
+							if (lineSep) {
+								printf(r, ",\n");
+							} else r.addComma();
+						}
 						printf(r, "%s:`", pairs[i].name);
 						r.addExpr(pairs[i].expr, SfPrintFlags.ExprWrap);
 					}
-					r.addChar("}".code);
+					if (lineSep) {
+						printf(r, "%(-\n)}");
+					} else {
+						r.indent--;
+						printf(r, "`}");
+					}
 				} else {
 					expr.error("Anonymous object literals are only supported in >= 2.3."
 						+ " If this is an array-object, try assigning into a typed variable");
