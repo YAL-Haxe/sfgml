@@ -105,7 +105,7 @@ extern class Exception {
 	}
 	
 	#if (sfgml.modern || sfgml_version >= "2.3")
-	#if sgml_simple_exceptions
+	#if sfgml_simple_exceptions
 	private static inline function wrapValue(val:Any):Any {
 		return {
 			value: val,
