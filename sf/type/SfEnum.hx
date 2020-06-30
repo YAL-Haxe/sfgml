@@ -135,9 +135,9 @@ class SfEnum extends SfEnumImpl {
 		}
 		//
 		if (out.length > 0) {
-			if (sfConfig.hintFolds) printf(outb, "\n//{ %(type_dot)\n", this);
+			if (sfConfig.hintFolds) printf(outb, "\n%(+region)\n", sprintf("%type_dot", this));
 			outb.addBuffer(out);
-			if (sfConfig.hintFolds) printf(outb, "\n//}\n");
+			if (sfConfig.hintFolds) printf(outb, "\n%(-region)\n");
 		}
 		if (init.length > 0) {
 			if (sfConfig.hintFolds) printf(initb, "// %(type_dot):\n", this);
@@ -250,9 +250,9 @@ class SfEnum extends SfEnumImpl {
 			out.addTopLevelFuncClose();
 		}
 		if (out.length > 0) {
-			if (sfConfig.hintFolds) printf(outb, "\n//{ %(type_dot)\n", this);
+			if (sfConfig.hintFolds) printf(outb, "\n%(+region)\n", sprintf("%type_dot", this));
 			outb.addBuffer(out);
-			if (sfConfig.hintFolds) printf(outb, "\n//}\n");
+			if (sfConfig.hintFolds) printf(outb, "\n%(-region)\n");
 		}
 		if (init.length > 0) {
 			if (sfConfig.hintFolds) printf(initb, "// %(type_dot):\n", this);

@@ -470,9 +470,9 @@ class SfClass extends SfClassImpl {
 		var rc = r;
 		r = out;
 		if (rc != null && rc.length > 0) {
-			if (hintFolds) printf(r, "\n//{`%(type_dot)\n", this);
+			if (hintFolds) printf(r, "\n%(+region)\n", sprintf("%type_dot", this));
 			r.addBuffer(rc);
-			if (hintFolds) printf(r, "\n//}\n");
+			if (hintFolds) printf(r, "\n%(-region)\n");
 		}
 		if (init != null && init.length > 0) {
 			if (hintFolds) printf(initBuf, "// %(type_dot):\n", this);

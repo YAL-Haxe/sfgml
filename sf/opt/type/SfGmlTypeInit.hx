@@ -30,7 +30,7 @@ class SfGmlTypeInit {
 		var stdPack = sfConfig.stdPack;
 		var stdPre = stdPack != null ? stdPack + "_" : "";
 		//
-		if (sfConfig.hintFolds) printf(init, "//{ metatype\n");
+		if (sfConfig.hintFolds) printf(init, "%(+region)\n", "metatype");
 		
 		#if !sfgml_legacy_meta
 		// we'll need markerValue defined before anything else
@@ -104,7 +104,7 @@ class SfGmlTypeInit {
 		//
 		
 		//
-		if (sfConfig.hintFolds) printf(init, "//}\n");
+		if (sfConfig.hintFolds) printf(init, "%(-region)\n");
 	}
 	public static function printProto(init:SfBuffer) {
 		var hasArrayDecl = sfConfig.hasArrayDecl;
@@ -158,9 +158,9 @@ class SfGmlTypeInit {
 			printf(pbuf, "%c;\n", hasArrayDecl ? "]".code : ")".code);
 		}
 		if (pbuf.length > 0) {
-			if (sfConfig.hintFolds) printf(init, "//{ prototypes\n");
+			if (sfConfig.hintFolds) printf(init, "%(+region)\n", "prototypes");
 			init.addBuffer(pbuf);
-			if (sfConfig.hintFolds) printf(init, "//}\n");
+			if (sfConfig.hintFolds) printf(init, "%(-region)\n");
 		}
 	}
 }

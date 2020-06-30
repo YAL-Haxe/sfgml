@@ -95,6 +95,27 @@ class SfBuffer extends SfBufferImpl {
 		}
 	}
 	
+	public function addHintFoldOpen(name:String) {
+		if (sfConfig.hintFolds) {
+			if (sfConfig.next && !sfConfig.gmxMode) {
+				addString("#region ");
+			} else {
+				addString("//{ ");
+			}
+			addString(name);
+		}
+	}
+	
+	public function addHintFoldClose() {
+		if (sfConfig.hintFolds) {
+			if (sfConfig.next && !sfConfig.gmxMode) {
+				addString("#endregion");
+			} else {
+				addString("//}");
+			}
+		}
+	}
+	
 	private static var docNameFieldsCache:SfTypeMap<String> = new SfTypeMap();
 	private static function docNameFields(dt:DefType):String {
 		switch (dt.type) {

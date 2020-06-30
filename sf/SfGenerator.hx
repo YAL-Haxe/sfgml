@@ -348,6 +348,8 @@ class SfGenerator extends SfGeneratorImpl {
 			case "field_auto": b.addFieldPathAuto(v);
 			case "base_type": b.addBaseTypeName(v);
 			case "hint": b.addHintString(v);
+			case "+region": b.addHintFoldOpen(v);
+			case "-region": b.addHintFoldClose(); return false;
 			case "l_": b.addString(sfConfig.localPrefix); return false;
 			case "var": b.addString(sfConfig.localPrefix); b.addString(v);
 			default: return null;
@@ -540,7 +542,8 @@ class SfGenerator extends SfGeneratorImpl {
 						printf(r, "%(-\n)}");
 					} else {
 						r.indent--;
-						printf(r, "`}");
+						if (pairs.length > 0) r.addSep();
+						printf(r, "}");
 					}
 				} else {
 					expr.error("Anonymous object literals are only supported in >= 2.3."
