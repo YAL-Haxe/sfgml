@@ -351,6 +351,7 @@ class SfClass extends SfClassImpl {
 		ctr.isInst = ctr_isInst; ctr.name = ctr_name;
 	}
 	
+	static var globalObjects:Map<String, Bool> = new Map();
 	override public function printTo(out:SfBuffer, initBuf:SfBuffer):Void {
 		var hintFolds = sfConfig.hintFolds;
 		var r:SfBuffer = null;
@@ -384,7 +385,13 @@ class SfClass extends SfClassImpl {
 				for (f in staticList) {
 					if (!f.isHidden) { hasStatics = true; break; }
 				}
-				if (hasStatics) printf(r, "globalvar %type_auto;`%type_auto`=`{};\n", this, this);
+				if (hasStatics) {
+					var path = sprintf("%type_auto", this);
+					if (!globalObjects.exists(path)) {
+						globalObjects[path] = true;
+						printf(r, "globalvar %s;`%s`=`{};\n", path, path);
+					}
+				}
 			}
 			
 			// static fields:
