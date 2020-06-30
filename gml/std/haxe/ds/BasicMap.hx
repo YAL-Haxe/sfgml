@@ -1,7 +1,174 @@
 package haxe.ds;
 import gml.NativeArray;
 import gml.io.Buffer;
+import haxe.DynamicAccess;
+import haxe.Constraints.IMap;
 
+#if sfgml.modern
+class BasicMap<K, V> implements haxe.Constraints.IMap<K, V> {
+	static var blank:Dynamic = [];
+	
+	var obj:DynamicAccess<V> = {};
+	/** Number of "holes" (removed pairs) in this structure */
+	var blanks:Int = 0;
+	
+	var cachedKeys:Array<K> = null;
+	
+	public function new() {
+		//
+	}
+	
+	public function copy():IMap<K, V> {
+		var obj = obj;
+		var blank = blank;
+		var result = new BasicMap<K, V>();
+		var resObj = result.obj;
+		//
+		var keys = obj.keys();
+		var keyCount = keys.length;
+		var i = -1;
+		var key:String;
+		if (blanks > 0) while (++i < keyCount) {
+			key = keys[i];
+			var val = obj[key];
+			if (val != blank) resObj[key] = val;
+		}
+		else while (++i < keyCount) {
+			key = keys[i];
+			resObj[key] = obj[key];
+		}
+		return result;
+	}
+	
+	public function clear():Void {
+		var obj = obj;
+		var keys = obj.keys();
+		var keyCount = keys.length;
+		if (blanks == keyCount) return; // already empty
+		var blank = blank;
+		var i = -1; while (++i < keyCount) {
+			obj[keys[i]] = blank;
+		}
+		blanks = keyCount;
+	}
+	
+	public function exists(key:K):Bool {
+		return obj.exists(cast key) && (blanks <= 0 || obj[cast key] != blank);
+	}
+	
+	public function get(key:K):Null<V> {
+		var val = obj[cast key];
+		return val != blank ? val : null;
+	}
+	
+	public function set(key:K, val:V):Void {
+		if (blanks > 0) {
+			var cachedKeys = cachedKeys;
+			if (cachedKeys != null) {
+				if (obj.exists(cast key)) {
+					if (obj[cast key] == blank) blanks--;
+				} else {
+					cachedKeys[cachedKeys.length] = key;
+				}
+			} else {
+				if (obj[cast key] == blank) blanks--;
+			}
+		}
+		obj[cast key] = val;
+	}
+	
+	public function remove(key:K):Bool {
+		if (obj.exists(cast key)) {
+			if (blanks > 0) {
+				if (obj[cast key] == blank) return false;
+				cachedKeys = null;
+			}
+			obj[cast key] = blank;
+			blanks++;
+			return true;
+		} else return false;
+	}
+	
+	function keysArray():Array<K> {
+		throw "Should be implemented in the specific Map class";
+	}
+	public function keys():Iterator<K> {
+		return keysArray().iterator();
+	}
+	
+	public function iterator():Iterator<V> {
+		return new BasicMapIterator(this);
+	}
+	
+	public function keyValueIterator():KeyValueIterator<K, V> {
+		return new BasicMapKeyValueIterator(this);
+	}
+	
+	static var toString_buf:Buffer = Buffer.defValue;
+	public function toString():String {
+		var b = toString_buf;
+		if (b == Buffer.defValue) {
+			b = new Buffer(1024, Grow, 1);
+			toString_buf = b;
+		}
+		b.rewind();
+		b.writeChars("{");
+		var keys = obj.keys();
+		for (i in 0 ... keys.length) {
+			if (i > 0) b.writeChars(", ");
+			var k = keys[i];
+			b.writeChars(k);
+			b.writeChars(" => ");
+			b.writeChars(Std.string(obj[k]));
+		}
+		b.writeString("}");
+		b.rewind();
+		return b.readString();
+	}
+}
+
+class BasicMapIterator<K, V> {
+	final access:DynamicAccess<V>;
+	final keys:Array<K>;
+	var index:Int;
+
+	public inline function new(map:BasicMap<K, V>) {
+		this.access = @:privateAccess map.obj;
+		this.keys = @:privateAccess map.keysArray();
+		index = 0;
+	}
+	
+	public inline function hasNext():Bool {
+		return index < keys.length;
+	}
+	
+	public inline function next():V {
+		return access.get(cast keys[index++]);
+	}
+}
+
+class BasicMapKeyValueIterator<K, V> {
+	final access:DynamicAccess<V>;
+	final keys:Array<K>;
+	var index:Int;
+
+	public inline function new(map:BasicMap<K, V>) {
+		this.access = @:privateAccess map.obj;
+		this.keys = @:privateAccess map.keysArray();
+		index = 0;
+	}
+	
+	public inline function hasNext():Bool {
+		return index < keys.length;
+	}
+	
+	public inline function next():{key:K, value:V} {
+		var key = keys[index++];
+		return {value: access.get(cast key), key: key};
+	}
+}
+
+#else
 /**
  * A rough port of
  * https://github.com/petewarden/c_hashmap
@@ -230,3 +397,4 @@ class BasicMap<K, V> {
 	public var used:Bool;
 	public function new() { }
 }
+#end

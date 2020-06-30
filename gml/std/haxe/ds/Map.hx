@@ -29,7 +29,7 @@ abstract Map<K,V>(IMap<K,V>) {
 		return this.iterator();
 	}
 	
-	public inline function keyValueIterator():KeyValueIterator {
+	public inline function keyValueIterator():KeyValueIterator<K, V> {
 		return this.keyValueIterator();
 	}
 

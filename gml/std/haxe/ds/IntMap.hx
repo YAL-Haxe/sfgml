@@ -7,6 +7,26 @@ import gml.io.Buffer;
  * @author YellowAfterlife
  */
 class IntMap<T> extends BasicMap<Int, T> implements haxe.Constraints.IMap<Int,T> {
+	#if sfgml.modern
+	override private function keysArray():Array<Int> {
+		var keys = cachedKeys;
+		if (keys != null) return keys;
+		var obj = obj;
+		var keys = obj.keys();
+		var keyCount = keys.length;
+		var resKeys:Array<Int> = NativeArray.createEmpty(keyCount - blanks);
+		var resCount = -1;
+		var i = -1; while (++i < keyCount) {
+			var key = keys[i];
+			if (obj[key] != BasicMap.blank) {
+				var ik = Std.parseInt(key);
+				if (ik != null) resKeys[++resCount] = ik;
+			}
+		}
+		cachedKeys = resKeys;
+		return resKeys;
+	}
+	#else
 	private inline function hashOf(s:Int) {
 		return rawHash(function(b:Buffer) {
 			b.writeInt(s);
@@ -41,4 +61,5 @@ class IntMap<T> extends BasicMap<Int, T> implements haxe.Constraints.IMap<Int,T>
 	public function toString():String {
 		return rawPrint();
 	}
+	#end
 }
