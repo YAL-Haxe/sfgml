@@ -59,7 +59,7 @@ class SfType extends SfTypeImpl {
 		super(t);
 		isStd = t.meta.has(":std");
 		if (SfCore.sfConfig.modern) {
-			var preferLinear = isStd;
+			var preferLinear = isStd && isExtern;
 			#if sfgml_linear
 			preferLinear = true;
 			#end
