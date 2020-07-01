@@ -67,6 +67,11 @@ class SfGml_ArrayImpl extends SfOptImpl {
 				case SfNew(c, _, []) if (c == tArray): {
 					x.def = SfArrayDecl([]);
 				};
+				case SfBinop(OpAssign, _.def => SfInstField(inst, fd), len) if (fd == Array_length): {
+					if (modern) {
+						x.def = SfCall(x.mod(SfIdent("array_resize")), [inst, len]);
+					} else x.error("Array resizing is only supported in 2.3+");
+				};
 				case SfInstField(inst, fd) if (fd == Array_length): {
 					x.def = SfCall(x.mod(SfIdent(array_length)), [inst]);
 				};
