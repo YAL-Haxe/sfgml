@@ -125,6 +125,8 @@ class SfConfig extends SfConfigImpl {
 	/** Stores type information in [1,0] instead of [0] */
 	public var legacyMeta:Bool = bool("sfgml-legacy-meta");
 	
+	public var optRepeat:Bool = bool("sfgml-repeat", true);
+	
 	public function new() {
 		super();
 		instanceof = true;

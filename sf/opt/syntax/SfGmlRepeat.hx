@@ -16,6 +16,7 @@ import haxe.macro.Expr.Unop;
  */
 class SfGmlRepeat extends SfOptImpl {
 	override public function apply() {
+		if (!sfConfig.optRepeat) return;
 		forEachExpr(function(e:SfExpr, w:SfExprList, f:SfExprIter) {
 			do {
 				var initIter:SfExpr, initTill:SfExpr, cond:SfExpr, post:SfExpr, expr:SfExpr;
