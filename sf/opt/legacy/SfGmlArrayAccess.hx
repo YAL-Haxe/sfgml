@@ -162,18 +162,6 @@ class SfGmlArrayAccess extends SfOptImpl {
 	override public function apply() {
 		var atype = sfGenerator.typeBoot;
 		ignoreHidden = true;
-		// change array.length to array_length_1d(array) because Haxe doesn't:
-		var lenid = sfConfig.modern ? "array_length" : "array_length_1d";
-		var flen = sfGenerator.typeArray.fieldMap.get("length");
-		forEachExpr(function(e:SfExpr, w, f) {
-			e.iter(w, f);
-			switch (e.def) {
-				case SfInstField(x, q) if (q == flen): {
-					e.def = SfCall(e.mod(SfIdent(lenid)), [x]);
-				};
-				default:
-			}
-		});
 		//
 		wget = atype.fieldMap.get("wget");
 		if (wget == null) throw "Array has no wget";
