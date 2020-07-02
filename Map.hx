@@ -12,6 +12,10 @@ import haxe.ds.*;
 @:multiType(@:followWithAbstracts K)
 abstract Map<K,V>(haxe.Constraints.IMap<K,V>) {
 	public function new();
+	
+	public inline function destroy():Void { }
+	
+	public inline function clear():Void this.clear();
 
 	public inline function set(key:K, value:V) this.set(key, value);
 
@@ -29,7 +33,7 @@ abstract Map<K,V>(haxe.Constraints.IMap<K,V>) {
 		return this.iterator();
 	}
 	
-	public inline function keyValueIterator():KeyValueIterator<K,V> {
+	public inline function keyValueIterator():KeyValueIterator<K, V> {
 		return this.keyValueIterator();
 	}
 
@@ -66,7 +70,7 @@ abstract Map<K,V>(haxe.Constraints.IMap<K,V>) {
 import SfTools.raw;
 import gml.ds.HashTable;
 
-@:forward(destroy, exists, remove, get, set, keys, iterator, toString)
+@:forward(clear, destroy, exists, remove, get, set, keys, iterator, toString)
 abstract Map<K, V>(HashTable<K, V>) from HashTable<K, V> to HashTable<K, V> {
 	public inline function new() {
 		this = raw("ds_map_create")();

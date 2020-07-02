@@ -12,6 +12,10 @@ import haxe.Constraints.IMap;
 @:multiType(@:followWithAbstracts K)
 abstract Map<K,V>(IMap<K,V>) {
 	public function new();
+	
+	public inline function destroy():Void { }
+	
+	public inline function clear():Void this.clear();
 
 	public inline function set(key:K, value:V) this.set(key, value);
 
