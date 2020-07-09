@@ -1221,7 +1221,7 @@ class SfGenerator extends SfGeneratorImpl {
 					printf(r, "try`{%(+\n)");
 					r.addExpr(block, SfPrintFlags.StatWrap);
 					var c = catches[0];
-					printf(r, "%(-\n)}`catch`(%s)`{%(+\n)", c.v.name);
+					printf(r, "%(-\n)}`catch`(%var)`{%(+\n)", c.v.name);
 					r.addExpr(c.expr, SfPrintFlags.StatWrap);
 					printf(r, "%(-\n)}");
 				} else expr.error("try-catch is only supported in GMS>=2.3");
