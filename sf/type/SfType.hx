@@ -1,4 +1,7 @@
 package sf.type;
+import haxe.io.Path;
+import haxe.macro.Context;
+import haxe.macro.Type;
 import haxe.macro.Type.BaseType;
 
 /**
@@ -55,6 +58,9 @@ class SfType extends SfTypeImpl {
 	 */
 	public var dotStatic:Bool = false;
 	
+	private static var new_stdDir:String = null;
+	private static var new_sfgmlDir:String = null;
+	private static var new_sfhxDir:String = null;
 	public function new(t:BaseType) {
 		//
 		#if sfgml_doc_is_toplevel
@@ -85,7 +91,23 @@ class SfType extends SfTypeImpl {
 		#end
 		//
 		super(t);
-		isStd = t.meta.has(":std");
+		// figure out whether this is a standard library class:
+		if (t.meta.has(":std")) {
+			isStd = true;
+		} else {
+			if (new_stdDir == null) {
+				new_stdDir = Path.normalize(Path.directory(Context.resolvePath("Any.hx")));
+				new_sfhxDir = Path.normalize(Path.directory(Context.resolvePath("SfTools.hx")));
+				var path_sfgml_gml = Path.directory(Context.resolvePath("gml/Lib.hx"));
+				var path_sfgml = Path.directory(path_sfgml_gml);
+				new_sfgmlDir = Path.normalize(path_sfgml);
+			}
+			var path = Path.normalize(Context.getPosInfos(t.pos).file);
+			isStd = StringTools.startsWith(path, new_stdDir)
+				||  StringTools.startsWith(path, new_sfhxDir)
+				||  StringTools.startsWith(path, new_sfgmlDir);
+		}
+		//
 		if (SfCore.sfConfig.modern) {
 			var preferLinear = isStd && isExtern;
 			#if sfgml_linear
