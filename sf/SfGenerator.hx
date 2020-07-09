@@ -630,11 +630,11 @@ class SfGenerator extends SfGeneratorImpl {
 						&& currentField.needsMethodClosure()
 					) {
 						switch (selfLevel) {
-							case -1: r.addString("self");
-							case -2: r.addString("other");
-							default: r.addTypePathAuto(c);
+							case -1: r.addString("self.");
+							case -2: r.addString("other.");
+							default: printf(r, "%type_auto.", c);
 						}
-						printf(r, ".%s", f.name);
+						r.addString(f.name);
 					} else {
 						printf(r, "%(type_auto).%s", c, f.name);
 					}
@@ -1244,7 +1244,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfMeta(m, x): r.addExpr(x, flags);
 			//}
 			default: error(expr, "Can't print " + expr.getName());
-		} // switch (expr)
+		} // switch (expr), can return
 	}
 	
 	private inline function printAssignOp(r:SfBuffer, op:Binop, ?ctx:SfExpr) {
