@@ -56,6 +56,34 @@ class SfType extends SfTypeImpl {
 	public var dotStatic:Bool = false;
 	
 	public function new(t:BaseType) {
+		//
+		#if sfgml_doc_is_toplevel
+		if (!isStd && !t.meta.has(":native") && !t.meta.has(":expose")) {
+			var hasDoc = t.meta.has(":doc");
+			if (!hasDoc) {
+				if (Std.is(this, SfClass)) {
+					var ct:ClassType = cast t;
+					var ctr = ct.constructor;
+					if (ctr != null && ctr.get().meta.has(":doc")) {
+						hasDoc = true;
+					} else {
+						for (ff in [ct.fields, ct.statics]) {
+							for (f in ff.get()) {
+								if (f.meta.has(":doc")) { hasDoc = true; break; }
+							}
+							if (hasDoc) break;
+						}
+					}
+				} else if (Std.is(this, SfEnum)) {
+					for (c in (cast t:EnumType).constructs) {
+						if (c.meta.has(":doc")) { hasDoc = true; break; }
+					}
+				}
+			}
+			if (hasDoc) t.pack.splice(0, t.pack.length);
+		}
+		#end
+		//
 		super(t);
 		isStd = t.meta.has(":std");
 		if (SfCore.sfConfig.modern) {
