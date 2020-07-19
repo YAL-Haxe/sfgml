@@ -1,6 +1,7 @@
 package sf.type;
 import haxe.macro.Type;
 import sf.SfCore.*;
+import sf.opt.syntax.SfGmlRest;
 import sf.type.SfArgument;
 import sf.type.SfClassField;
 import sf.type.SfTypeMap;
@@ -79,6 +80,7 @@ class SfBuffer extends SfBufferImpl {
 	override public function addArguments(args:Array<SfArgument>):Void {
 		var l = sfConfig.localPrefix;
 		for (i in 0 ... args.length) {
+			if (SfGmlRest.getRestType(args[i].v.type) != null) break;
 			if (i > 0) addComma();
 			addString(l);
 			addString(args[i].v.name);
@@ -89,6 +91,7 @@ class SfBuffer extends SfBufferImpl {
 		var sep = thisArg;
 		if (thisArg) addString("this");
 		for (i in 0 ... args.length) {
+			if (SfGmlRest.getRestType(args[i].v.type) != null) break;
 			if (sep) addComma(); else sep = true;
 			addString(l);
 			addString(args[i].v.name);

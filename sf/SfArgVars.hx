@@ -1,5 +1,6 @@
 package sf;
 import haxe.macro.Type;
+import sf.opt.syntax.SfGmlRest;
 import sf.type.SfArgument;
 import sf.type.SfBuffer;
 import sf.type.SfClassField;
@@ -42,8 +43,13 @@ class SfArgVars {
 				printf(r, "var this`=`self;\n");
 			}
 			var hasOpt = false;
+			var hasRest = false;
 			for (arg in args) {
 				var v = arg.value;
+				if (SfGmlRest.getRestType(arg.v.type) != null) {
+					hasRest = true;
+					continue;
+				}
 				if (v == null) continue;
 				hasOpt = true;
 				if (v == TNull) continue;
@@ -51,7 +57,11 @@ class SfArgVars {
 				printf(r, "if`(%(var)`==`undefined)`%(var)`=`%(const);\n", s, s, v);
 			}
 			// this is purely a countermeasure for IDE not shutting up about "extra arguments"
-			if (hasOpt) printf(r, "if`(false)`throw argument[%d];\n", args.length - 1);
+			if (hasRest) {
+				printf(r, "if`(false)`throw argument[argument_count`-`1];\n");
+			} else if (hasOpt) {
+				printf(r, "if`(false)`throw argument[%d];\n", args.length - 1);
+			}
 			return;
 		}
 		
