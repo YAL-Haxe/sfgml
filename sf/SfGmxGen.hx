@@ -71,8 +71,8 @@ class SfGmxGen {
 							mcrValue = sprintf("%x", sff.expr);
 						};
 						case FVar(AccCall, AccNo | AccNever): { // v(get, never) -> getter
-							var sfxName = "get_" + sff.name;
-							var sfx = sfc.staticMap[sfxName];
+							var sfxName = "get_" + sff.realName;
+							var sfx = sfc.realMap[sfxName];
 							if (sfx != null) {
 								var sfb = new SfBuffer();
 								var sfxExpr = sfx.expr.unpack();
