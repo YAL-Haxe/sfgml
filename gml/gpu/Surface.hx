@@ -68,4 +68,10 @@ extern class Surface {
 	inline function toSprite(ox:Float, oy:Float):Sprite {
 		return Sprite.fromSurface(this, ox, oy);
 	}
+	
+	//
+	@:expose("draw_surface") function draw(x:Float, y:Float):Void;
+	@:expose("draw_surface_ext") function drawExt(x:Float, y:Float,
+		xscale:Float, yscale:Float, angle:Float, color:Color, alpha:Float):Void;
+	//
 }
