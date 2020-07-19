@@ -20,6 +20,9 @@ class SfGmlWith extends SfOptImpl {
 	 * needs a `var this = self;` (read: if we have loops preventing us from just using self/other)
 	 */
 	public static function needsThisSelf(expr:SfExpr):Bool {
+		#if sfgml_keep_this_self
+		return true;
+		#end
 		var withDepth = 0;
 		function check(x:SfExpr, st, it) {
 			switch (x.def) {
