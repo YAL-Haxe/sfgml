@@ -337,6 +337,7 @@ class SfGenerator extends SfGeneratorImpl {
 	
 	private static var getFieldName_map:Map<String, String> = makeReserved("i_", true);
 	public function getFieldName(name:String) {
+		return "i_" + name;
 		var r = getFieldName_map[name];
 		return r != null ? r : name;
 	}
@@ -1202,7 +1203,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfReturn(z, x): { // return x
 				r.addString("return ");
 				#if (sfgml_tracecall)
-				printf(r, 'tracecall("- %z",`', r.addFieldPathAuto(currentField));
+				printf(r, 'tracecall("- %field_auto",`', currentField);
 				#end
 				if (z) {
 					r.addExpr(x, SfPrintFlags.ExprWrap);
