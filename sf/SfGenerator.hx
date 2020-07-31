@@ -708,13 +708,13 @@ class SfGenerator extends SfGeneratorImpl {
 							var at = anonMap.baseGet(dt);
 							if (at != null) {
 								s = _field;
-								if (at.dotAccess) {
-									printf(r, '%x.%s', obj, s);
-									z = false;
-								} else if (at.isDsMap) {
+								if (at.isDsMap) {
 									var fd = at.fieldMap[s];
 									if (fd != null) s = fd.name;
 									printf(r, '%x[?"%s"]', obj, s);
+									z = false;
+								} else if (at.dotAccess) {
+									printf(r, '%x.%s', obj, s);
 									z = false;
 								} else if (at.indexMap.exists(s)) {
 									printf(r, "%x[", obj);
@@ -766,13 +766,13 @@ class SfGenerator extends SfGeneratorImpl {
 						var at = anonMap.baseGet(dt);
 						if (at != null) {
 							s = f;
-							if (at.dotAccess) {
-								printf(r, '%x.%s', q, s);
-								z = false;
-							} else if (at.isDsMap) {
+							if (at.isDsMap) {
 								var fd = at.fieldMap[s];
 								if (fd != null) s = fd.name;
 								printf(r, '%x[?"%s"]', q, s);
+								z = false;
+							} else if (at.dotAccess) {
+								printf(r, '%x.%s', q, s);
 								z = false;
 							} else if (at.indexMap.exists(s)) {
 								printf(r, "%x[@", q);
