@@ -48,13 +48,13 @@ class SfClass extends SfClassImpl {
 			}
 		}
 		// if we do .field, we do not want them named same as built-in variables:
-		if (dotAccess) for (fd in instList) {
+		if (dotAccess && !isExtern) for (fd in instList) {
 			var s0 = fd.name;
 			var s1 = sfGenerator.getFieldName(s0);
 			if (s0 != s1) fd.name = s1;
 		}
 		// ditto for statics if we dot .static:
-		if (dotStatic) for (fd in staticList) {
+		if (dotStatic && !isExtern) for (fd in staticList) {
 			var s0 = fd.name;
 			var s1 = sfGenerator.getFieldName(s0);
 			if (s0 != s1) fd.name = s1;
