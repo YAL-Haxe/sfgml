@@ -12,7 +12,7 @@ class SfEnumTools {
 	#if sfgml.modern
 	public static function getParameter(q:EnumValue, i:Int):Dynamic {
 		if (NativeType.isStruct(q)) {
-			var params = (cast q).__enumParams__;
+			var params:Array<String> = (cast q).__enumParams__;
 			return NativeStruct.getField(q, params[i]);
 		} else if (NativeType.isArray(q)) {
 			return SfGmlEnumValue.fromEnumValue(q).get(i + 1);
@@ -21,7 +21,7 @@ class SfEnumTools {
 	
 	public static function getParameterCount(q:EnumValue):Int {
 		if (NativeType.isStruct(q)) {
-			var params = (cast q).__enumParams__;
+			var params:Array<String> = (cast q).__enumParams__;
 			return params.length;
 		} else if (NativeType.isArray(q)) {
 			return SfGmlEnumValue.fromEnumValue(q).length - 1;
@@ -30,7 +30,7 @@ class SfEnumTools {
 	
 	public static function setParameter(q:EnumValue, i:Int, value:Dynamic):Void {
 		if (NativeType.isStruct(q)) {
-			var params = (cast q).__enumParams__;
+			var params:Array<String> = (cast q).__enumParams__;
 			NativeStruct.setField(q, params[i], value);
 		} else if (NativeType.isArray(q)) {
 			SfGmlEnumValue.fromEnumValue(q).set(i + 1, value);
