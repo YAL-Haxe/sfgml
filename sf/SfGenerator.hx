@@ -337,6 +337,8 @@ class SfGenerator extends SfGeneratorImpl {
 	
 	private static var getFieldName_map:Map<String, String> = makeReserved("i_", true);
 	public function getFieldName(name:String) {
+		var p = sfConfig.fieldPrefix;
+		if (p != "") return p + name;
 		var r = getFieldName_map[name];
 		return r != null ? r : name;
 	}

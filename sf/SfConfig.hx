@@ -33,6 +33,9 @@ class SfConfig extends SfConfigImpl {
 	/** Prefix for local variables (for max compatibility) */
 	public var localPrefix = string("sfgml-local", "_");
 	
+	/** Prefix for class fields (https://help.yoyogames.com/hc/en-us/community/posts/360012736697--) */
+	public var fieldPrefix = string("sfgml-field-prefix", "");
+	
 	/** File to modify in the extension */
 	public var gmxFile = string("sfgml-ext-file", string("sfgml-gmx-file", null));
 	
