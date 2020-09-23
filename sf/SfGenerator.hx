@@ -155,7 +155,8 @@ class SfGenerator extends SfGeneratorImpl {
 		//
 		inline function addMainExpr(b:SfBuffer):Void {
 			if (mainExpr != null) {
-				b.addExpr(mainExpr, SfPrintFlags.StatWrap);
+				var wrap = b.addTopLevelPrintIfPrefix();
+				b.addExpr(mainExpr, wrap ? SfPrintFlags.Stat : SfPrintFlags.StatWrap);
 				b.addSemico();
 				b.addLine();
 			}

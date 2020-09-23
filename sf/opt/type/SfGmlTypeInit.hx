@@ -41,7 +41,9 @@ class SfGmlTypeInit {
 		if (qMetaMarker != null) {
 			qMetaMarkerText = sprintf("%(field_auto)", qMetaMarker);
 			//
-			printf(init, "globalvar %s;`%s`=`", qMetaMarkerText, qMetaMarkerText);
+			printf(init, "globalvar %s;`", qMetaMarkerText);
+			init.addTopLevelPrintIfPrefix();
+			printf(init, "%s`=`", qMetaMarkerText);
 			if (!sfConfig.hasArrayCreate) {
 				printf(init, "0;`%s[0]`=`undefined", qMetaMarkerText);
 			} else if (!hasArrayDecl) {
@@ -62,7 +64,9 @@ class SfGmlTypeInit {
 			var e:SfEnum = Std.is(t, SfEnum) ? cast t : null;
 			var c:SfClass = Std.is(t, SfClass) ? cast t : null;
 			//
-			printf(init, "globalvar mt_%(type_auto);`mt_%(type_auto)`=`", t, t);
+			printf(init, "globalvar mt_%(type_auto);`", t);
+			init.addTopLevelPrintIfPrefix();
+			printf(init, "mt_%(type_auto)`=`", t);
 			if (modern) {
 				printf(init, "new %s%s", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			} else {
@@ -91,6 +95,7 @@ class SfGmlTypeInit {
 			//
 			if (modern && c != null && c.superClass != null && c.module != SfGmlType.mtModule) {
 				if (qMetaClass_super != null) {
+					init.addTopLevelPrintIfPrefix();
 					printf(init, "mt_%(type_auto).%s`=`mt_%(type_auto);\n",
 						c, qMetaClass_super.name, c.superClass);
 				} else {

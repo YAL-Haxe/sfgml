@@ -71,7 +71,8 @@ class SfClass extends SfClassImpl {
 	static function printFieldExpr(r:SfBuffer, f:SfClassField) {
 		sfGenerator.currentField = f;
 		var printCond = sfConfig.printIf;
-		if (printCond != null) printf(r, "if (%s) {%(+\n)", printCond);
+		if (sfConfig.modern && !f.checkDocState(f.parentType.docState)) printCond = null;
+		if (printCond != null) printf(r, "if`(%s)`{%(+\n)", printCond);
 		#if (sfgml_tracecall)
 		printf(r, 'tracecall("+ %(field_auto)");\n', f);
 		#end
@@ -94,7 +95,7 @@ class SfClass extends SfClassImpl {
 				case TAbstract(_.get() => { name: "Bool" }, _): "false";
 				default: "undefined";
 			}
-			if (v != null) printf(r, " else return %s;", v);
+			if (v != null) printf(r, "`else return %s;", v);
 		}
 		sfGenerator.currentField = null;
 	}
@@ -127,11 +128,14 @@ class SfClass extends SfClassImpl {
 		ctr.isInst = false;
 		var ctr_exposePath:String;
 		if (isStruct) {
+			r.addLine();
+			if (dotStatic) printf(r, "globalvar %type_auto;`", this);
+			r.addTopLevelPrintIfPrefixField(ctr);
+			//
 			if (dotStatic) {
-				printf(r, "\nglobalvar %type_auto;", this);
-				printf(r, "`%type_auto = method(undefined,`function(", this);
+				printf(r, "%type_auto = method(undefined,`function(", this);
 			} else {
-				printf(r, "\nfunction %(type_auto)(", this);
+				printf(r, "function %(type_auto)(", this);
 			}
 			r.addArguments(ctr.args);
 			printf(r, ")`constructor`{%(+\n)", this);
@@ -343,6 +347,7 @@ class SfClass extends SfClassImpl {
 		}
 		r.addTopLevelFuncCloseField(ctr, dotStatic);
 		if (isStruct && !nativeGen) {
+			r.addTopLevelPrintIfPrefix();
 			var mtc = sfGenerator.findRealClassField("gml.MetaClass", "constructor");
 			if (mtc != null) {
 				printf(r, "mt_%type_auto.%s`=`%type_auto;\n", this, mtc.name, this);
@@ -389,7 +394,9 @@ class SfClass extends SfClassImpl {
 					var path = sprintf("%type_auto", this);
 					if (!globalObjects.exists(path)) {
 						globalObjects[path] = true;
-						printf(r, "globalvar %s;`%s`=`{};\n", path, path);
+						printf(r, "globalvar %s;`", path);
+						r.addTopLevelPrintIfPrefix();
+						printf(r, "%s`=`{};\n", path, path);
 					}
 				}
 			}
@@ -405,6 +412,7 @@ class SfClass extends SfClassImpl {
 					var fbody = true;
 					if (f.isVar) { // dynamic fields get a variable
 						printf(init, "globalvar %s%s;`", g_, path);
+						init.addTopLevelPrintIfPrefix();
 						printf(init, "%s%s`=`", g_, path);
 						if (f.expr == null || f.expr.def.match(SfConst(TNull))) {
 							init.addString("undefined");
@@ -424,14 +432,14 @@ class SfClass extends SfClassImpl {
 				}; // static function
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
-					if (!dotStatic) printf(init, "globalvar %s%(field_auto);", g_, f);
+					if (!dotStatic) printf(init, "globalvar %s%(field_auto);`", g_, f);
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
 						var fd = fx.getData();
 						var fsf = fx.mod(SfStaticField(this, f));
+						init.addTopLevelPrintIfPrefix();
 						switch (fx.def) {
 							case SfBlock(w): { // v = { ...; x; } -> { ...; v = x; }
-								init.addLine();
 								var wn = w.length;
 								var wx = w.slice(0, wn - 1);
 								if (modern) {
@@ -446,7 +454,6 @@ class SfClass extends SfClassImpl {
 								}
 							};
 							default: {
-								init.addSep();
 								fx = fx.mod(SfBinop(OpAssign, fsf, fx));
 								printf(init, "%sw;\n", fx);
 							};

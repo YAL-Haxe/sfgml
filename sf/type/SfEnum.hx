@@ -78,6 +78,7 @@ class SfEnum extends SfEnumImpl {
 			getIndexPath = stdPre + "enum_getIndex";
 			//
 			var decl = sfGenerator.declBuffer;
+			decl.addTopLevelPrintIfPrefix();
 			printf(decl, "function %s()`{%(+\n)", toStringPath);
 			var Std_string = sfGenerator.findRealClassField("Std", "string");
 			if (Std_string != null) {
@@ -87,6 +88,7 @@ class SfEnum extends SfEnumImpl {
 			}
 			printf(decl, "%(-\n)}\n");
 			//
+			decl.addTopLevelPrintIfPrefix();
 			printf(decl, "function %s%s()`{%(+\n)", stdPre, "enum_getIndex");
 			printf(decl, "return __enumIndex__;");
 			printf(decl, "%(-\n)}\n");
@@ -94,15 +96,19 @@ class SfEnum extends SfEnumImpl {
 		//
 		var out = new SfBuffer(), init = new SfBuffer();
 		if (hasNativeEnum()) printNativeEnum(init);
-		printf(out, "\nfunction mc_%(type_auto)()`{%(+\n)", this);
+		out.addLine();
+		out.addTopLevelPrintIfPrefix();
+		printf(out, "function mc_%(type_auto)()`constructor`{%(+\n)", this);
 		printf(out, "static getIndex`=`method(undefined,`%s);\n", getIndexPath);
 		printf(out, "static toString`=`method(undefined,`%s);\n", toStringPath);
 		printf(out, "static __enum__`=`mt_%(type_auto);", this);
 		printf(out, "%(-\n)};\n");
 		for (ctr in ctrList) {
-			printf(out, "\nfunction mc_%(field_auto)()", ctr);
+			out.addLine();
+			out.addTopLevelPrintIfPrefixField(ctr);
+			printf(out, "function mc_%(field_auto)()", ctr);
 			printf(out, "`:`mc_%(type_auto)()", this);
-			printf(out, " constructor`{%(+\n)");
+			printf(out, "`constructor`{%(+\n)");
 			//
 			printf(out, "static __enumParams__`=`[");
 			var sep = false;

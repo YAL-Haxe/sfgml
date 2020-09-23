@@ -47,10 +47,15 @@ class SfBuffer extends SfBufferImpl {
 	}
 	public function addTopLevelFuncOpenField(fd:SfField, ?thisArg:Bool) {
 		if (sfConfig.topLevelFuncs) {
-			if (fd.needsMethodClosure()) {
+			var needsMethodClosure = fd.needsMethodClosure();
+			if (!needsMethodClosure) addLine();
+			//
+			addTopLevelPrintIfPrefixField(fd);
+			//
+			if (needsMethodClosure) {
 				printf(this, "%(field_auto)`=`method(%type_auto, function(", fd, fd.parentType);
 			} else {
-				printf(this, "\nfunction %(field_auto)(", fd);
+				printf(this, "function %(field_auto)(", fd);
 			}
 			if (thisArg == null) {
 				thisArg = Std.is(fd, SfClassField) ? (cast fd:SfClassField).needsThisArg() : false;
@@ -58,6 +63,20 @@ class SfBuffer extends SfBufferImpl {
 			addThisArguments(thisArg, fd.args);
 			printf(this, ")`{%(+\n)");
 		} else printf(this, "\n#define %(field_auto)\n", fd);
+	}
+	public function addTopLevelPrintIfPrefix() {
+		var cond = sfConfig.printIf;
+		if (cond != null) {
+			printf(this, "if`(%s)`", cond);
+			return true;
+		} else return false;
+	}
+	public function addTopLevelPrintIfPrefixField(fd:SfField) {
+		var cond = sfConfig.printIf;
+		if (cond != null && fd.needsPrintIfWrap()) {
+			addTopLevelPrintIfPrefix();
+			return true;
+		} else return false;
 	}
 	public function addTopLevelFuncClose(?closeMethod:Bool) {
 		if (sfConfig.topLevelFuncs) {

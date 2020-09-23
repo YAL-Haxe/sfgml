@@ -48,4 +48,12 @@ class SfField extends SfFieldImpl {
 		if (cf.isInst || cf == cf.parentClass.constructor) return false;
 		return true;
 	}
+	
+	/**
+	 * Returns whether `-D sfgml-print-if` condition can go outside the declaration
+	 * (which is so if the static field is non-@:doc and thus shouldn't be referenced)
+	 */
+	public function needsPrintIfWrap():Bool {
+		return !checkDocState(parentType.docState);
+	}
 }
