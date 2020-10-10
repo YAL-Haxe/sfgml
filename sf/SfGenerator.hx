@@ -437,6 +437,8 @@ class SfGenerator extends SfGeneratorImpl {
 	 */
 	public var selfLevel:Int = -1;
 	
+	public var isInSwitchBlock:Bool = false;
+	
 	override public function printExpr(r:SfBuffer, expr:SfExpr, flags:SfPrintFlags):Void {
 		if (flags == null) throw "Flags is null";
 		inline function addExprs(_exprs:Array<SfExpr>, _flags:SfPrintFlags) {
@@ -581,7 +583,10 @@ class SfGenerator extends SfGeneratorImpl {
 						if (cf != null && cf.isInst && cf.isStructField) {
 							flags |= SfArgVarsExt.ThisSelf;
 						}
+						var _isInSwitchBlock = isInSwitchBlock;
+						isInSwitchBlock = false;
 						SfArgVars.printExt(r, fn.expr, fn.args, flags);
+						isInSwitchBlock = _isInSwitchBlock;
 						r.addExpr(fn.expr, SfPrintFlags.StatWrap);
 						printf(r, "%(-\n)}");
 					} else printf(r, "{}");
@@ -1184,20 +1189,26 @@ class SfGenerator extends SfGeneratorImpl {
 				} else printIf(r, c, a, b, true);
 			};
 			case SfWhile(_cond, _expr, _normal): {
+				var _isInSwitchBlock = isInSwitchBlock;
+				isInSwitchBlock = false;
 				if (_normal) {
 					printf(r, "while`%x`", _cond);
 				} else r.addString("do ");
 				r.addBlockExpr(_expr);
 				if (!_normal) printf(r, " until`(%x)", _cond.invert());
+				isInSwitchBlock = _isInSwitchBlock;
 			};
 			case SfCFor(q, c, p, x): {
 				printf(r, "for`(");
+				var _isInSwitchBlock = isInSwitchBlock;
+				isInSwitchBlock = false;
 				switch (q.def) {
 					case SfBlock([]): r.addString(";");
 					default: printf(r, "%sx;", q);
 				}
 				printf(r, "`%x;`%sx)`", c.unpack(), p);
 				addBlock(x);
+				isInSwitchBlock = _isInSwitchBlock;
 			};
 			case SfSwitch(_expr, _cases, _, _default): {
 				printSwitch(r, _expr, _cases, _default);
@@ -1214,7 +1225,10 @@ class SfGenerator extends SfGeneratorImpl {
 				printf(r, ")");
 				#end
 			}
-			case SfBreak: r.addString("break");
+			case SfBreak: {
+				if (isInSwitchBlock) expr.warning("GML does not support nested break - this will only break out of a switch-block");
+				r.addString("break");
+			};
 			case SfContinue: r.addString("continue");
 			case SfTry(block, catches): {
 				if (sfConfig.hasTryCatch) {
@@ -1381,6 +1395,8 @@ class SfGenerator extends SfGeneratorImpl {
 		r.addLine(1);
 		//
 		var trail = false;
+		var _isInSwitchBlock = isInSwitchBlock;
+		isInSwitchBlock = true;
 		for (cc in cw) {
 			if (trail) r.addLine(); else trail = true;
 			// "case v1: case v2:"
@@ -1434,6 +1450,7 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		r.addLine(-1);
 		r.addBlockClose();
+		isInSwitchBlock = _isInSwitchBlock;
 	}
 	
 }
