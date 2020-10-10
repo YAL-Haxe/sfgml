@@ -9,10 +9,10 @@ import haxe.Int64;
  * @author YellowAfterlife
  */
 #if !sfgml_native_bytes
-@:std @:coreApi
+@:std //@:coreApi
 class Bytes {
 	/** not coreApi:  */
-	public var length(default, null):Int;
+	public var length(get, null):Int;
 	inline function get_length():Int {
 		return b.length;
 	}
