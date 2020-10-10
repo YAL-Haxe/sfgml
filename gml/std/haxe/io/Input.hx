@@ -178,6 +178,21 @@ class Input {
 		if (last == "\r".code) buf.shiftPosition( -1);
 		buf.writeByte(0);
 		buf.rewind();
+		dataPos = pos;
+		return buf.readString();
+	}
+	
+	public function readString(count:Int):String {
+		var pos = dataPos;
+		var data = this.data;
+		var maxLen = dataLen - pos;
+		if (count > maxLen) count = maxLen;
+		var buf = buffer;
+		buf.rewind();
+		for (_ in 0 ... count) buf.writeByte(data[pos++]);
+		buf.writeByte(0);
+		buf.rewind();
+		dataPos = pos;
 		return buf.readString();
 	}
 }
