@@ -2,6 +2,7 @@ package sf.type;
 
 import haxe.macro.Type.ClassType;
 import sf.SfCore.*;
+import sf.SfGmlBuiltin;
 import sf.opt.syntax.SfGmlWith;
 import sf.type.SfBuffer;
 import sf.type.SfClass;
@@ -103,6 +104,8 @@ class SfClass extends SfClassImpl {
 	public function needsSeparateNewFunc():Bool {
 		return children.length > 0 || meta.has(":gml.keep.new");
 	}
+	
+	static var builtinVarMap:Map<String, Bool> = null;
 	
 	private function printConstructor(r:SfBuffer, ctr:SfClassField, ignoreFields:Map<String, Bool>):Void {
 		var ctr_isInst = ctr.isInst;
@@ -228,7 +231,18 @@ class SfClass extends SfClassImpl {
 					if (iterFound.exists(iterName)) continue;
 					iterFound[iterName] = true;
 					//
-					printf(r, "static %s`=`", iterName);
+					var vmap = builtinVarMap;
+					if (vmap == null) {
+						vmap = new Map();
+						for (name in SfGmlBuiltin.vars.split(" ")) vmap[name] = true;
+						builtinVarMap = vmap;
+					}
+					if (vmap.exists(iterName)) {
+						if (sfConfig.debug) r.addString("/* static */");
+					} else {
+						r.addString("static ");
+					}
+					printf(r, "%s`=`", iterName);
 					if (iterField.needsFunction()) {
 						if (checkInsert) {
 							printf(r, "function(");
