@@ -90,6 +90,12 @@ extern class Sprite extends Asset {
 	):Void;
 	//}
 	
+	//{ speed (GMS2)
+	function getSpeed():Float;
+	function getSpeedType():SpriteSpeedType;
+	function setSpeed(speed:Float, type:SpriteSpeedType):Void;
+	//}
+	
 	//{ texture
 	var textures(get, never):SpriteTextures;
 	private inline function get_textures():SpriteTextures {
@@ -131,4 +137,10 @@ abstract SpriteTextures(Sprite) from Sprite {
 	@:arrayAccess private inline function get(i:Int):Texture {
 		return this.textureAt(i);
 	}
+}
+
+@:native("spritespeed") @:snakeCase
+extern enum abstract SpriteSpeedType(Int) from Int to Int {
+	@:native("framespersecond") var FramesPerSecond;
+	@:native("framespergameframe") var FramesPerGameFrame;
 }
