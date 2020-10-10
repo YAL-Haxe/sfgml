@@ -1,4 +1,5 @@
 package gml.io;
+import gml.gpu.Surface;
 import gml.io.BufferType;
 import haxe.Int64;
 
@@ -154,6 +155,29 @@ import haxe.Int64;
 	public function compress(offset:Int, length:Int):Buffer;
 	public function decompress():Buffer;
 	
+	#if !sfgml.modern
+	@:native("get_surface") private function getSurfaceImpl(sf:Surface, mode:Int, offset:Int, modulo:Int):Void;
+	@:native("set_surface") private function setSurfaceImpl(sf:Surface, mode:Int, offset:Int, modulo:Int):Void;
+	#end
+	
+	/** Copies BGRA data from a surface to a buffer */
+	public inline function getSurface(sf:Surface, offset:Int):Void {
+		#if sfgml.modern
+		return BufferImpl.getSurface(this, sf, offset);
+		#else
+		getSurfaceImpl(sf, 0, offset, 0);
+		#end
+	}
+	
+	/** Copies BGRA data from a buffer to a surface */
+	public inline function setSurface(sf:Surface, offset:Int):Void {
+		#if sfgml.modern
+		return BufferImpl.setSurface(this, sf, offset);
+		#else
+		setSurfaceImpl(sf, 0, offset, 0);
+		#end
+	}
+	
 	/// Synchronously loads a buffer from given file.
 	public static function load(path:String):Buffer;
 	
@@ -209,4 +233,40 @@ import haxe.Int64;
 		dst.position = dstNext;
 		return true;
 	}
+	#if sfgml.modern
+	/**
+	 * What's going on here:
+	 * 2.3.1+ removed the long-unused mode/modulo arguments from
+	 * buffer_get_surface and buffer_set_surface, but 
+	 */
+	static function bufferSurfaceFunctionsHave3args_init():Bool {
+		var rt = Lib.runtimeVersion;
+		if (NativeString.pos("2.3.0.", rt) == 1) return false;
+		if (NativeString.pos("23.1.1.", rt) != 1) return true;
+		var buildStr = NativeString.delete(rt, 1, "23.1.1.".length);
+		if (NativeString.digits(buildStr) != buildStr) return true;
+		var buildNum = NativeType.toReal(buildStr);
+		return buildNum >= 186;
+	}
+	static var bufferSurfaceFunctionsHave3args:Bool = bufferSurfaceFunctionsHave3args_init();
+	//
+	static function getSetSurface_init(fn:Dynamic) {
+		var ctx = { fn: fn };
+		if (bufferSurfaceFunctionsHave3args) {
+			return NativeFunction.bind(ctx, function(buf, surf, offset) {
+				(cast NativeScope.self).fn(buf, surf, offset);
+			});
+		} else {
+			return NativeFunction.bind(ctx, function(buf, surf, offset) {
+				(cast NativeScope.self).fn(buf, surf, 0, offset, 0);
+			});
+		}
+	}
+	public static var getSurface:(buf:Buffer, surf:Surface, offset:Int)->Void = getSetSurface_init(
+		NativeFunction.bind(null, Syntax.code("buffer_get_surface"))
+	);
+	public static var setSurface:(buf:Buffer, surf:Surface, offset:Int)->Void = getSetSurface_init(
+		NativeFunction.bind(null, Syntax.code("buffer_set_surface"))
+	);
+	#end
 }
