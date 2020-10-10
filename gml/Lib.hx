@@ -59,6 +59,9 @@ extern class Lib {
 	
 	/** Points to "global" scope, just in case you want to do something with it. */
 	static var global:GlobalScope;
+	
+	/** Such as "2.3.0.401" */
+	@:expose("GM_runtime_version") static var runtimeVersion:String;
 }
 @:object("global") private extern class GlobalScope implements Dynamic { }
 
