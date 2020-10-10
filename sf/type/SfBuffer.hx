@@ -53,7 +53,9 @@ class SfBuffer extends SfBufferImpl {
 			addTopLevelPrintIfPrefixField(fd);
 			//
 			if (needsMethodClosure) {
-				printf(this, "%(field_auto)`=`method(%type_auto, function(", fd, fd.parentType);
+				var fda:String = sprintf("%(field_auto)", fd);
+				if (fda.indexOf(".") < 0) printf(this, "globalvar %s;`", fda);
+				printf(this, "%s`=`method(%type_auto, function(", fda, fd.parentType);
 			} else {
 				printf(this, "function %(field_auto)(", fd);
 			}
