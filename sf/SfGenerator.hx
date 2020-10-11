@@ -307,11 +307,15 @@ class SfGenerator extends SfGeneratorImpl {
 			case TBool(b): if (b) r.addString("true"); else r.addString("false");
 			case TNull: r.addString("undefined");
 			case TThis: {
+				#if (sfgml_keep_this_self == "force")
+				r.addString("this");
+				#else
 				switch (selfLevel) {
 					case 0: r.addString("self");
 					case 1: r.addString("other");
 					default: r.addString("this");
 				}
+				#end
 			};
 			default: Context.error("Can't print " + value.getName(), pos);
 		}
