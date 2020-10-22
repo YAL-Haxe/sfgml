@@ -26,9 +26,9 @@ class String {
 	}
 
 	#if (sfgml_modern)
-	public inline function indexOf(sub:String, startPos:Int = 0):Int {
+	public inline function indexOf(sub:String, startPos:Int = 1):Int {
 		var out = NativeString.posExt(sub, this, startPos);
-		return out > 0 ? out - 1 : -1;
+		return out - 1;
 	}
 	#else
 	@:native("pos_ext_haxe")
