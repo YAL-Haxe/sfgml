@@ -79,7 +79,12 @@ class SfGml_Type_enumHelpers extends SfOptImpl {
 		function getExprEnum(v:SfExpr):SfEnum {
 			switch (v.getTypeNz()) {
 				case TEnum(_.get() => et, _): return sfGenerator.enumMap.baseGet(et);
-				default: return null;
+				default: {
+					switch (v.def) {
+						case SfCast(v0, _): return getExprEnum(v0);
+						default: return null;
+					}
+				}
 			}
 		}
 		inline function checkEnum(e:SfEnum):Bool {
