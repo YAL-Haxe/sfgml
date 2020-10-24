@@ -158,7 +158,7 @@ class SfClass extends SfClassImpl {
 		
 		// generate initalizer:
 		if (isStruct) {
-			if (SfGmlWith.needsThisSelf(ctr.expr)) printf(r, "var this`=`self;\n");
+			//
 		}
 		else if (objName != null) { // it's instance-based
 			if (sfConfig.next) {
@@ -294,7 +294,8 @@ class SfClass extends SfClassImpl {
 			SfArgVars.print(r, ctr);
 			printFieldExpr(r, ctr);
 			r.addLine();
-		} else {
+		}
+		else {
 			//
 			var args = ctr.args;
 			var argc = args.length;
@@ -446,9 +447,10 @@ class SfClass extends SfClassImpl {
 				}; // static function
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
-					if (!dotStatic) printf(init, "globalvar %s%(field_auto);`", g_, f);
+					if (!dotStatic) printf(init, "globalvar %s%(field_auto);", g_, f);
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
+						init.addSep();
 						var fd = fx.getData();
 						var fsf = fx.mod(SfStaticField(this, f));
 						init.addTopLevelPrintIfPrefix();
