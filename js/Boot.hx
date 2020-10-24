@@ -119,7 +119,9 @@ class Boot {
 			i = size; while (--i >= 0) r[i] = null;
 		}
 		#end
+		#if sfgml_legacy_meta
 		MetaType.set(r, meta);
+		#end
 		var n:Int = gml.Lib.argc;
 		i = 2;
 		while (i < n) {
