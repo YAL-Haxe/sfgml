@@ -24,12 +24,21 @@ class String {
 	public inline function charCodeAt(i:Int):Int {
 		return NativeString.charCodeAt(this, i + 1);
 	}
-	@:native("pos_ext")
+
+	#if (sfgml_modern)
+	public inline function indexOf(sub:String, startPos:Int = 1):Int {
+		var out = NativeString.posExt(sub, this, startPos);
+		return out - 1;
+	}
+	#else
+	@:native("pos_ext_haxe")
 	public function indexOf(sub:String, startPos:Int = 0):Int {
 		var hay = startPos > 0 ? NativeString.delete(this, 1, startPos) : this;
 		var out = NativeString.pos(sub, hay);
 		return out > 0 ? out + startPos - 1 : -1;
 	}
+	#end
+
 	@:native("pos_last")
 	public function lastIndexOf(sub:String, ?startPos:Int):Int {
 		var i = 0, out = -1;
