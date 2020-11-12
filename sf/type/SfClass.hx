@@ -445,6 +445,14 @@ class SfClass extends SfClassImpl {
 					}
 					//
 				}; // static function
+				case FVar(AccCall | AccInline, AccNo | AccNever): {
+					if (!sfConfig.gmxMode && f.checkDocState(docState)) {
+						var val = f.getGetterMacro();
+						if (val != null) {
+							printf(init, "#macro %(field_auto) %s\n", f, val);
+						}
+					}
+				};
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
 					if (!dotStatic) printf(init, "globalvar %s%(field_auto);", g_, f);

@@ -1,5 +1,7 @@
 package sf.type;
 import haxe.macro.Type;
+import sf.SfCore.*;
+using sf.type.expr.SfExprTools;
 
 /**
  * ...
@@ -46,5 +48,42 @@ class SfClassField extends SfClassFieldImpl {
 	/** Whether this field will have a function generated for method body */
 	public inline function needsFunction():Bool {
 		return !isHidden && isCallable && expr != null;
+	}
+	
+	/** Returns code for a getter macro, provided that this is a getter */
+	public function getGetterMacro():String {
+		// just to be sure (and quick-cut inline expressions):
+		switch (kind) {
+			case FVar(AccInline, AccNo | AccNever): {
+				switch (expr.def) {
+					case SfConst(_): return sprintf("%x", expr);
+					default: return sprintf("(%x)", expr);
+				}
+			}
+			case FVar(AccCall, AccNo | AccNever): {};
+			default: return null;
+		}
+		// no dot statics:
+		if (parentClass.dotStatic) {
+			classField.pos.warningAt('Can\'t print a macro for $realName in a dot-static class.');
+			return null;
+		}
+		// lookup getter:
+		var getterName = "get_" + realName;
+		var getter = parentClass.realMap[getterName];
+		if (getter == null) {
+			classField.pos.warningAt('Can\'t find the getter $getterName to expose for $realName');
+			return null;
+		}
+		//
+		switch ([getter.kind, getter.expr.def]) {
+			case [FMethod(MethInline), SfReturn(true, v)]: {
+				// if method is inline and single-line, we'll use that as the macro value
+				return sprintf("(%x)", v);
+			};
+			default: {
+				return sprintf("%(field_auto)()", getter);
+			};
+		}
 	}
 }

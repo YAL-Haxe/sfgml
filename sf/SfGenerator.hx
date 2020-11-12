@@ -116,7 +116,7 @@ class SfGenerator extends SfGeneratorImpl {
 		//if (cond != null) printf(init, "if (%s) {\n", cond);
 		//
 		if (sfConfig.header != null) {
-			for (line in sfConfig.header.split("\\n")) printf(mixed, "// %s\n", line);
+			for (line in sfConfig.header.split("\n")) printf(mixed, "%s\n", line);
 		}
 		if (SfGml_StdTypeImpl.isUsed) printTypeGrid(decl);
 		if (SfGml_Type_enumHelpers.code != "") {
@@ -495,7 +495,11 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfDynamic(_code, _args): {
 				if (_args.length >= 10) error(expr, "Too many arguments");
 				var modWith = _code == SfGmlWith.withCode;
-				if (modWith) if (selfLevel >= 0) selfLevel++; else selfLevel--;
+				var _isInSwitchBlock = isInSwitchBlock;
+				if (modWith) {
+					isInSwitchBlock = false;
+					if (selfLevel >= 0) selfLevel++; else selfLevel--;
+				}
 				var start = 0;
 				var cubAt = _code.indexOf("{");
 				while (cubAt >= 0) {
@@ -522,7 +526,10 @@ class SfGenerator extends SfGeneratorImpl {
 					cubAt = _code.indexOf("{", i);
 				}
 				r.addSub(_code, start);
-				if (modWith) if (selfLevel >= 0) selfLevel--; else selfLevel++;
+				if (modWith) {
+					isInSwitchBlock = _isInSwitchBlock;
+					if (selfLevel >= 0) selfLevel--; else selfLevel++;
+				}
 			};
 			case SfArrayDecl(vals): {
 				r.addChar("[".code);

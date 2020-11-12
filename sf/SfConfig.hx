@@ -19,7 +19,7 @@ class SfConfig extends SfConfigImpl {
 	public var hintEmptyTypes = bool("sf-hint-empty-types", false);
 	
 	/** Name of the init script. */
-	public var entrypoint = string("sfgml-main", "main");
+	public var entrypoint = string("sfgml-main");
 	
 	/** File header information, if any */
 	public var header = string("sfgml-header");
@@ -48,7 +48,10 @@ class SfConfig extends SfConfigImpl {
 	/** Whether to omit /// comments in code */
 	public var noCodeDoc = bool("sfgml-no-code-doc", false);
 	
-	/** Whether compiled to an extension (can output macros) */
+	/**
+	 * Whether compiled to an extension
+	 * (consequences include having to store macros in extension nodes rather than #macro)
+	 */
 	public var gmxMode = bool("sfgml-extension");
 	
 	/** Whether to use GMS2-specific syntax */

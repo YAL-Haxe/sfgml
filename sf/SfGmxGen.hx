@@ -67,28 +67,8 @@ class SfGmxGen {
 					var doc = sff.doc;
 					var mcrValue:String;
 					switch (sff.kind) {
-						case FVar(AccInline, AccNo | AccNever): { // inline var v = 4 -> 4
-							mcrValue = sprintf("%x", sff.expr);
-						};
-						case FVar(AccCall, AccNo | AccNever): { // v(get, never) -> getter
-							var sfxName = "get_" + sff.realName;
-							var sfx = sfc.realMap[sfxName];
-							if (sfx != null) {
-								var sfb = new SfBuffer();
-								var sfxExpr = sfx.expr.unpack();
-								switch ([sfx.kind, sfxExpr.def]) {
-									case [FMethod(MethInline), SfReturn(true, v)]: {
-										// if method is inline and single-line, we'll use that as the macro value
-										printf(sfb, "(%x)", v);
-									};
-									default: printf(sfb, "%(field_auto)()", sfx);
-								}
-								mcrValue = sfb.toString();
-							} else {
-								if (sff.docState > 0) Context.warning("Can't find " + sfxName
-									+ " to make a macro for " + sff.name, sff.classField.pos);
-								mcrValue = null;
-							}
+						case FVar(AccInline | AccCall, AccNo | AccNever): { // inline var v = 4 -> 4
+							mcrValue = sff.getGetterMacro();
 						};
 						default: mcrValue = "g_" + path;
 					}; // mcrValue = switch(sff.kind)
