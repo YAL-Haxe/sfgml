@@ -134,6 +134,18 @@ class SfConfig extends SfConfigImpl {
 		super();
 		instanceof = true;
 		update();
+		if (header == null) {
+			// OK!
+		} else if (StringTools.startsWith(header, "/")) { // "/path"
+			try {
+				header = sys.io.File.getContent(header.substring(1));
+				header = StringTools.replace(header, "\r", "");
+			} catch (x:Dynamic) {
+				Sys.println("Error grabbing header: " + x);
+			}
+		} else {
+			header = "// " + StringTools.replace(header, "\\n", "\n// ");
+		}
 	}
 	public function update() {
 		var d = findData();
