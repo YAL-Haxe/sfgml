@@ -164,6 +164,7 @@ class SfConfig extends SfConfigImpl {
 		hasFunctionLiterals = v23;
 		hasChainedAccessors = v23;
 		topLevelFuncs = v23 && !gmxMode;
+		entrypoint = string("sfgml-main", d.modern ? "" : "main");
 		//
 		#if (sf_debug_config)
 		var fields = Reflect.fields(this);

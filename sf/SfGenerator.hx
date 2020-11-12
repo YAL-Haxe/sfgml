@@ -164,10 +164,13 @@ class SfGenerator extends SfGeneratorImpl {
 		mixed.addBuffer(decl);
 		if (sfConfig.modern) {
 			mixed.addBuffer(out);
+			var ep = sfConfig.entrypoint;
+			if (ep != "") printf(mixed, "function %s()`{", ep);
 			mixed.addLine();
 			mixed.addBuffer(init);
 			mixed.addLine();
 			addMainExpr(mixed);
+			if (ep != "") printf(mixed, "}");
 		} else {
 			addMainExpr(init);
 			mixed.addBuffer(init);
