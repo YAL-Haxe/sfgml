@@ -103,20 +103,35 @@ class SfEnum extends SfEnumImpl {
 		printf(out, "static toString`=`method(undefined,`%s);\n", toStringPath);
 		printf(out, "static __enum__`=`mt_%(type_auto);", this);
 		printf(out, "%(-\n)};\n");
+		//
+		function addEnumParamsLiteral(ctr:SfEnumCtr) {
+			printf(out, "[");
+			for (i => arg in ctr.args) {
+				if (i > 0) out.addComma();
+				printf(out, '"%s"', arg.v.name);
+			}
+			printf(out, "]");
+		}
+		var avoidStaticArrayDeclarations = sfConfig.avoidStaticArrayDeclarations;
+		//
 		for (ctr in ctrList) {
+			if (avoidStaticArrayDeclarations) {
+				out.addLine();
+				out.addTopLevelPrintIfPrefixField(ctr);
+				printf(out, "global.__mp_%(field_auto)`=`", ctr);
+				addEnumParamsLiteral(ctr);
+			}
 			out.addLine();
 			out.addTopLevelPrintIfPrefixField(ctr);
 			printf(out, "function mc_%(field_auto)()", ctr);
 			printf(out, "`:`mc_%(type_auto)()", this);
 			printf(out, "`constructor`{%(+\n)");
 			//
-			printf(out, "static __enumParams__`=`[");
-			var sep = false;
-			for (arg in ctr.args) {
-				if (sep) out.addComma(); else sep = true;
-				printf(out, '"%s"', arg.v.name);
-			}
-			printf(out, "];\n");
+			printf(out, "static __enumParams__`=`");
+			if (avoidStaticArrayDeclarations) {
+				printf(out, "global.__mp_%(field_auto)", ctr);
+			} else addEnumParamsLiteral(ctr);
+			printf(out, ";\n");
 			printf(out, "static __enumIndex__`=`");
 			printCtrIndexLiteral(out, ctr);
 			printf(out, ";%(-\n)};\n");
