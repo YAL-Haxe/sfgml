@@ -123,6 +123,7 @@ class SfEnum extends SfEnumImpl {
 			//
 			if (ctr.args.length == 0 && !noRef) {
 				printf(out, "globalvar %(field_auto);`", ctr);
+				out.addTopLevelPrintIfPrefix();
 				printf(out, "%(field_auto)`=`new mc_%(field_auto)();\n", ctr, ctr);
 			} else {
 				out.addTopLevelFuncOpenField(ctr);
