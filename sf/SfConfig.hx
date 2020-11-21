@@ -128,6 +128,9 @@ class SfConfig extends SfConfigImpl {
 	 */
 	public var avoidPrefixStatements:Bool = false;
 	
+	/** [2.3.0][req 177710] `a[i](...)` produces invalid JS on HTML5 */
+	public var avoidArrayAccessCalls:Bool = false;
+	
 	/** [2.3.0][req 177719] `static a=[]` produces broken JS on HTML5  */
 	public var avoidStaticArrayDeclarations:Bool = false;
 	
@@ -171,6 +174,7 @@ class SfConfig extends SfConfigImpl {
 		hasFunctionLiterals = v23;
 		hasChainedAccessors = v23;
 		topLevelFuncs = v23 && !gmxMode;
+		avoidArrayAccessCalls = v23 && !v231;
 		avoidStaticArrayDeclarations = v23 && !v231;
 		entrypoint = string("sfgml-main", d.modern ? "" : "main");
 		//
