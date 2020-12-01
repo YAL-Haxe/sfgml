@@ -39,6 +39,7 @@ class SfGmlCullHelpers extends SfOptImpl {
 		ignoreHidden = true;
 		cullClass("gml.internal.NativeFunctionInvoke");
 		cullClass("gml.internal.NativeConstructorInvoke");
+		cullClass("IntIterator");
 		//
 		var _Exception = cullClass("haxe.Exception");
 		if (_Exception != null) {
