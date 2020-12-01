@@ -77,6 +77,12 @@ class SfBuffer extends SfBufferImpl {
 		var cond = sfConfig.printIf;
 		if (cond != null && fd.needsPrintIfWrap()) {
 			addTopLevelPrintIfPrefix();
+			if (!fd.parentType.dotStatic
+				&& (
+					Std.is(fd, SfClassField) && (cast fd:SfClassField).kind.match(FMethod(_))
+					|| Std.is(fd, SfEnumCtr) && (cast fd:SfEnumCtr).args.length > 0
+				)
+			) addLine();
 			return true;
 		} else return false;
 	}
