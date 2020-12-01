@@ -92,7 +92,7 @@ class SfYyGen {
 		var gd:Bool = sfConfig.gmxDoc;
 		var md:Bool = sfConfig.gmxMcrDoc;
 		var skipFuncs = sfConfig.codePath != null;
-		var debug = sfConfig.debug;
+		var canHide = true;
 		//
 		var mArr = file.constants;
 		var mMap = new Map<String, SfYyGUID>();
@@ -120,7 +120,7 @@ class SfYyGen {
 				mvc: "1.0",
 				constantName: name,
 				value: value,
-				hidden: !debug && doc == null
+				hidden: canHide && doc == null
 			});
 		}
 		function addFunc(name:String, doc:String, sff:SfField) {
@@ -149,8 +149,8 @@ class SfYyGen {
 				name: name,
 				externalName: name,
 				// https://bugs.yoyogames.com/view.php?id=30523
-				help: (gd && doc != null) ? doc : (debug ? name + "(...)" : ""),
-				hidden: !debug && !(gd && doc != null),
+				help: (gd && doc != null) ? doc : (canHide ? "" : name + "(...)"),
+				hidden: canHide && !(gd && doc != null),
 				kind: 2,
 				returnType: 2,
 				argCount: argc,
