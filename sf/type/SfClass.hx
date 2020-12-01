@@ -458,7 +458,7 @@ class SfClass extends SfClassImpl {
 					if (!dotStatic) printf(init, "globalvar %s%(field_auto);", g_, f);
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
-						init.addSep();
+						if (!dotStatic) init.addSep();
 						var fd = fx.getData();
 						var fsf = fx.mod(SfStaticField(this, f));
 						init.addTopLevelPrintIfPrefix();
