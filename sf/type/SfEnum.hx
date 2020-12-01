@@ -120,6 +120,7 @@ class SfEnum extends SfEnumImpl {
 				out.addTopLevelPrintIfPrefixField(ctr);
 				printf(out, "global.__mp_%(field_auto)`=`", ctr);
 				addEnumParamsLiteral(ctr);
+				out.addSemico();
 			}
 			out.addLine();
 			out.addTopLevelPrintIfPrefixField(ctr);
