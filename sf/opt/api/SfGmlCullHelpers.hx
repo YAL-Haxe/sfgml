@@ -40,6 +40,7 @@ class SfGmlCullHelpers extends SfOptImpl {
 		cullClass("gml.internal.NativeFunctionInvoke");
 		cullClass("gml.internal.NativeConstructorInvoke");
 		cullClass("IntIterator");
+		cullClass("haxe.iterators.ArrayIterator");
 		//
 		var _Exception = cullClass("haxe.Exception");
 		if (_Exception != null) {
