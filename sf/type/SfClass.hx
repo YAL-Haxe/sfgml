@@ -229,6 +229,10 @@ class SfClass extends SfClassImpl {
 					if (iterField.isHidden) continue;
 					var iterName = iterField.name;
 					if (iterFound.exists(iterName)) continue;
+					switch (iterField.kind) {
+						case FVar(AccCall | AccInline, AccNo | AccNever): continue;
+						default:
+					}
 					iterFound[iterName] = true;
 					//
 					var vmap = builtinVarMap;
