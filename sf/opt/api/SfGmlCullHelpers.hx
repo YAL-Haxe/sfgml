@@ -23,6 +23,7 @@ class SfGmlCullHelpers extends SfOptImpl {
 			switch (x.def) {
 				case SfStaticField(c1, _) if (c1 == c): return true;
 				case SfTypeExpr(t) if (t == c): return true;
+				case SfNew(c1, _, _) if (c1 == c): return true;
 				default: return x.matchIter(st, it);
 			}
 		}
