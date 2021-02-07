@@ -106,7 +106,7 @@ extern class Exception {
 	
 	#if (sfgml.modern || sfgml_version >= "2.3")
 	#if sfgml_simple_exceptions
-	private static inline function wrapValue(val:Any):Any {
+	private static inline function wrapValue(val:Any):Dynamic {
 		return {
 			value: val,
 			message: code("string")(val),
@@ -121,13 +121,17 @@ extern class Exception {
 	}
 	public static function caught(value:Any):Any {
 		if (isNativeException(value)) return value;
-		return wrapValue(value);
+		var e:Dynamic = wrapValue(value);
+		(cast e:Exception).native = e;
+		return e;
 	}
 	public static function thrown(value:Any):Any {
 		if (isNativeException(value)) return value;
-		return wrapValue(value);
+		var e:Dynamic = wrapValue(value);
+		(cast e:Exception).native = e;
+		return e;
 	}
-	#else
+	#else // !sfgml_simple_exceptions
 	private static function isNativeException(value:Any):Bool {
 		if (code("is_struct")(value)) {
 			var c:Dynamic = code("variable_struct_get")(value, "__class__");
@@ -150,16 +154,17 @@ extern class Exception {
 		if (isNativeException(value)) return (value:Exception).native;
 		return new ValueException(value);
 	}
-	#end
-	#else
+	#end // if sfgml_simple_exceptions
+	#else // < 2.3
 	public static inline function caught(value:Any):Any {
 		return value;
 	}
 	public static inline function thrown(value:Any):Any {
 		return code("string")(value);
 	}
-	#end
+	#end // if 2.3
 	
+	#if sfgml_simple_exceptions inline #end
 	function unwrap():Any {
 		return native;
 	}
