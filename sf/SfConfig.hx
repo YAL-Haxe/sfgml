@@ -177,6 +177,7 @@ class SfConfig extends SfConfigImpl {
 		avoidArrayAccessCalls = v23 && !v231;
 		avoidStaticArrayDeclarations = v23 && !v231;
 		entrypoint = string("sfgml-main", d.modern ? "" : "main");
+		version = d.version;
 		//
 		#if (sf_debug_config)
 		var fields = Reflect.fields(this);
