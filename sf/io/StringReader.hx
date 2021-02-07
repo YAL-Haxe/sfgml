@@ -42,7 +42,9 @@ class StringReader {
 		length = source.length;
 		pos = 0;
 	}
-	public inline function close() { }
+	public inline function close() {
+		source.destroy();
+	}
 	//
 	public inline function read():Int return source.peekByte(pos++);
 	public inline function peek():Int return source.peekByte(pos);
