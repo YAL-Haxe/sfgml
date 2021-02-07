@@ -12,6 +12,9 @@ import sf.type.expr.SfExpr;
 import sf.opt.syntax.SfGmlWith;
 using sf.type.expr.SfExprTools;
 
+/**
+ * Responsible for printing variables for arguments
+ */
 class SfArgVars {
 	public static function printExt(r:SfBuffer, expr:SfExpr, args:Array<SfArgument>, flags:SfArgVarsExt) {
 		var argc:Int = args.length;
@@ -58,9 +61,9 @@ class SfArgVars {
 			}
 			// this is purely a countermeasure for IDE not shutting up about "extra arguments"
 			if (hasRest) {
-				printf(r, "if`(false)`throw argument[argument_count`-`1];\n");
+				printf(r, "if`(false)`show_debug_message(argument[argument_count`-`1]);\n");
 			} else if (hasOpt) {
-				printf(r, "if`(false)`throw argument[%d];\n", args.length - 1);
+				printf(r, "if`(false)`show_debug_message(argument[%d]);\n", args.length - 1);
 			}
 			return;
 		}
