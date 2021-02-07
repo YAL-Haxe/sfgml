@@ -169,7 +169,7 @@ class SfConfig extends SfConfigImpl {
 		var v231 = compare(d.version, "2.3.1") >= 0;
 		avoidPrefixStatements = v23;
 		modern = v23;
-		dotStatic = bool("sfgml-dot-static", v23);
+		dotStatic = bool("sfgml-dot-static", v23 && !gmxMode);
 		hasTryCatch = v23;
 		hasFunctionLiterals = v23;
 		hasChainedAccessors = v23;
@@ -212,7 +212,12 @@ class SfConfig extends SfConfigImpl {
 			case "yy": {
 				var yy = SfYyGen.getText(path);
 				next = true;
-				if (yy.indexOf('"resourceType": "GMScript"') >= 0) { // 2.3 script
+				if (yy.indexOf('"resourceType": "GMExtension"') >= 0) { // 2.3 extension
+					isExtension = true;
+					modern = true;
+					if (v == null) v = "2.3";
+				}
+				else if (yy.indexOf('"resourceType": "GMScript"') >= 0) { // 2.3 script
 					isExtension = false;
 					modern = true;
 					if (v == null) v = "2.3";

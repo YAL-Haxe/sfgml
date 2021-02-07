@@ -32,6 +32,10 @@ using StringTools;
  */
 class SfGenerator extends SfGeneratorImpl {
 	public var declBuffer:SfBuffer;
+	/** In 2.3 extension mode, we want static function `#define`s after the init function with globalvar setup */
+	public var staticFuncBuffer:SfBuffer;
+	/** In 2.3 extension mode, we want constructors before the rest of the code in init function */
+	public var constructorBuffer:SfBuffer;
 	public static function main() {
 		SfConfig.main();
 	}
@@ -93,6 +97,9 @@ class SfGenerator extends SfGeneratorImpl {
 		var out:SfBuffer = new SfBuffer();
 		var init:SfBuffer = new SfBuffer();
 		var decl:SfBuffer = new SfBuffer(); declBuffer = decl;
+		var sepStaticFuncs = sfConfig.modern && sfConfig.gmxMode;
+		constructorBuffer = sepStaticFuncs ? new SfBuffer() : out;
+		staticFuncBuffer = sepStaticFuncs ? new SfBuffer() : out;
 		// inline entry point, if needed:
 		if (mainExpr != null) switch (mainExpr.def) {
 			case SfCall(_.def => SfStaticField(_, f), []): {
@@ -153,7 +160,7 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 		
 		//
-		inline function addMainExpr(b:SfBuffer):Void {
+		function addMainExpr(b:SfBuffer):Void {
 			if (mainExpr != null) {
 				var wrap = b.addTopLevelPrintIfPrefix();
 				b.addExpr(mainExpr, wrap ? SfPrintFlags.Stat : SfPrintFlags.StatWrap);
@@ -161,16 +168,19 @@ class SfGenerator extends SfGeneratorImpl {
 				b.addLine();
 			}
 		}
+		if (sepStaticFuncs) mixed.addBuffer(constructorBuffer);
 		mixed.addBuffer(decl);
 		if (sfConfig.modern) {
 			mixed.addBuffer(out);
 			var ep = sfConfig.entrypoint;
-			if (ep != "") printf(mixed, "function %s()`{", ep);
+			var wrapEp = ep != "" && !sfConfig.gmxMode;
+			if (wrapEp) printf(mixed, "function %s()`{", ep);
 			mixed.addLine();
 			mixed.addBuffer(init);
 			mixed.addLine();
 			addMainExpr(mixed);
-			if (ep != "") printf(mixed, "}");
+			if (wrapEp) printf(mixed, "}");
+			if (sepStaticFuncs) mixed.addBuffer(staticFuncBuffer);
 		} else {
 			addMainExpr(init);
 			mixed.addBuffer(init);

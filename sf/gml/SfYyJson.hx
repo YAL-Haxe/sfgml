@@ -1,4 +1,4 @@
-package sf;
+package sf.gml;
 
 import haxe.Json;
 using StringTools;
@@ -8,6 +8,10 @@ using StringTools;
  * @author YellowAfterlife
  */
 class SfYyJson {
+	public static function parse(s:String, v23:Bool):Dynamic {
+		return SfYyJsonParser.parse(s, v23);
+	}
+	
 	static function stringify_string(b:StringBuf, s:String):Void {
 		b.addChar('"'.code);
 		var start = 0;

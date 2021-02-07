@@ -27,7 +27,10 @@ typedef SfYyExtFile = {> SfYyExtNode,
 }
 
 typedef SfYyExtMacro = {> SfYyExtNode,
-	var constantName:String;
+	// 2.2
+	var ?constantName:String;
+	// 2.3
+	var ?name:String;
 	var hidden:Bool;
 	var value:String;
 }
@@ -44,9 +47,14 @@ typedef SfYyExtFunc = {> SfYyExtNode,
 }
 
 typedef SfYyExtNode = {
-	var id:SfYyGUID;
-	var modelName:String;
-	var mvc:String;
+	// 2.2:
+	var ?id:SfYyGUID;
+	var ?modelName:String;
+	var ?mvc:String;
+	// 2.3:
+	var ?resourceType:String;
+	var ?resourceVersion:String;
+	var ?tags:Array<String>;
 }
 
 abstract SfYyGUID(String) {

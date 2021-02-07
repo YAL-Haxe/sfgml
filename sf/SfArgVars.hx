@@ -38,7 +38,7 @@ class SfArgVars {
 		
 		//
 		var lp = sfConfig.localPrefix;
-		if (sfConfig.modern) {
+		if (sfConfig.modern && flags.hasNone(SfArgVarsExt.XVarArgs)) {
 			if (showThis && flags.has(SfArgVarsExt.ThisSelf)) {
 				printf(r, "var this`=`self;\n");
 			}
@@ -130,10 +130,14 @@ class SfArgVars {
 	 */
 	public static function print(r:SfBuffer, f:SfClassField) {
 		var flags:SfArgVarsExt = 0;
+		var modern = sfConfig.modern;
 		if (f.isSelfCall()) {
 			flags |= SfArgVarsExt.ThisSelf;
 		} else if (f.needsThisArg()) {
 			flags |= SfArgVarsExt.ThisArg;
+			if (modern) flags |= SfArgVarsExt.XVarArgs;
+		} else {
+			if (modern && !f.isInst && !f.dotAccess) flags |= SfArgVarsExt.XVarArgs;
 		}
 		printExt(r, f.expr, f.args, flags);
 	}
@@ -314,13 +318,21 @@ class SfArgVars {
 	}
 }
 enum abstract SfArgVarsExt(Int) from Int to Int {
+	/** Include a `this` argument */
 	var ThisArg = 1;
+	/** `this` is `self` */
 	var ThisSelf = 2;
+	/** Use argument variables even though we're on 2.3 */
+	var XVarArgs = 4;
+	
 	public function has(flag:SfArgVarsExt):Bool {
 		return (this & flag) == flag;
 	}
-	public inline function hasAny(flag:SfArgVarsExt):Bool {
-		return (this & flag) != 0;
+	public inline function hasAny(flags:SfArgVarsExt):Bool {
+		return (this & flags) != 0;
+	}
+	public inline function hasNone(flags:SfArgVarsExt):Bool {
+		return (this & flags) == 0;
 	}
 	@:op(A|B) public inline function or(flag:SfArgVarsExt):SfArgVarsExt {
 		return this | flag;

@@ -130,12 +130,13 @@ class SfClass extends SfClassImpl {
 		//
 		ctr.isInst = false;
 		var ctr_exposePath:String;
+		var globalvarCtr = isStruct && (dotStatic || sfConfig.gmxMode);
 		if (isStruct) {
 			r.addLine();
-			if (dotStatic) printf(r, "globalvar %type_auto;`", this);
+			if (globalvarCtr) printf(r, "globalvar %type_auto;`", this);
 			r.addTopLevelPrintIfPrefixField(ctr);
 			//
-			if (dotStatic) {
+			if (globalvarCtr) {
 				printf(r, "%type_auto = method(undefined,`function(", this);
 			} else {
 				printf(r, "function %(type_auto)(", this);
@@ -361,17 +362,14 @@ class SfClass extends SfClassImpl {
 					printf(r, '"%s";', name);
 				} else printf(r, "mt_%(type_auto);", this);
 			}
+			printf(r, "%(-\n)}");
+			if (globalvarCtr) printf(r, ");");
+			r.addLine();
 		} else {
 			printf(r, "return this;");
+			r.addTopLevelFuncCloseField(ctr, dotStatic);
 		}
-		r.addTopLevelFuncCloseField(ctr, dotStatic);
-		if (isStruct && !nativeGen) {
-			r.addTopLevelPrintIfPrefix();
-			var mtc = sfGenerator.findRealClassField("gml.MetaClass", "constructor");
-			if (mtc != null) {
-				printf(r, "mt_%type_auto.%s`=`%type_auto;\n", this, mtc.name, this);
-			}
-		}
+		
 		ctr.isInst = ctr_isInst; ctr.name = ctr_name;
 	}
 	
@@ -379,6 +377,8 @@ class SfClass extends SfClassImpl {
 	override public function printTo(out:SfBuffer, initBuf:SfBuffer):Void {
 		var hintFolds = sfConfig.hintFolds;
 		var r:SfBuffer = null;
+		var stfr:SfBuffer = null;
+		var ctrb:SfBuffer = null;
 		var init:SfBuffer = null;
 		var modern = sfConfig.modern;
 		var ignoreFields = new Map<String, Bool>();
@@ -387,6 +387,13 @@ class SfClass extends SfClassImpl {
 			var nativeGen = this.nativeGen;
 			sfGenerator.currentClass = this;
 			r = new SfBuffer();
+			if (sfGenerator.staticFuncBuffer != out) {
+				stfr = new SfBuffer();
+				ctrb = new SfBuffer();
+			} else {
+				stfr = r;
+				ctrb = r;
+			}
 			init = new SfBuffer();
 			// hint-enum:
 			if (docState > 0 && !dotAccess && !sfConfig.gmxMode) {
@@ -403,15 +410,26 @@ class SfClass extends SfClassImpl {
 			// constructor:
 			var ctr = constructor;
 			if (ctr != null && !ctr.isHidden) {
-				printConstructor(r, ctr, ignoreFields);
-			} else if (dotStatic) {
+				printConstructor(isStruct ? ctrb : stfr, ctr, ignoreFields);
+				if (isStruct && !nativeGen) {
+					r.addTopLevelPrintIfPrefix();
+					var mtc = sfGenerator.findRealClassField("gml.MetaClass", "constructor");
+					if (mtc != null) {
+						printf(r, "mt_%type_auto.%s`=`%type_auto;\n", this, mtc.name, this);
+					}
+				}
+			}
+			else if (dotStatic) {
 				var hasStatics = false;
 				for (f in staticList) {
 					if (!f.isHidden) { hasStatics = true; break; }
 				}
 				if (hasStatics) {
+					// there is no constructor but we'll be defining Class.staticVar
+					// so we need an empty struct to assign variables to
 					var path = sprintf("%type_auto", this);
 					if (!globalObjects.exists(path)) {
+						// allow combining statics from same-named classes
 						globalObjects[path] = true;
 						printf(r, "globalvar %s;`", path);
 						r.addTopLevelPrintIfPrefix();
@@ -441,11 +459,11 @@ class SfClass extends SfClassImpl {
 					}
 					// function cc_yal_Some_field(...) { ... }
 					if (fbody) {
-						r.addTopLevelFuncOpenField(f);
-						SfArgVars.doc(r, f);
-						SfArgVars.print(r, f);
-						printFieldExpr(r, f);
-						r.addTopLevelFuncCloseField(f);
+						stfr.addTopLevelFuncOpenField(f);
+						SfArgVars.doc(stfr, f);
+						SfArgVars.print(stfr, f);
+						printFieldExpr(stfr, f);
+						stfr.addTopLevelFuncCloseField(f);
 					}
 					//
 				}; // static function
@@ -502,12 +520,23 @@ class SfClass extends SfClassImpl {
 			//
 			sfGenerator.currentClass = null;
 		} // if (!isHidden)
-		var rc = r;
-		r = out;
-		if (rc != null && rc.length > 0) {
-			if (hintFolds) printf(r, "\n%(+region)\n", sprintf("%type_dot", this));
-			r.addBuffer(rc);
-			if (hintFolds) printf(r, "\n%(-region)\n");
+		if (r != null && (r.length > 0 || stfr.length > 0 || ctrb.length > 0)) {
+			var fq = sprintf("%type_dot", this);
+			if (r.length > 0) {
+				var addTo = dotAccess ? out : sfGenerator.staticFuncBuffer;
+				if (hintFolds) printf(addTo, "\n%(+region)\n", fq);
+				addTo.addBuffer(r);
+				if (hintFolds) printf(addTo, "\n%(-region)\n");
+			}
+			if (stfr != r && stfr.length > 0) {
+				var addTo = sfGenerator.staticFuncBuffer;
+				if (hintFolds) printf(addTo, "\n%(+region)\n", fq);
+				addTo.addBuffer(stfr);
+				if (hintFolds) printf(addTo, "\n%(-region)\n");
+			}
+			if (ctrb != r && ctrb.length > 0) {
+				sfGenerator.constructorBuffer.addBuffer(ctrb);
+			}
 		}
 		if (init != null && init.length > 0) {
 			if (hintFolds) printf(initBuf, "// %(type_dot):\n", this);

@@ -2,6 +2,7 @@ package sf;
 import haxe.Json;
 import haxe.io.Path;
 import haxe.macro.Context;
+import sf.opt.syntax.SfGmlRest;
 import sf.type.SfClass;
 import sf.type.SfClassField;
 import sf.type.SfField;
@@ -10,6 +11,7 @@ import sys.io.File;
 import sf.SfCore.sfConfig;
 import sf.SfCore.sfGenerator;
 import sf.gml.SfYyExtension;
+import sf.gml.*;
 
 /**
  * ...
@@ -42,14 +44,35 @@ class SfYyGen {
 	public static function getText(path:String) {
 		if (path == getText_path && getText_text != null) return getText_text;
 		var path_in = path;
-		if (!FileSystem.exists(path) && FileSystem.exists(path + ".base")) path_in += ".base";
+		if (/*!FileSystem.exists(path) && */FileSystem.exists(path + ".base")) {
+			path_in += ".base";
+		}
 		var text:String = File.getContent(path_in);
 		getText_path = path;
 		getText_text = text;
 		return text;
 	}
-	public static function run(path:String) {
-		var json = getText(path);
+	static function findExtFile(extension:SfYyExtension, path:String):SfYyExtFile {
+		var fileName:String = sfConfig.gmxFile;
+		var file:SfYyExtFile;
+		if (fileName != null) {
+			for (q in extension.files) {
+				if (q.filename == fileName) {
+					file = q; break;
+				}
+			}
+			if (file == null) error('Extension does not have a file `$fileName`.', path);
+		} else {
+			for (q in extension.files) {
+				if (Path.extension(q.filename).toLowerCase() == "gml") {
+					file = q; break;
+				}
+			}
+			if (file == null) error("Extension has no GML files.", path);
+		}
+		return file;
+	}
+	static function runV22(path:String, json:String) {
 		// GMS2 uses non-spec int64s in extensions JSON
 		json = ~/("(?:copyToTargets|supportedTargets)":\s*)(\d{12,32})/g.replace(json, '$1"$2"');
 		//
@@ -68,26 +91,7 @@ class SfYyGen {
 		var extension:SfYyExtension = Json.parse(json);
 		timeEnd();
 		//
-		var file:SfYyExtFile = (function() {
-			var fileName:String = sfConfig.gmxFile;
-			var file:SfYyExtFile;
-			if (fileName != null) {
-				for (q in extension.files) {
-					if (q.filename == fileName) {
-						file = q; break;
-					}
-				}
-				if (file == null) error('Extension does not have a file `$fileName`.', path);
-			} else {
-				for (q in extension.files) {
-					if (Path.extension(q.filename).toLowerCase() == "gml") {
-						file = q; break;
-					}
-				}
-				if (file == null) error("Extension has no GML files.", path);
-			}
-			return file;
-		})();
+		var file:SfYyExtFile = findExtFile(extension, path);
 		//
 		var gd:Bool = sfConfig.gmxDoc;
 		var md:Bool = sfConfig.gmxMcrDoc;
@@ -105,10 +109,7 @@ class SfYyGen {
 		fArr = []; if (!skipFuncs) file.functions = fArr;
 		//
 		timeStart("Printing GML");
-		if (sfConfig.codePath == null) {
-			var filePath:String = Path.directory(path) + "/" + file.filename;
-			sfGenerator.printTo(filePath);
-		} else sfGenerator.printTo(sfConfig.codePath);
+		sfGenerator.printTo(Path.directory(path) + "/" + file.filename);
 		timeEnd();
 		//
 		function addMacro(name:String, value:String, doc:String) {
@@ -188,5 +189,125 @@ class SfYyGen {
 		timeStart("Saving");
 		File.saveContent(path, json);
 		timeEnd();
+	}
+	static function runV23(path:String, json:String) {
+		var timeShow = true, timeStamp = 0.;
+		inline function timeStart(name:String) {
+			if (timeShow) {
+				print(name + "...");
+				timeStamp = Sys.time();
+			}
+		}
+		inline function timeEnd() {
+			if (timeShow) println(' OK! (' + Std.int((Sys.time() - timeStamp) * 1000) + 'ms)');
+		}
+		//
+		timeStart("Decoding JSON");
+		var extension:SfYyExtension = SfYyJson.parse(json, true);
+		timeEnd();
+		//
+		var funcDoc = sfConfig.gmxDoc;
+		var macroDoc = sfConfig.gmxMcrDoc;
+		var skipFuncs = sfConfig.codePath != null;
+		//
+		var file:SfYyExtFile = findExtFile(extension, path);
+		var mcrArr = file.constants;
+		mcrArr.resize(0);
+		var fnArr = file.functions;
+		fnArr.resize(0);
+		//
+		timeStart("Printing GML");
+		sfGenerator.printTo(Path.directory(path) + "/" + file.filename);
+		timeEnd();
+		//
+		function addMacro(name:String, value:String, doc:String) {
+			mcrArr.push({
+				value: value,
+				hidden: doc == null,
+				resourceVersion: "1.0",
+				name: name,
+				tags: [],
+				resourceType: "GMExtensionConstant"
+			});
+		}
+		function addFunc(name:String, doc:String, fd:SfField) {
+			if (skipFuncs) return;
+			
+			var argc = fd.args != null ? fd.args.length : 0;
+			if (argc > 0) {
+				var lastArg = fd.args[argc - 1];
+				if (lastArg.value != null // has optional arguments
+					|| SfGmlRest.getRestType(lastArg.v.type) != null // has rest-arg
+				) {
+					argc = -1; // allow any number of arguments (for lack of better options)
+				}
+			}
+			
+			if (Std.is(fd, SfClassField)) {
+				var cf:SfClassField = cast fd;
+				
+				// we don't want extension definitions for Class:func()
+				if (cf.isStructField) {
+					if (cf.isInst || cf.parentClass.constructor == cf) return;
+				}
+				
+				// add a spot for `this` argument in linear functions
+				if (argc >= 0 && cf.needsThisArg()) argc += 1;
+			}
+			
+			var argTypes = [];
+			for (i in 0 ... argc) argTypes.push(2);
+			
+			fnArr.push({
+				name: name,
+				externalName: name,
+				help: funcDoc && doc != null ? doc : "",
+				hidden: !(funcDoc && doc != null),
+				kind: 2,
+				returnType: 2,
+				argCount: argc,
+				args: argTypes,
+				resourceVersion: "1.0",
+				tags: [],
+				resourceType: "GMExtensionFunction",
+			});
+		}
+		//
+		if (!skipFuncs && sfConfig.entrypoint != "") {
+			var ep = sfConfig.entrypoint;
+			fnArr.push({
+				name: ep,
+				externalName: ep,
+				help: "",
+				hidden: true,
+				kind: 2,
+				returnType: 2,
+				argCount: 0,
+				args: [],
+				resourceVersion: "1.0",
+				tags: [],
+				resourceType: "GMExtensionFunction",
+			});
+		}
+		SfGmxGen.iter(addFunc, addMacro);
+		//
+		timeStart("Encoding JSON");
+		json = SfYyJsonPrinter.stringify(extension, true);
+		timeEnd();
+		//
+		json = ~/("(?:copyToTargets|supportedTargets)":\s*)"([^"]+)"/g.replace(json, '$1$2');
+		//
+		timeStart("Saving");
+		File.saveContent(path, json);
+		timeEnd();
+	}
+	public static function run(path:String) {
+		var json = getText(path);
+		if (json.indexOf('"resourceType":') >= 0) {
+			runV23(path, json);
+		} else {
+			runV22(path, json);
+		}
+		
 	}
 }
