@@ -1024,6 +1024,7 @@ class SfGenerator extends SfGeneratorImpl {
 							printf(r, "%x.%s", _inst, _field.name);
 						} else {
 							k = 0;
+							#if !sfgml_no_accessors
 							switch (_field.parentType.name) {
 								case "ds_list": switch (_field.name) {
 									case "find_value": k = 1;
@@ -1038,6 +1039,7 @@ class SfGenerator extends SfGeneratorImpl {
 									case "set": k = 6;
 								};
 							}
+							#end
 							if (k <= 0) {
 								//
 							} else if (sfConfig.hasChainedAccessors
