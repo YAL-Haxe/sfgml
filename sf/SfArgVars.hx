@@ -140,7 +140,7 @@ class SfArgVars {
 			flags |= SfArgVarsExt.ThisArg;
 			if (modern && sfConfig.gmxMode) flags |= SfArgVarsExt.XVarArgs;
 		} else {
-			if (modern && !f.isInst && !f.dotAccess && sfConfig.gmxMode) flags |= SfArgVarsExt.XVarArgs;
+			if (modern && !f.isInst && !f.parentClass.dotStatic && sfConfig.gmxMode) flags |= SfArgVarsExt.XVarArgs;
 		}
 		printExt(r, f.expr, f.args, flags);
 	}
