@@ -117,6 +117,9 @@ class SfGmlLocalFunc extends SfOptImpl {
 						isFinal: true,
 						isExtern: false,
 						#end
+						#if (haxe >= "4.2")
+						isAbstract: false,
+						#end
 					};
 					//
 					var sfd = new SfClassField(currentClass, cf, false);

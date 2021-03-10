@@ -12,7 +12,7 @@ abstract Int64(__Int64) {
 	public inline function copy():Int64 return this;
 	
 	public static inline function make(high:Int32, low:Int32):Int64 {
-		return (high << 32) | low;
+		return (cast high << 32) | cast low;
 	}
 	
 	@:from public static inline function ofInt(x:Int):Int64 {

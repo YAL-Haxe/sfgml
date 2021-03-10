@@ -11,6 +11,10 @@ import haxe.ds.Vector;
  */
 @:std @:coreApi
 class StringTools {
+	public static inline function unsafeCodeAt(s:String, index:Int):Int {
+		return NativeString.charCodeAt(s, index);
+	}
+	
 	private static var urlEncode_in:Buffer = Buffer.defValue;
 	private static var urlEncode_out:Buffer = Buffer.defValue;
 	private static var urlEncode_esc:Array<Bool> = null;
