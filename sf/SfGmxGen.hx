@@ -75,9 +75,7 @@ class SfGmxGen {
 					if (mcrValue != null) {
 						if (show) {
 							var sfb = new SfBuffer();
-							sfb.addChar("(".code);
-							sfb.addBaseTypeName(sff.type);
-							sfb.addChar(")".code);
+							printf(sfb, "(%base_type)", sff.type);
 							if (doc != null && doc != "") printf(sfb, "%s", doc);
 							doc = sfb.toString();
 						}
@@ -90,7 +88,7 @@ class SfGmxGen {
 			} // for (field in statics)
 			//
 			var ctr = sfc.constructor;
-			if (ctr != null) {
+			if (ctr != null && !ctr.isStructField) {
 				var _ctr_name = ctr.name;
 				var _ctr_isInst = ctr.isInst;
 				// new [if we have child classes that'll call it via super()]:
@@ -103,7 +101,13 @@ class SfGmxGen {
 				ctr.name = ctr.metaGetText(ctr.meta, ":native");
 				if (ctr.name == null) ctr.name = "create";
 				ctr.isInst = false;
-				addFunc(ctr.getPathAuto(), ctr.getArgDoc(sfcd), ctr);
+				var doc = ctr.getArgDoc(sfcd);
+				if (doc != null && StringTools.endsWith(doc, ")")) {
+					var s = sfc.metaString(":docName");
+					if (s == null) s = sfc.name;
+					doc += sprintf("->%s", s);
+				}
+				addFunc(ctr.getPathAuto(), doc, ctr);
 				// restore state:
 				ctr.name = _ctr_name;
 				ctr.isInst = _ctr_isInst;
@@ -128,6 +132,8 @@ class SfGmxGen {
 					}
 				};
 				case FMethod(_): {
+					// we don't want extension definitions for Class:func()
+					if (sff.isStructField) continue;
 					addFunc(sff.getPathAuto(), sff.getArgDoc(sfcd), sff);
 				};
 			}
@@ -153,8 +159,7 @@ class SfGmxGen {
 						var args = sfec.args;
 						for (i in 0 ... args.length) {
 							if (i > 0) printf(fb, ", ");
-							printf(fb, "%s:", args[i].v.name);
-							fb.addBaseTypeName(args[i].v.type);
+							printf(fb, "%s:%base_type", args[i].v.name, args[i].v.type);
 						}
 						printf(fb, ")");
 						if (doc != "") printf(fb, " : %s", doc);

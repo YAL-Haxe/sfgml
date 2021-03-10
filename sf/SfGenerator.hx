@@ -404,7 +404,10 @@ class SfGenerator extends SfGeneratorImpl {
 			case "type_auto": b.addTypePathAuto(v);
 			case "type_dot": b.addTypePath(v, ".".code);
 			case "field_auto": b.addFieldPathAuto(v);
-			case "base_type": b.addBaseTypeName(v);
+			case "base_type":
+				if (v is haxe.macro.Type) {
+					b.addMacroTypeName(v);
+				} else b.addBaseTypeName(v);
 			case "hint": b.addHintString(v);
 			case "+region": b.addHintFoldOpen(v);
 			case "-region": b.addHintFoldClose(); return false;
@@ -680,7 +683,8 @@ class SfGenerator extends SfGeneratorImpl {
 						printf(r, "%x.__enumIndex__", _expr);
 					}
 				} else {
-					printf(r, "%x[%d]", _expr, _index + 1);
+					var arg = _ctr.args[_index];
+					printf(r, "%x[%d%hint]", _expr, _index + 1, arg != null ? arg.v.name : "?");
 				}
 			};
 			case SfInstField(_inst, _field): {
@@ -955,6 +959,7 @@ class SfGenerator extends SfGeneratorImpl {
 						case OpNot: r.addChar("!".code);
 						case OpNeg: r.addChar("-".code);
 						case OpNegBits: r.addChar("~".code);
+						case OpSpread: r.addString("...");
 					};
 					if (!_postFix) r.addExpr(_expr, SfPrintFlags.Inline);
 				} else {

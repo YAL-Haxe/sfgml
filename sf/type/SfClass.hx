@@ -133,11 +133,10 @@ class SfClass extends SfClassImpl {
 		var globalvarCtr = isStruct && (dotStatic || sfConfig.gmxMode);
 		if (isStruct) {
 			r.addLine();
-			if (globalvarCtr) printf(r, "globalvar %type_auto;`", this);
 			r.addTopLevelPrintIfPrefixField(ctr);
 			//
 			if (globalvarCtr) {
-				printf(r, "%type_auto = method(undefined,`function(", this);
+				printf(r, "function mc_%(type_auto)(", this);
 			} else {
 				printf(r, "function %(type_auto)(", this);
 			}
@@ -235,6 +234,10 @@ class SfClass extends SfClassImpl {
 						default:
 					}
 					iterFound[iterName] = true;
+					//
+					if (globalvarCtr && iterField.checkDocState(iterClass.docState)) {
+						SfArgVars.hint(r, iterField);
+					}
 					//
 					var vmap = builtinVarMap;
 					if (vmap == null) {
@@ -363,7 +366,10 @@ class SfClass extends SfClassImpl {
 				} else printf(r, "mt_%(type_auto);", this);
 			}
 			printf(r, "%(-\n)}");
-			if (globalvarCtr) printf(r, ");");
+			if (globalvarCtr) {
+				printf(r, "\nglobalvar %type_auto;`", this);
+				printf(r, "%type_auto`=`method(undefined,`mc_%type_auto);", this, this);
+			}
 			r.addLine();
 		} else {
 			printf(r, "return this;");
@@ -459,8 +465,12 @@ class SfClass extends SfClassImpl {
 					}
 					// function cc_yal_Some_field(...) { ... }
 					if (fbody) {
+						var bind = f.needsMethodClosure();
+						if (bind) {
+							SfArgVars.hint(r, f);
+						}
 						stfr.addTopLevelFuncOpenField(f);
-						SfArgVars.doc(stfr, f);
+						if (!bind) SfArgVars.doc(stfr, f);
 						SfArgVars.print(stfr, f);
 						printFieldExpr(stfr, f);
 						stfr.addTopLevelFuncCloseField(f);

@@ -202,10 +202,9 @@ class SfArgVars {
 		r.addParOpen();
 		var comma = false;
 		if (Std.is(f, SfClassField) && (cast f:SfClassField).needsThisArg()) {
-			r.addString("this:");
-			r.addString(f.parentType.name);
+			printf(r, "this:%base_type", f.parentType);
 			if (jsdoc != null) {
-				printf(jsdoc, "/// @param this:%s\n", f.parentType.name);
+				printf(jsdoc, "/// @param {%base_type} this\n", f.parentType);
 			}
 			comma = true;
 		}
@@ -303,21 +302,72 @@ class SfArgVars {
 		// print return type:
 		if (argTypes) switch (f.type) {
 			case TAbstract(_.get() => at, _) if (at.name == "Void"):
-			default: {
-				r.addString("->");
-				r.addBaseTypeName(f.type);
-				/*if (r2 != null && argTypes) {
-					r2.addString("/// @return {");
-					r2.addBaseTypeName(f.type);
-					r2.addString("}");
-					r2.addLine();
-				}*/
-			};
+			default: printf(r, "->%base_type", f.type);
 		}
 		// print @:doc:
 		if (flags & 2 != 0) r.addLine();
 		if (jsdoc != null && jsdoc.length > 0) r.addString(jsdoc.toString());
 		if ((ext || jsdoc == null) && doc != null && doc.indexOf("\n") < 0) printf(r, "// %s", doc);
+	}
+	public static function hint(r:SfBuffer, fd:SfField) {
+		printf(r, "/// @hint ");
+		
+		var isFunc = fd.isCallable;
+		if (!isFunc) printf(r, "{%base_type} ", fd.type);
+		
+		var sft = fd.parentType;
+		r.addTypePath(sft, "_".code);
+		
+		var typeParams = sft.baseType.params;
+		if (typeParams != null && typeParams.length > 0) {
+			printf(r, "<");
+			var sep = false;
+			for (tp in typeParams) {
+				if (sep) printf(r, ";"); else sep = true;
+				r.addString(tp.name);
+				switch (tp.t) {
+					case TInst(_.get() => { kind: KTypeParameter(cs) }, _): {
+						var c = cs[0];
+						if (c != null) printf(r, ":%base_type", c);
+					};
+					default:
+				}
+			}
+			printf(r, ">");
+		}
+		//
+		if (Std.is(fd, SfClassField)) {
+			var cf:SfClassField = cast fd;
+			if (cf.parentClass.constructor == cf) {
+				// OK!
+			} else if (cf.isInst) {
+				printf(r, ":%s", fd.name);
+			} else {
+				printf(r, ".%s", fd.name);
+			}
+		} else {
+			printf(r, ":%s", fd.name);
+		}
+		//
+		if (isFunc) {
+			printf(r, "(");
+			var sep = false;
+			if (fd.args != null) for (arg in fd.args) {
+				if (sep) printf(r, ", "); else sep = true;
+				var argType = arg.v.type;
+				var restType = SfGmlRest.getRestType(argType);
+				if (restType != null) {
+					printf(r, "...");
+					argType = restType;
+				}
+				printf(r, "%s:%base_type", arg.v.name, argType);
+			}
+			printf(r, ")");
+			printf(r, "->%base_type", fd.type);
+		}
+		if (fd.doc != null && fd.doc != "") printf(r, " %s", fd.doc);
+		//
+		r.addLine();
 	}
 }
 enum abstract SfArgVarsExt(Int) from Int to Int {

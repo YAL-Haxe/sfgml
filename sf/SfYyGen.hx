@@ -246,11 +246,6 @@ class SfYyGen {
 			if (Std.is(fd, SfClassField)) {
 				var cf:SfClassField = cast fd;
 				
-				// we don't want extension definitions for Class:func()
-				if (cf.isStructField) {
-					if (cf.isInst || cf.parentClass.constructor == cf) return;
-				}
-				
 				// add a spot for `this` argument in linear functions
 				if (argc >= 0 && cf.needsThisArg()) argc += 1;
 			}

@@ -174,38 +174,40 @@ class SfBuffer extends SfBufferImpl {
 			default: return dt.name;
 		}
 	}
-	public function addBaseTypeName(ot:Type) {
+	public function addBaseTypeName(t:BaseType, ?par:Array<Type>, ?dt:DefType) {
+		var s = t.name;
+		if (t.meta.has(":docNameFields") && dt != null) {
+			s = docNameFieldsCache.baseGet(t);
+			if (s == null) {
+				s = docNameFields(dt);
+				docNameFieldsCache.baseSet(t, s);
+			}
+		}
+		else if (t.meta.has(":docName")) {
+			switch (t.meta.extract(":docName")) {
+				case [{ params: [{ expr: EConst(CString(s1)) }] }]: s = s1;
+				default:
+			}
+		}
+		addString(s);
+		if (par != null) {
+			var n = par.length;
+			if (n > 0) {
+				addChar("<".code);
+				var i = 0;
+				while (i < n) {
+					if (i > 0) addChar2(";".code, " ".code);
+					addMacroTypeName(par[i]);
+					i += 1;
+				}
+				addChar(">".code);
+			}
+		}
+	}
+	public function addMacroTypeName(ot:Type) {
 		var pack:Array<String>, par:Array<Type>, i:Int, n:Int, s:String;
 		inline function f(t:BaseType, ?p:Array<Type>, ?dt:DefType) {
-			s = t.name;
-			if (t.meta.has(":docNameFields") && dt != null) {
-				s = docNameFieldsCache.baseGet(t);
-				if (s == null) {
-					s = docNameFields(dt);
-					docNameFieldsCache.baseSet(t, s);
-				}
-			}
-			else if (t.meta.has(":docName")) {
-				switch (t.meta.extract(":docName")) {
-					case [{ params: [{ expr: EConst(CString(s1)) }] }]: s = s1;
-					default:
-				}
-			}
-			addString(s);
-			par = p;
-			if (par != null) {
-				n = par.length;
-				if (n > 0) {
-					addChar("<".code);
-					i = 0;
-					while (i < n) {
-						if (i > 0) addChar2(";".code, " ".code);
-						addBaseTypeName(par[i]);
-						i += 1;
-					}
-					addChar(">".code);
-				}
-			}
+			addBaseTypeName(t, p, dt);
 		}
 		switch (ot) {
 			case TEnum(_.get() => et, p): f(et, p);
@@ -213,40 +215,34 @@ class SfBuffer extends SfBufferImpl {
 			case TType(_.get() => dt, p): f(dt, p, dt);
 			case TFun(args, ret): {
 				n = args.length;
-				addString("function[");
+				addString("function<");
 				i = 0; while (i < n) {
-					if (i > 0) addString("; ");
 					var s = args[i].name;
 					if (s != null && s != "") {
 						addString(args[i].name);
 						addChar(":".code);
 					}
-					addBaseTypeName(args[i].t);
+					addMacroTypeName(args[i].t);
+					addString("; ");
 					i += 1;
 				}
-				addChar2("]".code, ":".code);
-				addBaseTypeName(ret);
+				addMacroTypeName(ret);
+				addChar("<".code);
 			};
 			case TDynamic(t): {
-				addString("dynamic");
-				if (t != null) {
-					addChar("<".code);
-					addBaseTypeName(t);
-					addChar(">".code);
-				}
+				addString("any");
 			};
-			case TLazy(_() => t): addBaseTypeName(t);
+			case TLazy(_() => t): addMacroTypeName(t);
 			case TAbstract(_.get() => at, p): {
 				switch (at.module) {
 					case "StdTypes": switch (at.name) {
 						case "Null": {
-							addString("null<");
-							addBaseTypeName(p[0]);
-							addString(">");
+							addMacroTypeName(p[0]);
+							addChar("?".code);
 						};
 						case "Bool": addString("bool");
 						case "Int": addString("int");
-						case "Float": addString("real");
+						case "Float": addString("number");
 						case "String": addString("string");
 						case "Void": addString("void");
 						default: f(at, p);
@@ -263,7 +259,7 @@ class SfBuffer extends SfBufferImpl {
 					default: f(at, p);
 				}
 			}
-			default: addString("?");
+			default: addString("any");
 		}
 	}
 }
