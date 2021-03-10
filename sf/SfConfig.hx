@@ -2,6 +2,7 @@ package sf;
 import haxe.io.Path;
 import haxe.macro.Compiler;
 import sf.SfConfigImpl.*;
+import sf.type.SfBuffer;
 /**
  * ...
  * @author YellowAfterlife
@@ -10,7 +11,8 @@ class SfConfig extends SfConfigImpl {
 	
 	// default target versions (if not specified):
 	static inline var defVersion1:String = "1.4.1804";
-	static inline var defVersion2:String = "2.2.1";
+	static inline var defVersion2:String = "2.2.5";
+	static inline var defVersion23:String = "2.3.1";
 	
 	/** */
 	public var version = string("sfgml-version", null);
@@ -215,16 +217,16 @@ class SfConfig extends SfConfigImpl {
 				if (yy.indexOf('"resourceType": "GMExtension"') >= 0) { // 2.3 extension
 					isExtension = true;
 					modern = true;
-					if (v == null) v = "2.3";
+					if (v == null) v = defVersion23;
 				}
 				else if (yy.indexOf('"resourceType": "GMScript"') >= 0) { // 2.3 script
 					isExtension = false;
 					modern = true;
-					if (v == null) v = "2.3";
+					if (v == null) v = defVersion23;
 				} // todo: 2.3 extension... when constructors in extensions are allowed
 				else {
 					isExtension = true;
-					if (v == null) v = "2.2.5";
+					if (v == null) v = defVersion2;
 				}
 			};
 			default: {
@@ -268,8 +270,8 @@ class SfConfig extends SfConfigImpl {
 		var vd = findVersion();
 		if (vd.version == null) {
 			vd.version = vd.next ? defVersion2 : defVersion1;
-			Compiler.define("sfgml_version", vd.version);
 		}
+		Compiler.define("sfgml_version", vd.version);
 		findVersion_1 = vd;
 		if (vd.next) def("sfgml_next", true);
 		def("sfgml_extension", vd.extension);
