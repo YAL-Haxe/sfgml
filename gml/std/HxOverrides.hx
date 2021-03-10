@@ -4,7 +4,7 @@ package;
  * ...
  * @author YellowAfterlife
  */
-@:noDoc
+@:noDoc @:std
 class HxOverrides {
 	static function dateStr( date :Date ) : String {
 		return date.toString();

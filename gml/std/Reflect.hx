@@ -10,7 +10,7 @@ import gml.internal.NativeFunctionInvoke;
  * ...
  * @author YellowAfterlife
  */
-@:coreApi class Reflect {
+@:coreApi @:std class Reflect {
 	
 	private static inline var modernOnly:String = "This method is only available in GMS>=2.3.";
 	private static inline var structOnly:String = "This method can only be used with struct values.";
