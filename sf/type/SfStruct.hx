@@ -33,4 +33,10 @@ class SfStruct extends SfStructImpl {
 		//
 		if (doc != null) doc = StringTools.trim(doc);
 	}
+	
+	public function getRegionName():String {
+		var s = metaString(":gml.regionName");
+		if (s != null) return s;
+		return SfCore.sprintf("%type_dot", this);
+	}
 }

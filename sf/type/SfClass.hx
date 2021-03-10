@@ -521,15 +521,22 @@ class SfClass extends SfClassImpl {
 			sfGenerator.currentClass = null;
 		} // if (!isHidden)
 		if (r != null && (r.length > 0 || stfr.length > 0 || ctrb.length > 0)) {
-			var fq = sprintf("%type_dot", this);
+			var fq = getRegionName();
+			var mainBuf = dotAccess ? out : sfGenerator.staticFuncBuffer;
+			var staticBuf = sfGenerator.staticFuncBuffer;
+			var splitBuf = sfGenerator.getSplitBuf(fq);
+			if (splitBuf != null) {
+				mainBuf = splitBuf;
+				staticBuf = splitBuf;
+			}
 			if (r.length > 0) {
-				var addTo = dotAccess ? out : sfGenerator.staticFuncBuffer;
+				var addTo = mainBuf;
 				if (hintFolds) printf(addTo, "\n%(+region)\n", fq);
 				addTo.addBuffer(r);
 				if (hintFolds) printf(addTo, "\n%(-region)\n");
 			}
 			if (stfr != r && stfr.length > 0) {
-				var addTo = sfGenerator.staticFuncBuffer;
+				var addTo = staticBuf;
 				if (hintFolds) printf(addTo, "\n%(+region)\n", fq);
 				addTo.addBuffer(stfr);
 				if (hintFolds) printf(addTo, "\n%(-region)\n");

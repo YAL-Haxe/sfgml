@@ -23,6 +23,7 @@ import sf.type.expr.SfExprDef.*;
 import sf.type.expr.SfExpr;
 import SfTools.*;
 import sf.SfCore.*;
+import sys.io.File;
 using sf.type.expr.SfExprTools;
 using StringTools;
 
@@ -36,6 +37,17 @@ class SfGenerator extends SfGeneratorImpl {
 	public var staticFuncBuffer:SfBuffer;
 	/** In 2.3 extension mode, we want constructors before the rest of the code in init function */
 	public var constructorBuffer:SfBuffer;
+	
+	public var splitFiles:Array<SfGmlSplitFile> = [];
+	public function getSplitBuf(fq:String):SfBuffer {
+		for (file in sfGenerator.splitFiles) {
+			if (file.regex.match(fq)) {
+				return file.buf;
+			}
+		}
+		return null;
+	}
+	
 	public static function main() {
 		SfConfig.main();
 	}
@@ -89,6 +101,31 @@ class SfGenerator extends SfGeneratorImpl {
 			} else path = Path.withExtension(path, "gml");
 		}
 		//
+		var headerLines:Array<String>;
+		if (sfConfig.header != null) {
+			headerLines = sfConfig.header.split("\n");
+		} else headerLines = [];
+		//
+		var splitRel = SfConfigImpl.string("sfgml-split");
+		if (splitRel != null) try {
+			var splitText = sys.io.File.getContent(splitRel);
+			splitText = StringTools.replace(splitText, "\r\n", "\n");
+			var rx = ~/^(.+)->(.+?)(\/\/.+)?$/;
+			var outDir = Path.directory(path);
+			if (!sfConfig.gmxMode) outDir = Path.directory(outDir);
+			for (line in splitText.split("\n")) if (rx.match(line)) {
+				var from = rx.matched(1).trim();
+				var to = rx.matched(2).trim();
+				var note = rx.matched(3);
+				var file = new SfGmlSplitFile(from, to, outDir);
+				splitFiles.push(file);
+				for (line in headerLines) printf(file.buf, "%s\n", line);
+				if (note != null) printf(file.buf, "\n%s", note);
+			}
+		} catch (x:Dynamic) {
+			Sys.println("Error grabbing split: " + x);
+		}
+		//
 		var next = sfConfig.next;
 		var hasArrayDecl = sfConfig.hasArrayDecl;
 		(new SfGmlSnakeCase()).apply();
@@ -122,9 +159,7 @@ class SfGenerator extends SfGeneratorImpl {
 		var cond = sfConfig.printIf;
 		//if (cond != null) printf(init, "if (%s) {\n", cond);
 		//
-		if (sfConfig.header != null) {
-			for (line in sfConfig.header.split("\n")) printf(mixed, "%s\n", line);
-		}
+		for (line in headerLines) printf(mixed, "%s\n", line);
 		if (SfGml_StdTypeImpl.isUsed) printTypeGrid(decl);
 		if (SfGml_Type_enumHelpers.code != "") {
 			if (hintFolds) printf(decl, "//{ enum names\n");
@@ -191,7 +226,10 @@ class SfGenerator extends SfGeneratorImpl {
 		if (!sfConfig.timestamp && sfConfig.entrypoint == "" && mainExpr.isEmpty()) {
 			mixedStr = StringTools.ltrim(mixedStr);
 		}
-		sys.io.File.saveContent(path, mixedStr);
+		File.saveContent(path, mixedStr);
+		for (file in splitFiles) {
+			File.saveContent(file.full, file.buf.toString());
+		}
 	}
 	
 	private static var identRx:EReg = ~/[A-Za-z_]/g;
@@ -1479,4 +1517,20 @@ class SfGenerator extends SfGeneratorImpl {
 		isInSwitchBlock = _isInSwitchBlock;
 	}
 	
+}
+class SfGmlSplitFile {
+	public var regex:EReg;
+	public var full:String;
+	public var buf:SfBuffer = new SfBuffer();
+	static var escapeRx = new EReg("([.*+?^${}()|[\\]\\/\\\\])", 'g');
+	public function new(match:String, rel:String, outDir:String) {
+		var rs = escapeRx.replace(match, "\\$1");
+		rs = rs.replace("\\*", ".+?");
+		regex = new EReg("^" + rs + "$", "");
+		if (sfConfig.gmxMode) {
+			full = Path.join([outDir, rel + ".gml"]);
+		} else {
+			full = Path.join([outDir, rel, rel + ".gml"]);
+		}
+	}
 }

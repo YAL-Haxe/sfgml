@@ -158,9 +158,12 @@ class SfEnum extends SfEnumImpl {
 		}
 		//
 		if (out.length > 0) {
-			if (sfConfig.hintFolds) printf(outb, "\n%(+region)\n", sprintf("%type_dot", this));
-			outb.addBuffer(out);
-			if (sfConfig.hintFolds) printf(outb, "\n%(-region)\n");
+			var fq = getRegionName();
+			var splitBuf = sfGenerator.getSplitBuf(fq);
+			var b = splitBuf != null ? splitBuf : outb;
+			if (sfConfig.hintFolds) printf(b, "\n%(+region)\n", fq);
+			b.addBuffer(out);
+			if (sfConfig.hintFolds) printf(b, "\n%(-region)\n");
 		}
 		if (init.length > 0) {
 			if (sfConfig.hintFolds) printf(initb, "// %(type_dot):\n", this);
