@@ -83,7 +83,7 @@ import gml.ds.ArrayList;
 		var n = arr.length;
 		while (++i < n) {
 			if (arr[i] == v) {
-				#if (sfgml_version >= 2.3.1)
+				#if (sfgml_version >= "2.3.1")
 				NativeArray.delete(arr, i, 1);
 				#else
 				while (++i < n) {
@@ -110,7 +110,7 @@ import gml.ds.ArrayList;
 		if (len <= 0) return [];
 		var r:Array<T> = NativeArray.createEmpty(len);
 		NativeArray.copyPart(r, 0, arr, pos, len);
-		#if (sfgml_version >= 2.3.1)
+		#if (sfgml_version >= "2.3.1")
 		NativeArray.delete(arr, pos, len);
 		#else
 		pos += len;
