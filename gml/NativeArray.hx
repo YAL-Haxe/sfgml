@@ -1,5 +1,6 @@
 package gml;
 import SfTools.*;
+import haxe.extern.Rest;
 
 /**
  * Exposes GML-specific array functions.
@@ -69,4 +70,9 @@ extern class NativeArray {
 	
 	static function equals<T>(a:Array<T>, b:Array<T>):Bool;
 	
+	/** GMS 2.3+ */
+	static function delete<T>(arr:Array<T>, index:Int, count:Int):Void;
+	
+	/** GMS 2.3+ */
+	static function insert<T>(arr:Array<T>, index:Int, values:Rest<T>):Void;
 }

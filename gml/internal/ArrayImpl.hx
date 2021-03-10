@@ -83,10 +83,14 @@ import gml.ds.ArrayList;
 		var n = arr.length;
 		while (++i < n) {
 			if (arr[i] == v) {
+				#if (sfgml_version >= 2.3.1)
+				NativeArray.delete(arr, i, 1);
+				#else
 				while (++i < n) {
 					arr[i - 1] = arr[i];
 				}
 				arr.resize(n - 1);
+				#end
 				return true;
 			}
 		}
@@ -106,12 +110,16 @@ import gml.ds.ArrayList;
 		if (len <= 0) return [];
 		var r:Array<T> = NativeArray.createEmpty(len);
 		NativeArray.copyPart(r, 0, arr, pos, len);
+		#if (sfgml_version >= 2.3.1)
+		NativeArray.delete(arr, pos, len);
+		#else
 		pos += len;
 		while (pos < n) {
 			arr[pos - len] = arr[pos];
 			pos += 1;
 		}
 		arr.resize(n - len);
+		#end
 		return r;
 		#else
 		throw modernOnly;
@@ -154,7 +162,7 @@ import gml.ds.ArrayList;
 			out = arr1;
 			NativeArray.copyset(out, 0, arr1[0]);
 			#else
-			out = [];
+			out = NativeArray.createEmpty(len1);
 			NativeArray.copyPart(out, 0, arr1, 0, len1);
 			#end
 			if (len2 > 0) NativeArray.copyPart(out, len1, arr2, 0, len2);
@@ -163,7 +171,7 @@ import gml.ds.ArrayList;
 			out = arr2;
 			NativeArray.copyset(out, 0, arr2[0]);
 			#else
-			out = [];
+			out = NativeArray.createEmpty(len2);
 			NativeArray.copyPart(out, 0, arr2, 0, len2);
 			#end
 		} else out = [];
@@ -233,7 +241,7 @@ import gml.ds.ArrayList;
 			out = arr;
 			NativeArray.copyset(out, 0, arr[0]);
 			#else
-			out = [];
+			out = NativeArray.createEmpty(len);
 			NativeArray.copyPart(out, 0, arr, 0, len);
 			#end
 		} else out = [];
