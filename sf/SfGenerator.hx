@@ -1400,6 +1400,9 @@ class SfGenerator extends SfGeneratorImpl {
 	}
 	
 	private inline function printIf(r:SfBuffer, c:SfExpr, t:SfExpr, x:SfExpr, small:Bool):Void {
+		#if sfgml_verbose_brackets
+		small = false;
+		#end
 		if (sfConfig.hint) switch (c.def) {
 			case SfParenthesis(_.def => SfBinop(o,
 				a = _.def => SfEnumAccess(_, e, _.def => SfConst(TInt(0))),
