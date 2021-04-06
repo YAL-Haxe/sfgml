@@ -149,7 +149,9 @@ class SfConfig extends SfConfigImpl {
 			// OK!
 		} else if (StringTools.startsWith(header, "/")) { // "/path"
 			try {
-				header = sys.io.File.getContent(header.substring(1));
+				var rel = header.substring(1);
+				var full = haxe.macro.Context.resolvePath(rel);
+				header = sys.io.File.getContent(full);
 				header = StringTools.replace(header, "\r", "");
 			} catch (x:Dynamic) {
 				Sys.println("Error grabbing header: " + x);
