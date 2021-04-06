@@ -418,9 +418,9 @@ class SfClass extends SfClassImpl {
 			if (ctr != null && !ctr.isHidden) {
 				printConstructor(isStruct ? ctrb : stfr, ctr, ignoreFields);
 				if (isStruct && !nativeGen) {
-					r.addTopLevelPrintIfPrefix();
 					var mtc = sfGenerator.findRealClassField("gml.MetaClass", "constructor");
-					if (mtc != null) {
+					if (mtc != null && !mtc.isHidden) {
+						r.addTopLevelPrintIfPrefix();
 						printf(r, "mt_%type_auto.%s`=`%type_auto;\n", this, mtc.name, this);
 					}
 				}
