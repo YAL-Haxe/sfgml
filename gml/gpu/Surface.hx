@@ -72,6 +72,22 @@ extern class Surface {
 	//
 	@:expose("draw_surface") function draw(x:Float, y:Float):Void;
 	@:expose("draw_surface_ext") function drawExt(x:Float, y:Float,
-		xscale:Float, yscale:Float, angle:Float, color:Color, alpha:Float):Void;
+		xscale:Float, yscale:Float, angle:Float, color:Color, alpha:Float
+	):Void;
+	@:expose("draw_surface_part") function drawPart(
+		left:Float, top:Float, width:Float, height:Float,
+		x:Float, y:Float
+	):Void;
+	@:expose("draw_surface_part_ext") function drawPartExt(
+		left:Float, top:Float, width:Float, height:Float,
+		x:Float, y:Float,
+		xscale:Float, yscale:Float, color:Color, alpha:Float
+	):Void;
+	@:expose("draw_surface_general") function drawGeneral(
+		left:Float, top:Float, width:Float, height:Float,
+		x:Float, y:Float,
+		xscale:Float, yscale:Float, angle:Float,
+		cTL:Color, cTR:Color, cBL:Color, cBR:Color, alpha:Float
+	):Void;
 	//
 }
