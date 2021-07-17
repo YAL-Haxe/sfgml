@@ -19,9 +19,12 @@ extern class Lib {
 	/** Returns the number of milliseconds since sometime. */
 	static inline function getTimer():Int return currentTime;
 	
-	/** Returns a native callstack via debug_get_callstack */
+	/**
+	 * Returns a native callstack via debug_get_callstack.
+	 * @param maxDepth [2.3.2+] Maximum number of items to return
+	 */
 	@:expose("debug_get_callstack")
-	static function getCallStack():Array<String>;
+	static function getCallStack(?maxDepth:Int):Array<String>;
 	
 	/**
 	 * However, GML's `undefined` is the same as `null` in Haxe,

@@ -146,7 +146,11 @@ import gml.internal.NativeFunctionInvoke;
 		#if sfgml.modern
 		// ... GML doesn't actually have field deletion yet
 		if (NativeType.isStruct(o)) {
+			#if (sfgml_version >= "2.3.1")
+			gml.NativeStruct.deleteField(o, field);
+			#else
 			setField(o, field, null);
+			#end
 			return true;
 		} else throw structOnly;
 		#else

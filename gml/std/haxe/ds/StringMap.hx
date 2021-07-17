@@ -9,6 +9,9 @@ import gml.io.Buffer;
 class StringMap<T> extends BasicMap<String, T> implements haxe.Constraints.IMap<String,T> {
 	#if sfgml.modern
 	override private function keysArray():Array<String> {
+		#if (sfgml_version >= "2.3.1")
+		return obj.keys();
+		#else
 		var keys = cachedKeys;
 		if (keys != null) return keys;
 		if (blanks > 0) {
@@ -28,6 +31,7 @@ class StringMap<T> extends BasicMap<String, T> implements haxe.Constraints.IMap<
 		} else {
 			return obj.keys();
 		}
+		#end
 	}
 	#else
 	private inline function hashOf(s:String) {

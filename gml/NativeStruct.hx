@@ -20,6 +20,10 @@ package gml;
 	@:expose("variable_struct_set")
 	static function setField(obj:Dynamic, fd:String, val:Dynamic):Void;
 	
+	/** 2.3.1+ **/
+	@:expose("variable_struct_remove")
+	static function deleteField(obj:Dynamic, fd:String):Void;
+	
 	/**
 	 * Returns the name of constructor function for the given struct object.
 	 * Can also return:

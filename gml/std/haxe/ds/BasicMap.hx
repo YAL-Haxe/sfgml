@@ -6,17 +6,50 @@ import haxe.Constraints.IMap;
 
 #if sfgml.modern
 class BasicMap<K, V> implements haxe.Constraints.IMap<K, V> {
+	var obj:DynamicAccess<V> = {};
+	
+	public function new() {}
+	
+	#if (sfgml_version >= "2.3.1")
+	
+	public function copy():IMap<K, V> {
+		var keys = obj.keys();
+		var result = new BasicMap<K, V>();
+		var resObj = result.obj;
+		for (key => val in obj) {
+			resObj[key] = val;
+		}
+		return result;
+	}
+	
+	public function clear() {
+		for (key in obj.keys()) {
+			obj.remove(key);
+		}
+	}
+	
+	public inline function exists(key:K):Bool {
+		return obj.exists(cast key);
+	}
+	
+	public inline function get(key:K):V {
+		return obj.get(cast key);
+	}
+	public inline function set(key:K, val:V):Void {
+		obj[cast key] = val;
+	}
+	public inline function remove(key:K):Bool {
+		return obj.remove(cast key);
+	}
+	
+	#else
+	
 	static var blank:Dynamic = [];
 	
-	var obj:DynamicAccess<V> = {};
 	/** Number of "holes" (removed pairs) in this structure */
 	var blanks:Int = 0;
 	
 	var cachedKeys:Array<K> = null;
-	
-	public function new() {
-		//
-	}
 	
 	public function copy():IMap<K, V> {
 		var obj = obj;
@@ -88,6 +121,8 @@ class BasicMap<K, V> implements haxe.Constraints.IMap<K, V> {
 			return true;
 		} else return false;
 	}
+	
+	#end
 	
 	function keysArray():Array<K> {
 		throw "Should be implemented in the specific Map class";

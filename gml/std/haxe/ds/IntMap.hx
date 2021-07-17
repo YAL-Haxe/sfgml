@@ -9,6 +9,13 @@ import gml.io.Buffer;
 class IntMap<T> extends BasicMap<Int, T> implements haxe.Constraints.IMap<Int,T> {
 	#if sfgml.modern
 	override private function keysArray():Array<Int> {
+		#if (sfgml_version >= "2.3.1")
+		var keys:Array<Any> = cast obj.keys();
+		for (i in 0 ... keys.length) {
+			keys[i] = gml.NativeType.toInt64(keys[i]);
+		}
+		return cast keys;
+		#else
 		var keys = cachedKeys;
 		if (keys != null) return keys;
 		var obj = obj;
@@ -25,6 +32,7 @@ class IntMap<T> extends BasicMap<Int, T> implements haxe.Constraints.IMap<Int,T>
 		}
 		cachedKeys = resKeys;
 		return resKeys;
+		#end
 	}
 	#else
 	private inline function hashOf(s:Int) {

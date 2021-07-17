@@ -26,8 +26,14 @@ abstract DynamicAccess<T>(Dynamic<T>) from Dynamic<T> to Dynamic<T> {
 		return NativeStruct.hasField(this, key);
 	}
 	
-	public inline function remove(key:String):Bool {
+	public function remove(key:String):Bool {
+		#if (sfgml_version >= "2.3.1")
+		var result = NativeStruct.hasField(this, key);
+		NativeStruct.deleteField(this, key);
+		return result;
+		#else
 		return Reflect.deleteField(this, key);
+		#end
 	}
 	
 	public inline function keys():Array<String> {
