@@ -144,15 +144,15 @@ class SfEnum extends SfEnumImpl {
 			} else {
 				out.addTopLevelFuncOpenField(ctr);
 				SfArgVars.doc(out, ctr);
-				printf(out, "var this`=`new mc_%(field_auto)();\n", ctr);
+				printf(out, "var %this`=`new mc_%(field_auto)();\n", ctr);
 				var hasOpt = false;
 				for (i in 0 ... ctr.args.length) {
 					var arg = ctr.args[i];
-					printf(out, "this.%s`=`%(var);\n", arg.v.name, arg.v.name);
+					printf(out, "%this.%s`=`%(var);\n", arg.v.name, arg.v.name);
 					if (arg.value != null) hasOpt = true;
 				}
-				if (hasOpt) printf(out, "if`(false)`throw argument[%d];\n", ctr.args.length - 1);
-				printf(out, "return this");
+				if (hasOpt) printf(out, "if`(false)`return argument[%d];\n", ctr.args.length - 1);
+				printf(out, "return %this");
 				out.addTopLevelFuncCloseField(ctr);
 			}
 		}
