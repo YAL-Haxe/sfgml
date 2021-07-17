@@ -116,13 +116,17 @@ class SfBuffer extends SfBufferImpl {
 	public function addThisArguments(thisArg:Bool, args:Array<SfArgument>):Void {
 		var l = sfConfig.localPrefix;
 		var sep = thisArg;
-		if (thisArg) addString("this");
+		if (thisArg) addThisVar();
 		for (i in 0 ... args.length) {
 			if (SfGmlRest.getRestType(args[i].v.type) != null) break;
 			if (sep) addComma(); else sep = true;
 			addString(l);
 			addString(args[i].v.name);
 		}
+	}
+	public inline function addThisVar():Void {
+		addString(sfConfig.localPrefix);
+		addString("this");
 	}
 	
 	public function addHintFoldOpen(name:String) {

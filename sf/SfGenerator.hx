@@ -359,12 +359,12 @@ class SfGenerator extends SfGeneratorImpl {
 			case TNull: r.addString("undefined");
 			case TThis: {
 				#if (sfgml_keep_this_self == "force")
-				r.addString("this");
+				r.addThisVar();
 				#else
 				switch (selfLevel) {
 					case 0: r.addString("self");
 					case 1: r.addString("other");
-					default: r.addString("this");
+					default: r.addThisVar();
 				}
 				#end
 			};
@@ -413,6 +413,7 @@ class SfGenerator extends SfGeneratorImpl {
 			case "-region": b.addHintFoldClose(); return false;
 			case "l_": b.addString(sfConfig.localPrefix); return false;
 			case "var": b.addString(sfConfig.localPrefix); b.addString(v);
+			case "this": b.addThisVar(); return false;
 			default: return null;
 		}
 		return true;
@@ -1017,7 +1018,7 @@ class SfGenerator extends SfGeneratorImpl {
 						if (superClass.isStruct) {
 							printf(r, "method(%const, %(field_auto))", TThis, superClass.constructor);
 						} else {
-							printf(r, "%(field_auto)(this", superClass.constructor);
+							printf(r, "%(field_auto)(%this", superClass.constructor);
 							callFlags = 0; sep = true;
 						}
 					};
@@ -1025,7 +1026,7 @@ class SfGenerator extends SfGeneratorImpl {
 						if (_field.parentClass.dotAccess && sfConfig.modern) {
 							printf(r, "method(%const, %(field_auto))", TThis, _field);
 						} else {
-							printf(r, "%(field_auto)(this", _field);
+							printf(r, "%(field_auto)(%this", _field);
 							callFlags = 0; sep = true;
 						}
 					};
@@ -1305,12 +1306,21 @@ class SfGenerator extends SfGeneratorImpl {
 					if (catches.length > 1) {
 						catches[1].expr.error("Only 1-catch blocks are supported at this time.");
 					}
+					#if sfgml_fake_try_catch
+					printf(r, "if`(1)`{%(+\n)");
+					r.addExpr(block, SfPrintFlags.StatWrap);
+					var c = catches[0];
+					printf(r, "%(-\n)}`else`{%(+\n)var %var`=`undefined;\n", c.v.name);
+					r.addExpr(c.expr, SfPrintFlags.StatWrap);
+					printf(r, "%(-\n)}");
+					#else
 					printf(r, "try`{%(+\n)");
 					r.addExpr(block, SfPrintFlags.StatWrap);
 					var c = catches[0];
 					printf(r, "%(-\n)}`catch`(%var)`{%(+\n)", c.v.name);
 					r.addExpr(c.expr, SfPrintFlags.StatWrap);
 					printf(r, "%(-\n)}");
+					#end
 				} else expr.error("try-catch is only supported in GMS>=2.3");
 			};
 			case SfThrow(x): {

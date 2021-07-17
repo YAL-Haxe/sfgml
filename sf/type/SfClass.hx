@@ -162,19 +162,19 @@ class SfClass extends SfClassImpl {
 		}
 		else if (objName != null) { // it's instance-based
 			if (sfConfig.next) {
-				printf(r, "var this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
+				printf(r, "var %this`=`instance_create_depth(0,`0,`0,`%s);\n", objName);
 			} else {
-				printf(r, "var this`=`instance_create(0,`0,`%s);\n", objName);
+				printf(r, "var %this`=`instance_create(0,`0,`%s);\n", objName);
 			}
-			if (!nativeGen) printf(r, "this.__class__`=`mt_%(type_auto);\n", this);
+			if (!nativeGen) printf(r, "%this.__class__`=`mt_%(type_auto);\n", this);
 		}
 		else if (nativeGen && !sfConfig.fieldNames) {
 			// it's :nativeGen and we don't need field labels
 			// so we allocate the container and call it a day
-			printf(r, "var this");
+			printf(r, "var %this");
 			if (sfConfig.hasArrayCreate) {
 				printf(r, "`=`array_create(%d);\n", indexes);
-			} else printf(r, ";`this[%d]`=`0;\n", indexes - 1);
+			} else printf(r, ";`%this[%d]`=`0;\n", indexes - 1);
 		}
 		else { // normal linear
 			inline function printMeta(r:SfBuffer):Void {
@@ -185,7 +185,7 @@ class SfClass extends SfClassImpl {
 				} else printf(r, "mt_%(type_auto)", this);
 			}
 			//
-			printf(r, "var this");
+			printf(r, "var %this");
 			var protoCopyOffset:Int = 0;
 			if (nativeGen) {
 				// it has no meta so we want an empty array
@@ -193,10 +193,10 @@ class SfClass extends SfClassImpl {
 					printf(r, "`=`[]");
 				} else if (sfConfig.hasArrayCreate) {
 					printf(r, "`=`array_create(0)");
-				} else printf(r, ";`this[0]`=`0");
+				} else printf(r, ";`%this[0]`=`0");
 			} else if (sfConfig.legacyMeta) {
 				// it has legacy meta so we set that, at the same time creating the array
-				printf(r, ";`this[1,0%(hint)]`=`", "metatype");
+				printf(r, ";`%this[1,0%(hint)]`=`", "metatype");
 				printMeta(r);
 			} else {
 				// we initialize the array to have the meta as the first item
@@ -207,14 +207,14 @@ class SfClass extends SfClassImpl {
 					printMeta(r);
 					printf(r, "]");
 				} else {
-					printf(r, ";`this[0%(hint)]`=`", "metatype");
+					printf(r, ";`%this[0%(hint)]`=`", "metatype");
 					printMeta(r);
 				}
 			}
 			printf(r, ";\n");
 			// finally, if we need to, array_copy the protoype into the resulting structure.
 			if (indexes > protoCopyOffset) printf(r,
-				"array_copy(this,`%d,`mq_%(type_auto),`%d,`%d);\n",
+				"array_copy(%this,`%d,`mq_%(type_auto),`%d,`%d);\n",
 				protoCopyOffset, this, protoCopyOffset, indexes - protoCopyOffset
 			);
 		}
@@ -283,9 +283,9 @@ class SfClass extends SfClassImpl {
 					dynFound.set(iterName, true);
 					//
 					if (objName != null) {
-						printf(r, "this.%s`=`", iterField.name);
+						printf(r, "%this.%s`=`", iterField.name);
 					} else {
-						printf(r, "this[@%d%(hint)]`=`", iterField.index, iterField.name);
+						printf(r, "%this[@%d%(hint)]`=`", iterField.index, iterField.name);
 					}
 					//	
 					if (iterField.expr != null) {
@@ -322,7 +322,7 @@ class SfClass extends SfClassImpl {
 						printf(r, "method(self, %s)(", ctr_path);
 						asep = false;
 					} else {
-						printf(r, "%s(this", ctr_path);
+						printf(r, "%s(%this", ctr_path);
 						asep = true;
 					}
 					ai = 0;
@@ -343,7 +343,7 @@ class SfClass extends SfClassImpl {
 					printf(r, "method(self, %s)(", ctr_path);
 					asep = false;
 				} else {
-					printf(r, "%s(this", ctr_path);
+					printf(r, "%s(%this", ctr_path);
 					asep = true;
 				}
 				ai = -1;
@@ -372,7 +372,7 @@ class SfClass extends SfClassImpl {
 			}
 			r.addLine();
 		} else {
-			printf(r, "return this;");
+			printf(r, "return %this;");
 			r.addTopLevelFuncCloseField(ctr, dotStatic);
 		}
 		

@@ -43,7 +43,7 @@ class SfArgVars {
 		var lp = sfConfig.localPrefix;
 		if (sfConfig.modern && flags.hasNone(SfArgVarsExt.XVarArgs)) {
 			if (showThis && flags.has(SfArgVarsExt.ThisSelf)) {
-				printf(r, "var this`=`self;\n");
+				printf(r, "var %this`=`self;\n");
 			}
 			var hasOpt = false;
 			var hasRest = false;
@@ -74,10 +74,10 @@ class SfArgVars {
 		var arid:Int = 0;
 		if (showThis) {
 			if (flags.has(SfArgVarsExt.ThisSelf)) {
-				printf(r, "var this`=`self");
+				printf(r, "var %this`=`self");
 				found += 1;
 			} else {
-				printf(r, "var this`=`argument[%d]", arid);
+				printf(r, "var %this`=`argument[%d]", arid);
 				found += 1;
 				arid += 1;
 			}

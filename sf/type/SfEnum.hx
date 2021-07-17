@@ -231,24 +231,24 @@ class SfEnum extends SfEnumImpl {
 				printf(out, "%(-\n)];");
 			} else {
 				//
-				printf(out, "var this");
+				printf(out, "var %this");
 				if (hasAC) printf(out, "`=`array_create(%d)", argc + 1);
 				printf(out, ";\n");
 				//
 				if (hasLegacyMeta) {
-					if (debug) printf(out, 'this[1,1]`=`"%s";\n', ctr.name);
+					if (debug) printf(out, '%this[1,1]`=`"%s";\n', ctr.name);
 					if (sf.opt.type.SfGmlType.usesType) {
-						printf(out, "this[1,0]`=`mt_%(type_auto);\n", this);
+						printf(out, "%this[1,0]`=`mt_%(type_auto);\n", this);
 					}
 				}
 				//
-				printf(out, "this[0%(hint)]`=`", "id");
+				printf(out, "%this[0%(hint)]`=`", "id");
 				printCtrIndexLiteral(out, ctr);
 				printf(out, ";\n");
 				for (i in 0 ... argc) {
 					var arg = args[i];
 					inline function addArgSet():Void {
-						printf(out, "this[%d%(hint)]`=`", i + 1, arg.v.name);
+						printf(out, "%this[%d%(hint)]`=`", i + 1, arg.v.name);
 					}
 					if (arg.value != null) {
 						if (sfConfig.ternary) {
@@ -271,7 +271,7 @@ class SfEnum extends SfEnumImpl {
 					printf(out, ";\n");
 				}
 				//
-				printf(out, "return this;");
+				printf(out, "return %this;");
 			}
 			out.addTopLevelFuncClose();
 		}
