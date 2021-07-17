@@ -112,6 +112,26 @@ class SfOptBinop extends SfOptImpl {
 		}
 	}
 	
+	/**
+	 * GML doesn't have operator overloading, meaning that it's OK to change
+	 * if (!(a < b)) to if (a >= b)
+	 */
+	function simplifyIfNots(e:SfExpr, w:SfExprList, f:SfExprIter) {
+		e.iter(w, f);
+		var cond:SfExpr, notx:SfExpr;
+		switch (e.def) {
+			case SfIf(_cond, _, _, _):
+				cond = _cond.unpack();
+				notx = switch (cond.def) {
+					case SfUnop(OpNot, false, _notx): _notx;
+					default: return;
+				}
+			default: return;
+		}
+		var w = notx.invert(true);
+		if (w != null) cond.def = w.def;
+	}
+	
 	override public function apply() {
 		ignoreHidden = true;
 		//
@@ -121,5 +141,6 @@ class SfOptBinop extends SfOptImpl {
 		forEachExpr(wrapNullChecks);
 		#end
 		forEachExpr(simplifyComparisonsWithConstants);
+		forEachExpr(simplifyIfNots);
 	}
 }
