@@ -124,6 +124,7 @@ class SfEnum extends SfEnumImpl {
 			}
 			out.addLine();
 			out.addTopLevelPrintIfPrefixField(ctr);
+			printf(out, "/// @implements {%base_type}\n", enumType);
 			printf(out, "function mc_%(field_auto)()", ctr);
 			printf(out, "`:`mc_%(type_auto)()", this);
 			printf(out, "`constructor`{%(+\n)");
@@ -140,7 +141,7 @@ class SfEnum extends SfEnumImpl {
 			if (ctr.args.length == 0 && !noRef) {
 				printf(out, "globalvar %(field_auto);`", ctr);
 				out.addTopLevelPrintIfPrefix();
-				printf(out, "%(field_auto)`=`new mc_%(field_auto)();\n", ctr, ctr);
+				printf(out, "%(field_auto)`=`new mc_%(field_auto)(); /// @is {%base_type}\n", ctr, ctr, enumType);
 			} else {
 				out.addTopLevelFuncOpenField(ctr);
 				SfArgVars.doc(out, ctr);
@@ -207,7 +208,7 @@ class SfEnum extends SfEnumImpl {
 					}
 					printf(init, "]");
 				} else printf(init, "mc_%s()", path);
-				printf(init, ";\n");
+				printf(init, ";\n /// @is {%base_type}", enumType);
 				if (pureArray) continue;
 				path = "mc_" + path;
 			}
