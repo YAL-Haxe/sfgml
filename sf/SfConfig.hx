@@ -133,7 +133,7 @@ class SfConfig extends SfConfigImpl {
 	/** [2.3.0][req 177710] `a[i](...)` produces invalid JS on HTML5 */
 	public var avoidArrayAccessCalls:Bool = false;
 	
-	/** [2.3.0][req 177719] `static a=[]` produces broken JS on HTML5  */
+	/** [2.3.0,2.3.3][req 177719, 186114] `static a=[]` produces broken JS on HTML5  */
 	public var avoidStaticArrayDeclarations:Bool = false;
 	
 	/** Stores type information in [1,0] instead of [0] */
@@ -171,6 +171,7 @@ class SfConfig extends SfConfigImpl {
 		//
 		var v23 = compare(d.version, "2.3") >= 0;
 		var v231 = compare(d.version, "2.3.1") >= 0;
+		var v234 = compare(d.version, "2.3.4") >= 0;
 		avoidPrefixStatements = v23;
 		modern = v23;
 		dotStatic = bool("sfgml-dot-static", v23 && !gmxMode);
@@ -179,7 +180,7 @@ class SfConfig extends SfConfigImpl {
 		hasChainedAccessors = v23;
 		topLevelFuncs = v23 && !gmxMode;
 		avoidArrayAccessCalls = v23 && !v231;
-		avoidStaticArrayDeclarations = v23 && !v231;
+		avoidStaticArrayDeclarations = v23 && !v234;
 		entrypoint = string("sfgml-main", d.modern ? "" : "main");
 		version = d.version;
 		//
