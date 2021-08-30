@@ -193,18 +193,28 @@ class SfBuffer extends SfBufferImpl {
 				default:
 			}
 		}
-		addString(s);
-		if (par != null) {
+		if (s != null && par != null && s.indexOf("$1") >= 0) {
 			var n = par.length;
-			if (n > 0) {
-				addChar("<".code);
-				var i = 0;
-				while (i < n) {
-					if (i > 0) addChar2(";".code, " ".code);
-					addMacroTypeName(par[i]);
-					i += 1;
+			while (--n >= 0) {
+				var b = new SfBuffer();
+				b.addMacroTypeName(par[n]);
+				s = StringTools.replace(s, "$" + (n + 1), b.toString());
+			}
+			addString(s);
+		} else {
+			addString(s);
+			if (par != null) {
+				var n = par.length;
+				if (n > 0) {
+					addChar("<".code);
+					var i = 0;
+					while (i < n) {
+						if (i > 0) addChar2(";".code, " ".code);
+						addMacroTypeName(par[i]);
+						i += 1;
+					}
+					addChar(">".code);
 				}
-				addChar(">".code);
 			}
 		}
 	}
