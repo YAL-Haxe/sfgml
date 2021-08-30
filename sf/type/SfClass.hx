@@ -417,6 +417,7 @@ class SfClass extends SfClassImpl {
 			var ctr = constructor;
 			if (ctr != null && !ctr.isHidden) {
 				printConstructor(isStruct ? ctrb : stfr, ctr, ignoreFields);
+				globalObjects[sprintf("%type_auto", this)] = true;
 				if (isStruct && !nativeGen) {
 					var mtc = sfGenerator.findRealClassField("gml.MetaClass", "constructor");
 					if (mtc != null && !mtc.isHidden) {
