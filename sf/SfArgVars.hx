@@ -311,6 +311,7 @@ class SfArgVars {
 		if ((ext || jsdoc == null) && doc != null && doc.indexOf("\n") < 0) printf(r, "// %s", doc);
 	}
 	public static function hint(r:SfBuffer, fd:SfField) {
+		if (!fd.parentType.isStruct) return; // flat types are fine as-is
 		printf(r, "/// @hint ");
 		
 		var isFunc = fd.isCallable;
