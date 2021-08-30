@@ -488,10 +488,16 @@ class SfClass extends SfClassImpl {
 				};
 				case FVar(_, _): { // static var
 					// var cc_yal_Some_field[ = value];
-					if (!dotStatic) printf(init, "globalvar %s%(field_auto);", g_, f);
+					if (!dotStatic) {
+						printf(init, "globalvar %s%(field_auto);", g_, f);
+						printf(init, " /// @is {%base_type}", f.typeField.type);
+						init.addLine();
+					} else {
+						SfArgVars.hint(r, f);
+					}
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
-						if (!dotStatic) init.addSep();
+						//if (!dotStatic) init.addSep();
 						var fd = fx.getData();
 						var fsf = fx.mod(SfStaticField(this, f));
 						init.addTopLevelPrintIfPrefix();
@@ -515,7 +521,7 @@ class SfClass extends SfClassImpl {
 								printf(init, "%sw;\n", fx);
 							};
 						}
-					} else init.addLine();
+					}
 				};
 			}
 			
