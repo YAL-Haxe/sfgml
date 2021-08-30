@@ -277,10 +277,11 @@ class SfArgVars {
 			if (jsdoc != null) {
 				jsdoc.addString("/// @param ");
 				if (argTypes) printf(jsdoc, "{%(base_type)} ", avt);
-				if (opt) jsdoc.addChar("[".code);
+				if (opt) jsdoc.addChar("?".code);
+				if (def != null) jsdoc.addChar("[".code);
 				jsdoc.addString(avn);
 				if (def != null) printf(jsdoc, "=%(const)", def);
-				if (opt) jsdoc.addChar("]".code);
+				if (def != null) jsdoc.addChar("]".code);
 				jsdoc.addLine();
 			}
 		}
