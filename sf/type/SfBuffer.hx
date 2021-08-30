@@ -266,6 +266,11 @@ class SfBuffer extends SfBufferImpl {
 						default: af(at, p);
 					};
 					case "Any": addString("any");
+					case "EnumValue": addString("any");
+					case "haxe.ds.Vector": {
+						addString("array");
+						if (p.length > 0) printf(this, "<%base_type>", p[0]);
+					}
 					case "Class": {
 						if (p.length > 0) switch (p[0]) {
 							case TInst(_.get() => { name: "instance" }, _): {
