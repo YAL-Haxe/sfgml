@@ -24,6 +24,7 @@ import sf.type.expr.SfExpr;
 import SfTools.*;
 import sf.SfCore.*;
 import sys.io.File;
+import haxe.macro.Type;
 using sf.type.expr.SfExprTools;
 using StringTools;
 
@@ -37,6 +38,8 @@ class SfGenerator extends SfGeneratorImpl {
 	public var staticFuncBuffer:SfBuffer;
 	/** In 2.3 extension mode, we want constructors before the rest of the code in init function */
 	public var constructorBuffer:SfBuffer;
+	
+	public var jsdocTypedefMap:SfTypeMap<{type:Type, alias:BaseType}> = new SfTypeMap();
 	
 	public var splitFiles:Array<SfGmlSplitFile> = [];
 	public function getSplitBuf(fq:String):SfBuffer {
@@ -221,6 +224,11 @@ class SfGenerator extends SfGeneratorImpl {
 			mixed.addBuffer(init);
 			mixed.addBuffer(out);
 		}
+		jsdocTypedefMap.forEach(function(_, _, pair) {
+			var dst = sprintf("%base_type", pair.type);
+			var src = sprintf("%base_type", pair.alias);
+			if (src != dst)printf(mixed, "\n/// @typedef {%s} %s", dst, src);
+		});
 		//
 		var mixedStr = mixed.toString();
 		if (!sfConfig.timestamp && sfConfig.entrypoint == "" && mainExpr.isEmpty()) {

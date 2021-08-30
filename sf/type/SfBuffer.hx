@@ -213,10 +213,23 @@ class SfBuffer extends SfBufferImpl {
 		inline function f(t:BaseType, ?p:Array<Type>, ?dt:DefType) {
 			addBaseTypeName(t, p, dt);
 		}
+		inline function markTypedef(t:BaseType, src:Type) {
+			var sft = sfGenerator.typeMap.baseGet(t);
+			if (sft == null || !sft.isStd && !sft.isExtern) {
+				sfGenerator.jsdocTypedefMap.baseSet(t, {type:src, alias:t});
+			}
+		}
+		inline function af(t:AbstractType, p:Array<Type>) {
+			markTypedef(t, t.type);
+			addBaseTypeName(t, p, null);
+		}
 		switch (ot) {
 			case TEnum(_.get() => et, p): f(et, p);
 			case TInst(_.get() => ct, p): f(ct, p);
-			case TType(_.get() => dt, p): f(dt, p, dt);
+			case TType(_.get() => dt, p): {
+				markTypedef(dt, dt.type);
+				f(dt, p, dt);
+			};
 			case TFun(args, ret): {
 				n = args.length;
 				addString("function<");
@@ -231,13 +244,14 @@ class SfBuffer extends SfBufferImpl {
 					i += 1;
 				}
 				addMacroTypeName(ret);
-				addChar("<".code);
+				addChar(">".code);
 			};
 			case TDynamic(t): {
 				addString("any");
 			};
 			case TLazy(_() => t): addMacroTypeName(t);
 			case TAbstract(_.get() => at, p): {
+				//trace(at.module, at.name);
 				switch (at.module) {
 					case "StdTypes": switch (at.name) {
 						case "Null": {
@@ -249,7 +263,7 @@ class SfBuffer extends SfBufferImpl {
 						case "Float": addString("number");
 						case "String": addString("string");
 						case "Void": addString("void");
-						default: f(at, p);
+						default: af(at, p);
 					};
 					case "Any": addString("any");
 					case "Class": {
@@ -257,10 +271,10 @@ class SfBuffer extends SfBufferImpl {
 							case TInst(_.get() => { name: "instance" }, _): {
 								addString("object");
 							};
-							default: f(at, p);
-						} else f(at, p);
+							default: af(at, p);
+						} else af(at, p);
 					};
-					default: f(at, p);
+					default: af(at, p);
 				}
 			}
 			default: addString("any");
