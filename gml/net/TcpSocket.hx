@@ -5,6 +5,7 @@ import gml.io.Buffer;
  * ...
  * @author YellowAfterlife
  */
+@:std @:docName("network_socket")
 @:forward(destroy)
 abstract TcpSocket(Socket) {
 	public static var defValue:TcpSocket = cast -1;

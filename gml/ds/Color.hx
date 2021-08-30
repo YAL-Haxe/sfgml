@@ -5,6 +5,7 @@ import SfTools.*;
  * Wraps GameMaker's color-related functions and bitwise tricks in a convenient abstract.
  * @author YellowAfterlife
  */
+@:docName("int")
 abstract Color(Int) from Int to Int {
 	public static inline var white = 0xffffff;
 	public static inline var black = 0x000000;

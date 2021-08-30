@@ -4,6 +4,7 @@ package gml.net;
  * ...
  * @author YellowAfterlife
  */
+@:docName("network_type")
 @:native("network_socket") @:snakeCase
 @:std extern enum abstract SocketType(Int) {
 	var TCP;

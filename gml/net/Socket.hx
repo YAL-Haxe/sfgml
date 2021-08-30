@@ -6,6 +6,7 @@ import gml.Lib.raw as raw;
  * ...
  * @author YellowAfterlife
  */
+@:std @:docName("network_socket")
 @:native("network")
 extern class Socket {
 	//

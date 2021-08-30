@@ -5,6 +5,7 @@ import gml.io.Buffer;
  * ...
  * @author YellowAfterlife
  */
+@:std @:docName("network_socket")
 @:forward(destroy)
 abstract UdpWrapSocket(Socket) {
 	public static var defValue:UdpWrapSocket = cast -1;
