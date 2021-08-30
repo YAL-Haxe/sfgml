@@ -315,7 +315,9 @@ class SfArgVars {
 		printf(r, "/// @hint ");
 		
 		var isFunc = fd.isCallable;
-		if (!isFunc) printf(r, "{%base_type} ", fd.type);
+		if (!isFunc) {
+			printf(r, "{%base_type} ", fd.typeField.type);
+		}
 		
 		var sft = fd.parentType;
 		r.addTypePath(sft, "_".code);
