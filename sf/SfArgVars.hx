@@ -355,6 +355,7 @@ class SfArgVars {
 			var sep = false;
 			if (fd.args != null) for (arg in fd.args) {
 				if (sep) printf(r, ", "); else sep = true;
+				if (arg.value != null) printf(r, "?");
 				var argType = arg.v.type;
 				var restType = SfGmlRest.getRestType(argType);
 				if (restType != null) {
