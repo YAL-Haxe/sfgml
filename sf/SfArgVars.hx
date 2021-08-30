@@ -370,7 +370,7 @@ class SfArgVars {
 			printf(r, ")");
 			printf(r, "->%base_type", fd.type);
 		}
-		if (fd.doc != null && fd.doc != "") printf(r, " %s", fd.doc);
+		if (fd.doc != null && fd.doc != "" && fd.doc.indexOf("\n") < 0) printf(r, " %s", fd.doc);
 		//
 		r.addLine();
 	}
