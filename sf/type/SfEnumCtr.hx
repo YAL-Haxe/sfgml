@@ -1,7 +1,20 @@
 package sf.type;
+import sf.SfCore;
 
 /**
  * ...
  * @author YellowAfterlife
  */
-typedef SfEnumCtr = SfEnumCtrImpl;
+class SfEnumCtr extends SfEnumCtrImpl {
+	/**
+	 * Is it okay to reference this via enum_ctr?
+	 */
+	public function hasMacro():Bool {
+		if (parentEnum.isExtern) return true;
+		if (!parentEnum.isFake) return false;
+		if (parentEnum.docState < 0) return false;
+		if (!checkDocState(parentEnum.docState)) return false;
+		if (parentEnum.hasNativeEnum()) return false;
+		return true;
+	}
+}

@@ -747,19 +747,12 @@ class SfGenerator extends SfGeneratorImpl {
 					r.addFieldPath(_ctr, "_".code, "_".code);
 					r.add("()");
 				} else if (_enum.isFake) {
-					if (_enum.nativeGen) {
-						if (sfConfig.gmxMode) {
-							r.addFieldPath(_ctr, "_".code, "_".code);
-						} else printf(r, "%(type_auto).%s", _enum, _ctr.name);
-					} else if (_enum.isExtern) {
+					if (_enum.hasNativeEnum()) {
+						printf(r, "%(type_auto).%s", _enum, _ctr.name);
+					} else if (_ctr.hasMacro()) {
 						r.addFieldPath(_ctr, "_".code, "_".code);
 					} else {
-						r.addInt(_ctr.index);
-						if (sfConfig.hint) {
-							r.addHintOpen();
-							printf(r, "%s.%s", _enum.name, _ctr.name);
-							r.addHintClose();
-						}
+						printf(r, "%d%hint", _ctr.index, _enum.name + "." + _ctr.name);
 					}
 				} else {
 					if (sfConfig.gmxMode) r.addString("g_");
