@@ -7,6 +7,7 @@ package ;
 import gml.Lib.raw;
 import gml.NativeString;
 
+@:docName("string")
 @:std @:native("string") @:final
 @:gml.linear // (we want it to be passed to native functions as an argument)
 class String {
