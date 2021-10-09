@@ -196,6 +196,7 @@ class SfGenerator extends SfGeneratorImpl {
 			var ver = sfConfig.version;
 			printf(mixed, "// Generated at %s (%(d)ms) for v%s+\n", now, ms, ver);
 		}
+		printf(mixed, "/// @lint nullToAny true\n");
 		
 		//
 		function addMainExpr(b:SfBuffer):Void {
