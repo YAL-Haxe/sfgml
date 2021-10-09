@@ -98,7 +98,10 @@ class SfEnum extends SfEnumImpl {
 		if (hasNativeEnum()) printNativeEnum(init);
 		out.addLine();
 		out.addTopLevelPrintIfPrefix();
+		printf(out, "/// @interface {%type_auto}\n", this);
 		printf(out, "function mc_%(type_auto)()`constructor`{%(+\n)", this);
+		printf(out, "/// @hint {array} %type_auto:__enumParams__\n", this);
+		printf(out, "/// @hint {int} %type_auto:__enumIndex__\n", this);
 		printf(out, "static getIndex`=`method(undefined,`%s);\n", getIndexPath);
 		printf(out, "static toString`=`method(undefined,`%s);\n", toStringPath);
 		printf(out, "static __enum__`=`mt_%(type_auto);", this);
@@ -128,6 +131,9 @@ class SfEnum extends SfEnumImpl {
 			printf(out, "function mc_%(field_auto)()", ctr);
 			printf(out, "`:`mc_%(type_auto)()", this);
 			printf(out, "`constructor`{%(+\n)");
+			for (arg in ctr.args) {
+				printf(out, "/// @hint {%base_type} :%s\n", arg.v.type, arg.v.name);
+			}
 			//
 			printf(out, "static __enumParams__`=`");
 			if (avoidStaticArrayDeclarations) {
@@ -208,7 +214,7 @@ class SfEnum extends SfEnumImpl {
 					}
 					printf(init, "]");
 				} else printf(init, "mc_%s()", path);
-				printf(init, ";\n /// @is {%base_type}", enumType);
+				printf(init, "; /// @is {%base_type}\n", enumType);
 				if (pureArray) continue;
 				path = "mc_" + path;
 			}

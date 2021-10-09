@@ -262,6 +262,7 @@ class SfClass extends SfClassImpl {
 					} else {
 						r.addString("static ");
 					}
+					//
 					printf(r, "%s`=`", iterName);
 					if (iterField.needsFunction()) {
 						if (checkInsert) {
@@ -273,10 +274,11 @@ class SfClass extends SfClassImpl {
 							printf(r, "%(-\n)}");
 							ignoreFields[iterField.realName] = true;
 						} else printf(r, "method(undefined,`%(field_auto))", iterField);
+						printf(r, ";\n");
 					} else {
-						printf(r, "undefined");
+						printf(r, "undefined; /// @is {%base_type}\n", iterField.classField.type);
 					}
-					printf(r, ";\n");
+					
 				}
 				iterClass = iterClass.superClass;
 				checkInsert = false;

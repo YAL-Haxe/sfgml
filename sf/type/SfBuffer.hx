@@ -192,6 +192,19 @@ class SfBuffer extends SfBufferImpl {
 				case [{ params: [{ expr: EConst(CString(s1)) }] }]: s = s1;
 				default:
 			}
+		} else {
+			var sft = sfGenerator.typeMap.baseGet(t);
+			var b = new SfBuffer();
+			if (sft != null) {
+				var native = sft.metaString(":native");
+				if (native != null) {
+					b.add(StringTools.replace(native, ".", "_"));
+				} else b.addTypePathAuto(sft);
+			} else {
+				for (p in t.pack) { b.add(p); b.add("_"); }
+				b.add(t.name);
+			}
+			s = b.toString();
 		}
 		else {
 			var sft = sfGenerator.typeMap.baseGet(t);
@@ -295,6 +308,15 @@ class SfBuffer extends SfBufferImpl {
 					case "haxe.ds.Vector": {
 						addString("array");
 						if (p.length > 0) printf(this, "<%base_type>", p[0]);
+					}
+					case "haxe.extern.EitherType": {
+						var sep = false;
+						addString("(");
+						for (tp in p) {
+							if (sep) addString("|"); else sep = true;
+							addMacroTypeName(tp);
+						}
+						addString(")");
 					}
 					case "Class": {
 						if (p.length > 0) switch (p[0]) {
