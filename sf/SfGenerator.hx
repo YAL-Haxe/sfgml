@@ -226,9 +226,31 @@ class SfGenerator extends SfGeneratorImpl {
 			mixed.addBuffer(out);
 		}
 		jsdocTypedefMap.forEach(function(_, _, pair) {
-			var dst = sprintf("%base_type", pair.type);
+			var dst:String = null;
+			var dstType = pair.type;
+			for (i in 0 ... 16) switch (pair.type) {
+				case TType(_.get() => dt, _): dstType = dt.type;
+				case TAbstract(_.get() => at, _): dstType = at.type;
+				default: break;
+			}
+			var sfSrc = typeMap.baseGet(pair.alias);
+			if (sfSrc != null && sfSrc.baseType.params.length > 0) {
+				var dstBase:BaseType = null, dstParams:Array<Type> = null;
+				switch (pair.type) {
+					case TInst(_.get() => _ct, _p): dstBase = _ct; dstParams = _p;
+					case TAbstract(_.get() => _at, _p): dstBase = _at; dstParams = _p;
+					default: //trace(dstType);
+				}
+				if (dstParams != null && sfSrc.baseType.params.length == dstParams.length) {
+					var tb = new SfBuffer();
+					tb.addBaseTypeName(dstBase, []);
+					dst = tb.toString();
+				}
+			}
+			if (dst == null) dst = sprintf("%base_type", dstType);
+			
 			var src = sprintf("%base_type", pair.alias);
-			if (src != dst)printf(mixed, "\n/// @typedef {%s} %s", dst, src);
+			if (src != dst) printf(mixed, "\n/// @typedef {%s} %s", dst, src);
 		});
 		//
 		var mixedStr = mixed.toString();
