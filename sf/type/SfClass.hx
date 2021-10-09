@@ -218,6 +218,18 @@ class SfClass extends SfClassImpl {
 				protoCopyOffset, this, protoCopyOffset, indexes - protoCopyOffset
 			);
 		}
+		if (!isStruct && objName == null) {
+			printf(r, "/// @typedef {tuple");
+			var sep = false;
+			for (fd in fieldsByIndex) {
+				if (sep) printf(r, ","); else { printf(r, "<"); sep = true; }
+				if (fd != null) {
+					printf(r, "%s:%base_type", fd.name, fd.typeField.type);
+				} else printf(r, "any");
+			}
+			if (sep) printf(r, ">");
+			printf(r, "} %type_auto\n", this);
+		}
 		
 		if (isStruct) { // add prototype fields
 			var iterFound = new Map();
