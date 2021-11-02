@@ -206,17 +206,6 @@ class SfBuffer extends SfBufferImpl {
 			}
 			s = b.toString();
 		}
-		else {
-			var sft = sfGenerator.typeMap.baseGet(t);
-			var tb = new SfBuffer();
-			if (sft != null) {
-				tb.addTypePathAuto(sft);
-			} else {
-				for (p in t.pack) { tb.addString(p); tb.addChar("_".code); }
-				tb.addString(t.name);
-			}
-			s = tb.toString();
-		}
 		if (s != null && par != null && s.indexOf("$1") >= 0) {
 			var n = par.length;
 			while (--n >= 0) {
