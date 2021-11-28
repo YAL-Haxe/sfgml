@@ -1,4 +1,5 @@
 package gml;
+import gml.io.Pointer;
 
 /**
  * GML has a variety of helper functions for checking if a value is of one or other type
@@ -55,6 +56,7 @@ extern class NativeType {
 	@:expose("real") static function toReal(v:Dynamic):Float;
 	@:expose("bool") static function toBool(v:Dynamic):Bool;
 	@:expose("int64") static function toInt64(v:Dynamic):haxe.Int64;
+	@:expose("ptr") static function toPtr(v:Dynamic):Pointer;
 }
 @:noCompletion @:std class NativeTypeHelper {
 	public static function isNumber(v:Dynamic) {

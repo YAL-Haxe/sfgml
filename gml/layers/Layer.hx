@@ -1,4 +1,5 @@
 package gml.layers;
+import gml.gpu.Effect;
 import haxe.extern.EitherType;
 import gml.assets.*;
 
@@ -87,6 +88,15 @@ extern class Layer {
 		raw_shader(v);
 		return v;
 	}
+	
+	public var effect(get, set):Effect;
+	@:native("get_fx") private function get_effect():Effect;
+	@:native("set_fx") private function raw_effect(e:Effect):Void;
+	private inline function set_effect(e:Effect):Effect {
+		raw_effect(e);
+		return e;
+	}
+	@:native("clear_fx") public function clearEffect():Void;
 }
 /* autogen:
 function gen(name, type) { return `//
