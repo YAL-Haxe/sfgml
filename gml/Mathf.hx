@@ -31,4 +31,6 @@ import haxe.extern.Rest;
 	//
 	@:native("degtorad") static function degToRad(deg:Float):Float;
 	@:native("radtodeg") static function radToDeg(rad:Float):Float;
+	
+	@:native("point_in_rectangle") static function pointInRect(x:Float, y:Float, left:Float, top:Float, right:Float, bottom:Float):Bool;
 }

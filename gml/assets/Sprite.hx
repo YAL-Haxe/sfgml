@@ -112,7 +112,7 @@ extern class Sprite extends Asset {
 	@:expose("draw_sprite_part") function drawPart(subimg:Float, left:Float, top:Float,
 		width:Float, height:Float, x:Float, y:Float):Void;
 	@:expose("draw_sprite_part_ext") function drawPartExt(subimg:Float, left:Float, top:Float,
-		width:Float, height:Float, x:Float, y:Float, color:Color, alpha:Float):Void;
+		width:Float, height:Float, x:Float, y:Float, xscale:Float, yscale:Float, color:Color, alpha:Float):Void;
 	//
 	@:expose("draw_sprite_general") function drawGeneral(subimg:Float,
 		left:Float, top:Float, width:Float, height:Float,
