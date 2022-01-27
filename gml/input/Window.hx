@@ -46,6 +46,14 @@ package gml.input;
 		setFullscreen(v);
 		return v;
 	}
+	
+	static var caption(get, set):String;
+	private static function get_caption():String;
+	@:native("set_caption") private static function setCaption(v:String):Void;
+	private static inline function set_caption(s:String):String {
+		setCaption(s);
+		return s;
+	}
 }
 @:native("cr") extern enum abstract WindowCursor(Int) {
 	var none;
