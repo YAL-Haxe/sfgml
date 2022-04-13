@@ -166,7 +166,10 @@ class SfGmlLocalFunc extends SfOptImpl {
 					locals[v.name] = true;
 					if (set) expr.iter(st, it);
 				};
-				case SfFunction(fn): verifyFunc(fn);
+				case SfFunction(fn): {
+					if (fn.name != null) locals[fn.name] = true;
+					verifyFunc(fn);
+				};
 				default: expr.iter(st, it);
 			}
 		}
