@@ -1057,12 +1057,31 @@ class SfGenerator extends SfGeneratorImpl {
 						}
 					};
 					case SfStaticField(cl, fd): { // Type.func(...)
-						if (fd.name == "set_2D" && fd.parentType.realPath == "gml.NativeArray"
-							&& _args[0].def.match(SfLocal(_) | SfStaticField(_, _))
-						) { // NativeArray.set2D(a, b, c, d) -> a[@b, c] = d;
-							printf(r, "%x[@%x,`%x]`=`%x", _args[0], _args[1], _args[2], _args[3]);
-							return;
-						} else if (cl.dotStatic || !fd.isVar || fd.meta.has(":script")) {
+						switch (fd.parentType.realPath) {
+							case "gml.NativeArray":
+								if (fd.realName == "set2d") {
+									// NativeArray.set2d(a, b, c, d) -> a[@b, c] = d;
+									printf(r, "%x[@%x,`%x]`=`%x", _args[0], _args[1], _args[2], _args[3]);
+									return;
+								}
+							case "gml.NativeStruct":
+								var mode = -1;
+								switch (fd.realName) {
+									case "getField": mode = 0;
+									case "setField": mode = 1;
+								}
+								if (mode >= 0) {
+									printf(r, "%x[$", _args[0]);
+									switch (_args[1].def) {
+										case SfConst(TString(_)): {};
+										default: r.addChar(" ".code);
+									}
+									printf(r, "%x]", _args[1]);
+									if (mode == 1) printf(r, "`=`%x", _args[2]);
+									return;
+								}
+						}
+						if (cl.dotStatic || !fd.isVar || fd.meta.has(":script")) {
 							r.addFieldPathAuto(fd);
 						} else callFlags = 3;
 					};
@@ -1094,29 +1113,29 @@ class SfGenerator extends SfGeneratorImpl {
 						) {
 							printf(r, "%x.%s", _inst, _field.name);
 						} else {
-							k = 0;
+							var accessorKind = 0;
 							#if !sfgml_no_accessors
 							switch (_field.parentType.name) {
 								case "ds_list": switch (_field.name) {
-									case "find_value": k = 1;
-									case "set": k = 2;
+									case "find_value": accessorKind = 1;
+									case "set": accessorKind = 2;
 								};
 								case "ds_map": switch (_field.name) {
-									case "find_value": k = 3;
-									case "set": k = 4;
+									case "find_value": accessorKind = 3;
+									case "set": accessorKind = 4;
 								};
 								case "ds_grid": switch (_field.name) {
-									case "get": k = 5;
-									case "set": k = 6;
+									case "get": accessorKind = 5;
+									case "set": accessorKind = 6;
 								};
 							}
 							#end
-							if (k <= 0) {
+							if (accessorKind <= 0) {
 								//
 							} else if (sfConfig.hasChainedAccessors
 								|| _inst.unpack().def.match(SfLocal(_) | SfStaticField(_, _))
 							) {
-								switch (k) {
+								switch (accessorKind) {
 									case 1: printf(r, "%x[|%x]", _inst, _args[0]);
 									case 2: printf(r, "%x[|%x]`=`%x", _inst, _args[0], _args[1]);
 									case 3: printf(r, "%x[?%x]", _inst, _args[0]);
@@ -1126,7 +1145,7 @@ class SfGenerator extends SfGeneratorImpl {
 										_args[0], _args[1], _args[2]);
 								};
 								return;
-							} else k = 0;
+							} else accessorKind = 0;
 							r.addFieldPathAuto(_field);
 							printf(r, "(%x", _inst);
 							sep = true;
