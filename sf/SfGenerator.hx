@@ -632,13 +632,15 @@ class SfGenerator extends SfGeneratorImpl {
 						printf(r, "{`");
 						r.indent++;
 					}
+					var rxValidName = ~/^\w+$/;
 					for (i in 0 ... pairs.length) {
 						if (i > 0) {
 							if (lineSep) {
 								printf(r, ",\n");
 							} else r.addComma();
 						}
-						printf(r, "%s:`", pairs[i].name);
+						var name = pairs[i].name;
+						printf(r, "%s:`", rxValidName.match(name) ? name : haxe.Json.stringify(name));
 						r.addExpr(pairs[i].expr, SfPrintFlags.ExprWrap);
 					}
 					if (lineSep) {
