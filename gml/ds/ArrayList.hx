@@ -16,12 +16,14 @@ extern class ArrayList<T> implements ArrayAccess<T> {
 	function destroy():Void;
 	function clear():Void;
 	var length(default, null):Int;
+	@:pure function isEmpty():Bool;
 	//
 	@:pure function get(index:Int):T;
 	function set(index:Int, val:T):Void;
 	//
 	function add(values:Rest<T>):Void;
 	function insert(index:Int, value:T):Void;
+	function replace(index:Int, value:T):Void;
 	function remove(value:T):Void;
 	function delete(index:Int):Void;
 	@:pure function indexOf(value:T):Int;
@@ -123,7 +125,8 @@ private extern class ArrayListImpl<T> {
 	 * If the list contains more values after the given position,
 	 * their position will be shifted up one to make room making the list larger by one. 
 	 */
-	function insert(position:Int, value:T):Void;
+	function insert(index:Int, value:T):Void;
+	function replace(index:Int, value:T):Void;
 	
 	function delete(position:Int):Void;
 	inline function remove(value:T):Void {
