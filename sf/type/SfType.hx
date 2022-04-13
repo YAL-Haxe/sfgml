@@ -109,14 +109,21 @@ class SfType extends SfTypeImpl {
 		}
 		//
 		if (SfCore.sfConfig.modern) {
-			var preferLinear = isStd && isExtern;
-			#if sfgml_linear
-			preferLinear = true;
-			#end
-			if (preferLinear) {
-				isStruct = t.meta.has(":gml.struct");
+			if (t.meta.has(":gml.struct")) {
+				// explicit struct
+				isStruct = true;
+			} else if (t.meta.has(":gml.linear")) {
+				// explicit array
+				isStruct = false;
+			} else if (isExtern) {
+				// externs default to array (for thing_create)
+				isStruct = false;
 			} else {
-				isStruct = !isExtern && !t.meta.has(":gml.linear");
+				#if sfgml_linear
+				isStruct = false;
+				#else
+				isStruct = true;
+				#end
 			}
 			if (isStruct) {
 				dotAccess = true;
