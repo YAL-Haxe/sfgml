@@ -67,6 +67,11 @@ private extern class HashTableImpl<K, V> {
 	function read(string:String):Void;
 	function write():String;
 	
+	/**
+	 * NB! emptyMap.getKeys() returns null as of GM2022.4
+	 */
+	@:native("keys_to_array") function getKeys(?out:Array<K>):Array<K>;
+	
 	inline function keys():HashTableKeyIterator<K,V> {
 		return new HashTableKeyIterator(this);
 	}
@@ -78,6 +83,25 @@ private extern class HashTableImpl<K, V> {
 
 @:native("ds_map_key_iterator")
 @:nativeGen class HashTableKeyIterator<K, V> {
+	#if sfgml.modern
+	var map:HashTableImpl<K, V>;
+	var keys:Array<K>;
+	var index:Int;
+	var count:Int;
+	@:runtime public inline function new(map:HashTableImpl<K, V>) {
+		this.map = map;
+		this.keys = [];
+		this.map.getKeys(this.keys);
+		this.index = 0;
+		this.count = this.keys.length;
+	}
+	@:runtime public inline function hasNext() {
+		return index < count;
+	}
+	@:runtime public inline function next():K {
+		return keys[index++];
+	}
+	#else
 	var map:HashTableImpl<K, V>;
 	var key:K;
 	@:runtime public inline function new(map:HashTableImpl<K, V>) {
@@ -92,6 +116,7 @@ private extern class HashTableImpl<K, V> {
 		key = map.findNext(key);
 		return out;
 	}
+	#end
 }
 
 @:native("ds_map_value_iterator")
