@@ -177,12 +177,10 @@ class SfGmxGen {
 			}
 		} // addEnum
 		function addAbstract(sfa:SfAbstract) {
-			if (sfa.isHidden) return;
-			var sfad = sfa.docState;
-			
+			if (!sfa.needsMacros()) return;
 			// enum abstract?
-			if (sfa.meta.has(":enum") && sfa.impl != null && !sfa.impl.isHidden
-			) for (sff in sfa.impl.staticList) {
+			var sfad = sfa.docState;
+			for (sff in sfa.impl.staticList) {
 				if (!sff.meta.has(":enum")) continue;
 				if (!sff.checkDocState(sfad)) continue;
 				if (sff.expr == null) continue;
