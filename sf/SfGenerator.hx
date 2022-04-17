@@ -197,6 +197,7 @@ class SfGenerator extends SfGeneratorImpl {
 			printf(mixed, "// Generated at %s (%(d)ms) for v%s+\n", now, ms, ver);
 		}
 		printf(mixed, "/// @lint nullToAny true\n");
+		printf(mixed, "// Feather disable all\n");
 		
 		//
 		function addMainExpr(b:SfBuffer):Void {
