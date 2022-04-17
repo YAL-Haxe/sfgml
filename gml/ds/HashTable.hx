@@ -49,6 +49,8 @@ private extern class HashTableImpl<K, V> {
 	//
 	@:pure @:native("find_value") function get(key:K):Null<V>;
 	function set(key:K, value:V):Void;
+	/** Only changes the value if a pair already existed. Returns whether replaced. */
+	function replace(key:K, value:V):Bool;
 	@:pure function exists(key:K):Bool;
 	@:native("delete") function remove(key:K):Void;
 	//
@@ -71,6 +73,7 @@ private extern class HashTableImpl<K, V> {
 	 * NB! emptyMap.getKeys() returns null as of GM2022.4
 	 */
 	@:native("keys_to_array") function getKeys(?out:Array<K>):Array<K>;
+	@:native("values_to_array") function getValues(?out:Array<K>):Array<K>;
 	
 	inline function keys():HashTableKeyIterator<K,V> {
 		return new HashTableKeyIterator(this);

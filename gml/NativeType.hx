@@ -1,4 +1,5 @@
 package gml;
+import gml.NativeStruct;
 import gml.io.Pointer;
 
 /**
@@ -18,6 +19,10 @@ extern class NativeType {
 	static function isUndefined(v:Dynamic):Bool;
 	static function isVec3(v:Dynamic):Bool;
 	static function isVec4(v:Dynamic):Bool;
+	
+	static inline function isInstance(v:Dynamic):Bool {
+		return NativeStruct.instanceOf(v) == "instance";
+	}
 	
 	/** >= 2.3 */
 	static function isStruct(v:Dynamic):Bool;

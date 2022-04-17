@@ -11,6 +11,13 @@ import haxe.Constraints.Function;
 extern class Script extends Asset {
 	public static inline var defValue:Script = cast -1;
 	
+	/** In GMS2.3+, built-in functions use low IDs while user-defined scripts are offset */
+	#if sfgml.modern
+	public static inline var firstIndex:Int = 100000;
+	#else
+	public static inline var firstIndex:Int = 0;
+	#end
+	
 	/** Returns whether the given script index exists */
 	@:native("exists")
 	public static function isValid(q:Script):Bool;

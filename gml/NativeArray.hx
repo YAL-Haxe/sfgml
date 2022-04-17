@@ -75,4 +75,10 @@ extern class NativeArray {
 	
 	/** GMS 2.3+ */
 	static function insert<T>(arr:Array<T>, index:Int, values:Rest<T>):Void;
+	
+	/** GMS 2.3+ */
+	@:native("sort") static function sortSimple<T>(arr:Array<T>, ascend:Bool):Void;
+	
+	/** GMS 2.3+ */
+	static function sort<T>(arr:Array<T>, comparator:T->T->Int):Void;
 }
