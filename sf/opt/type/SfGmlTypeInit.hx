@@ -59,44 +59,51 @@ class SfGmlTypeInit {
 		//
 		var typeBoot = sfGenerator.typeBoot;
 		var modern = sfConfig.modern;
+		var safeInit = modern;
+		var setBuf = safeInit ? new SfBuffer() : init;
 		for (t in sfGenerator.typeList) {
 			if (!t.hasMetaType()) continue;
 			var e:SfEnum = Std.is(t, SfEnum) ? cast t : null;
 			var c:SfClass = Std.is(t, SfClass) ? cast t : null;
 			//
-			printf(init, "globalvar mt_%(type_auto);`", t);
-			init.addTopLevelPrintIfPrefix();
-			printf(init, "mt_%(type_auto)`=`", t);
-			if (modern) {
-				printf(init, "new %s%s", stdPre, e != null ? "haxe_enum" : "haxe_class");
-			} else {
-				printf(init, "%s%(s)_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
+			printf(init, "globalvar mt_%(type_auto);", t);
+			if (!safeInit) {
+				init.addSep();
+				init.addTopLevelPrintIfPrefix();
 			}
-			printf(init, '(%d,`"%(type_auto)"', t.index, t);
+			printf(setBuf, "mt_%(type_auto)`=`", t);
+			if (modern) {
+				printf(setBuf, "new %s%s", stdPre, e != null ? "haxe_enum" : "haxe_class");
+			} else {
+				printf(setBuf, "%s%(s)_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
+			}
+			printf(setBuf, '(%d,`"%(type_auto)"', t.index, t);
 			if (e != null) do {
 				if (!e.ctrNames) break;
 				if (hasArrayDecl) {
-					printf(init, ",`[");
+					printf(setBuf, ",`");
+					printf(setBuf, "[");
 				} else {
-					printf(init, ",`%(field_auto)(", typeBoot.realMap["decl"]);
+					printf(setBuf, ",`%(field_auto)(", typeBoot.realMap["decl"]);
 				}
 				var sep = false;
 				for (c in e.ctrList) {
-					if (sep) init.addComma(); else sep = true;
-					printf(init, '"%s"', c.name);
+					if (sep) setBuf.addComma(); else sep = true;
+					printf(setBuf, '"%s"', c.name);
 				}
 				if (hasArrayDecl) {
-					printf(init, "]");
+					printf(setBuf, "]");
 				} else {
-					printf(init, ")");
+					printf(setBuf, ")");
 				}
 			} while (false);
-			printf(init, ");\n");
+			printf(setBuf, ");\n");
+			if (safeInit) printf(init, "\n");
 			//
 			if (modern && c != null && c.superClass != null && c.module != SfGmlType.mtModule) {
 				if (qMetaClass_super != null) {
-					init.addTopLevelPrintIfPrefix();
-					printf(init, "mt_%(type_auto).%s`=`mt_%(type_auto);\n",
+					if (!safeInit) setBuf.addTopLevelPrintIfPrefix();
+					printf(setBuf, "mt_%(type_auto).%s`=`mt_%(type_auto);\n",
 						c, qMetaClass_super.name, c.superClass);
 				} else {
 					haxe.macro.Context.warning(
@@ -104,6 +111,12 @@ class SfGmlTypeInit {
 						c.classType.pos);
 				}
 			}
+		}
+		if (safeInit && setBuf.length > 0) {
+			setBuf.addTopLevelPrintIfPrefix();
+			printf(init, "(function()`{\n");
+			init.addBuffer(setBuf);
+			printf(init, "})();\n");
 		}
 		
 		//
