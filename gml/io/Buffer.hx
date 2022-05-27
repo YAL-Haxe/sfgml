@@ -8,7 +8,8 @@ import haxe.Int64;
  * but have to be deallocated explicitly.
  * @author YellowAfterlife
  */
-@:native("buffer") @:final extern class Buffer {
+@:native("buffer") @:final @:snakeCase
+extern class Buffer {
 	public static inline var defValue:Buffer = cast -1;
 	public static function sizeof(t:BufferType):Int;
 	
@@ -160,6 +161,13 @@ import haxe.Int64;
 	@:native("set_surface") private function setSurfaceImpl(sf:Surface, mode:Int, offset:Int, modulo:Int):Void;
 	#end
 	
+	#if (sfgml_version >= "2022")
+	/** Copies BGRA data from a surface to a buffer */
+	function getSurface(src_surface:Surface, offset:Int):Void;
+	
+	/** Copies BGRA data from a buffer to a surface */
+	function setSurface(dst_surface:Surface, offset:Int):Void;
+	#else
 	/** Copies BGRA data from a surface to a buffer */
 	public inline function getSurface(sf:Surface, offset:Int):Void {
 		#if sfgml.modern
@@ -177,9 +185,16 @@ import haxe.Int64;
 		setSurfaceImpl(sf, 0, offset, 0);
 		#end
 	}
+	#end
 	
 	/// Synchronously loads a buffer from given file.
 	public static function load(path:String):Buffer;
+	
+	/// Synchronously loads a buffer from given file.
+	public static function loadExt(path:String, destOffset:Int):Buffer;
+	
+	/// Synchronously loads a buffer from given file.
+	public static function loadPartial(path:String, srcOffset:Int, srcLen:Int, destOffset:Int):Buffer;
 	
 	///
 	public function save(path:String):Void;

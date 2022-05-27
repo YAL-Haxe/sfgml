@@ -55,6 +55,9 @@ extern class Surface {
 		Surface.resetTarget();
 	}
 	
+	static function getTarget():Surface;
+	static function getTargetExt(index:Int):Surface;
+	
 	//
 	@:native("copy") function copyFrom(x:Float, y:Float, source:Surface):Void;
 	@:native("copy_part") function copyPartFrom(x:Float, y:Float, source:Surface,

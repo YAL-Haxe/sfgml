@@ -38,13 +38,6 @@ class SfAbstract extends SfAbstractImpl {
 				init.addBuffer(b);
 			}
 		}
-		/*out.addString("var ");
-		out.addTypePathAuto(this);
-		out.addSepChar("=".code);
-		out.addBlockOpen();
-		out.addSep();
-		out.addBlockClose();
-		out.addLine();*/
 	}
 	
 }
