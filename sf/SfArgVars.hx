@@ -3,6 +3,7 @@ import haxe.macro.Type;
 import sf.opt.syntax.SfGmlRest;
 import sf.type.SfArgument;
 import sf.type.SfBuffer;
+import sf.type.SfClass;
 import sf.type.SfClassField;
 import sf.type.SfField;
 import sf.type.SfVar;
@@ -304,6 +305,14 @@ class SfArgVars {
 		if (argTypes) switch (f.type) {
 			case TAbstract(_.get() => at, _) if (at.name == "Void"):
 			default: printf(r, "->%base_type", f.type);
+		}
+		if (jsdoc != null && argTypes) {
+			if (!f.isStructField && (f is SfClassField) && (cast f:SfClassField).parentClass.constructor == f) {
+				printf(jsdoc, "/// @returns {%(base_type)}", f.parentType.baseType);
+			} else {
+				printf(jsdoc, "/// @returns {%(base_type)}", f.type);
+			}
+			jsdoc.addLine();
 		}
 		// print @:doc:
 		if (flags & 2 != 0) r.addLine();
