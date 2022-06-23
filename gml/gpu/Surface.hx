@@ -86,6 +86,9 @@ extern class Surface {
 		x:Float, y:Float,
 		xscale:Float, yscale:Float, color:Color, alpha:Float
 	):Void;
+	@:expose("draw_surface_stretched") function drawStretched(
+		x:Float, y:Float, width:Float, height:Float
+	):Void;
 	@:expose("draw_surface_general") function drawGeneral(
 		left:Float, top:Float, width:Float, height:Float,
 		x:Float, y:Float,

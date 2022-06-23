@@ -1,4 +1,5 @@
 package gml.assets;
+import gml.Instance;
 import gml.assets.Asset;
 
 /**
@@ -63,3 +64,4 @@ extern class Object extends Asset {
 	}
 	#end
 }
+typedef ObjectOf<T:Instance> = Object;

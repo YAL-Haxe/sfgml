@@ -1,5 +1,6 @@
 package gml.io;
 import gml.gpu.Surface;
+import gml.gpu.VertexBuffer;
 import gml.io.BufferType;
 import haxe.Int64;
 
@@ -190,14 +191,11 @@ extern class Buffer {
 	/// Synchronously loads a buffer from given file.
 	public static function load(path:String):Buffer;
 	
-	/// Synchronously loads a buffer from given file.
-	public static function loadExt(path:String, destOffset:Int):Buffer;
-	
-	/// Synchronously loads a buffer from given file.
-	public static function loadPartial(path:String, srcOffset:Int, srcLen:Int, destOffset:Int):Buffer;
-	
 	///
 	public function save(path:String):Void;
+	
+	public function loadExt(path:String, offset:Int):Void;
+	public function loadPartial(path:String, srcOffset:Int, srcLen:Int, destOffset:Int):Void;
 	
 	/// 
 	@:native("save_ext") public function savePart(path:String, offset:Int, size:Int):Void;
@@ -213,6 +211,16 @@ extern class Buffer {
 	@:native("base64_decode") public static function fromBase64(b64:String):Buffer;
 	
 	@:native("base64_encode") public function toBase64():String;
+	
+	@:native("create_from_vertex_buffer")
+	static function fromVertexBuffer(vb:VertexBuffer, type:BufferKind, alignment:Int):Buffer;
+	
+	@:native("create_from_vertex_buffer_ext")
+	static function fromVertexBufferExt(vb:VertexBuffer, type:BufferKind, alignment:Int, startVert:Int, numVerts:Int):Buffer;
+	
+	inline function copyFromVertexBuffer(vb:VertexBuffer, startVertex:Int, vertexCount:Int, destOffset:Int):Void {
+		vb.copyToBuffer(startVertex, vertexCount, this, destOffset);
+	}
 }
 @:std private class BufferImpl {
 	public static function writeBuffer(dst:Buffer, src:Buffer):Bool {

@@ -13,6 +13,7 @@ import haxe.extern.Rest;
 	static function clamp<T:Float>(val:T, min:T, max:T):T;
 	static function lerp(vfrom:Float, vto:Float, f:Float):Float;
 	static function sign(val:Float):Int;
+	static function frac(f:Float):Float;
 	static function sqr<T:Float>(val:T):T;
 	static function abs<T:Float>(val:T):T;
 	static function log10(f:Float):Float;

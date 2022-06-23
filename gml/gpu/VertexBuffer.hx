@@ -1,6 +1,7 @@
 package gml.gpu;
 import gml.ds.Color;
 import gml.io.Buffer;
+import gml.io.BufferKind;
 
 /**
  * ...
@@ -20,11 +21,31 @@ extern class VertexBuffer {
 	private function get_number():Int;
 	
 	//
-	@:native("create_buffer") function new():Void;
-	@:native("create_buffer_ext") static function alloc(size:Int):VertexBuffer;
-	@:native("create_buffer_from_buffer") static function fromBuffer(buf:Buffer, fmt:VertexFormat):Void;
-	@:native("create_buffer_from_buffer_ext") static function fromBufferExt(buf:Buffer, fmt:VertexFormat, offset:Int, vertNumber:Int):Void;
-	@:native("delete_buffer") function destroy():Void;
+	@:native("create_buffer")
+	function new():Void;
+	
+	@:native("create_buffer_ext")
+	static function alloc(size:Int):VertexBuffer;
+	
+	@:native("create_buffer_from_buffer")
+	static function fromBuffer(buf:Buffer, fmt:VertexFormat):VertexBuffer;
+	
+	@:native("create_buffer_from_buffer_ext")
+	static function fromBufferExt(buf:Buffer, fmt:VertexFormat, offset:Int, vertNumber:Int):VertexBuffer;
+	
+	@:native("delete_buffer")
+	function destroy():Void;
+	
+	inline function toBuffer(kind:BufferKind, alignment:Int):Buffer {
+		return Buffer.fromVertexBuffer(this, kind, alignment);
+	}
+	
+	inline function toBufferExt(kind:BufferKind, alignment:Int, startVertex:Int, vertexCount:Int):Buffer {
+		return Buffer.fromVertexBuffer(this, kind, alignment);
+	}
+	
+	@:native("copy_from_vertex_buffer")
+	function copyToBuffer(startVertex:Int, vertexCount:Int, destBuffer:Buffer, destOffset:Int):Void;
 	
 	//
 	function begin(fmt:VertexFormat):Void;
