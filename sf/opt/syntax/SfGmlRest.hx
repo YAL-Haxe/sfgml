@@ -45,8 +45,21 @@ class SfGmlRest extends SfOptImpl {
 		sfRest.isHidden = true;
 		var sfRest_create = sfRest.staticMap["create"];
 		var sfRest_get = sfRest.staticMap["get"];
+		var restOffset:Int = -1;
 		function iter(e:SfExpr, w:Array<SfExpr>, f) {
-			e.iter(w, f);
+			switch (e.def) {
+				case SfFunction(ef):
+					var _restOffset = restOffset;
+					var args = ef.args;
+					var argc = args.length;
+					if (argc > 0 && getRestType(args[argc - 1].v.type) != null) {
+						restOffset = argc - 1;
+					} else restOffset = 0;
+					e.iter(w, f);
+					restOffset = _restOffset;
+				default:
+					e.iter(w, f);
+			}
 			switch (e.def) {
 				case SfCall(_.def => SfStaticField(c, f), par) if (c == sfRest): {
 					function offset(argc:Bool):Void {
@@ -87,14 +100,14 @@ class SfGmlRest extends SfOptImpl {
 								}
 							}
 							e.def = SfDynamic("argument_count", []);
-							e.adjustByInt(w, -currentField.restOffset);
+							e.adjustByInt(w, -restOffset);
 						};
 						case "get": {
-							par[1].adjustByInt(null, currentField.restOffset);
+							par[1].adjustByInt(null, restOffset);
 							e.def = SfDynamic("argument[{0}]", [par[1]]);
 						};
 						case "set": {
-							par[1].adjustByInt(null, currentField.restOffset);
+							par[1].adjustByInt(null, restOffset);
 							e.def = SfDynamic("argument[{0}] = {1}", [par[1], par[2]]);
 						};
 					}
@@ -103,7 +116,9 @@ class SfGmlRest extends SfOptImpl {
 			}
 		}
 		forEachExpr(function(e, w, f) {
-			if (currentField != null) iter(e, w, iter);
+			if (currentField == null) return;
+			restOffset = currentField.restOffset;
+			iter(e, w, iter);
 		}, []); 
 	}
 }
