@@ -26,10 +26,11 @@ class String {
 		return NativeString.charCodeAt(this, i + 1);
 	}
 
-	#if (sfgml_modern)
-	public inline function indexOf(sub:String, startPos:Int = 1):Int {
-		var out = NativeString.posExt(sub, this, startPos);
-		return out - 1;
+	#if (sfgml_version >= "2.3")
+	@:native("pos_ext_haxe")
+	public function indexOf(needle:String, startPos:Int = 0):Int {
+		if (startPos <= 0) return NativeString.pos(needle, this) - 1;
+		return NativeString.posExt(needle, this, startPos) - 1;
 	}
 	#else
 	@:native("pos_ext_haxe")
@@ -39,8 +40,15 @@ class String {
 		return out > 0 ? out + startPos - 1 : -1;
 	}
 	#end
-
-	@:native("pos_last")
+	
+	#if (sfgml_version >= "2.3")
+	@:native("last_pos_haxe")
+	public function lastIndexOf(needle:String, ?startPos:Int):Int {
+		if (startPos == null || startPos >= this.length) return NativeString.lastPos(needle, this) - 1;
+		return NativeString.lastPosExt(needle, this, startPos) - 1;
+	}
+	#else
+	@:native("last_pos_haxe")
 	public function lastIndexOf(sub:String, ?startPos:Int):Int {
 		var i = 0, out = -1;
 		if (startPos == null) startPos = length;
@@ -51,6 +59,8 @@ class String {
 		}
 		return out;
 	}
+	#end
+	
 	public function split(del:String):Array<String> {
 		var str:String = this, num:Int = 0;
 		//
