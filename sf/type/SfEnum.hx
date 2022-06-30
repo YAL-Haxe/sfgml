@@ -14,6 +14,7 @@ class SfEnum extends SfEnumImpl {
 	
 	/** Whether constructor names should be included */
 	public var ctrNames:Bool = false;
+	public var nativeEnum:Bool = false;
 	
 	public function new(t) {
 		super(t);
@@ -21,6 +22,8 @@ class SfEnum extends SfEnumImpl {
 			isStruct = false;
 			dotAccess = false; // not that you can dot access anything on enums anyway
 		}
+		nativeEnum = hasMeta(":nativeEnum")
+			|| isStruct && docState > 0;
 		
 		// for structs, rename arguments that clash with built-ins:
 		if (isStruct) for (ctr in ctrList) {
@@ -42,7 +45,7 @@ class SfEnum extends SfEnumImpl {
 	/** Will this enum have a GML enum to go along with it? */
 	public function hasNativeEnum():Bool {
 		if (sfConfig.gmxMode) return false;
-		return nativeGen;
+		return nativeGen || nativeEnum;
 	}
 	
 	public function isPureArray():Bool {
