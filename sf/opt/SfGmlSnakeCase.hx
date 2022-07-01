@@ -87,6 +87,9 @@ class SfGmlSnakeCase extends SfOptImpl {
 			for (f in e.ctrList) {
 				if (!f.meta.has(":native") && !f.meta.has(":expose")) {
 					f.name = toSnakeCase(f.name);
+					if (@:privateAccess SfGenerator.getFieldName_map.exists(f.name)) {
+						f.name += "_hx";
+					}
 				}
 			}
 		}
