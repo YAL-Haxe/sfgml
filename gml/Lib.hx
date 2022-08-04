@@ -33,6 +33,9 @@ extern class Lib {
 	 */
 	@:expose("undefined") static var undefined:Dynamic;
 	
+	@:expose("self") static var nativeSelf:Dynamic;
+	@:expose("other") static var nativeOther:Dynamic;
+	
 	//{ GML-specific features
 	
 	@:noCompletion @:deprecated("Use Syntax.div instead")

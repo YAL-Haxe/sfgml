@@ -37,6 +37,9 @@ extern class Script extends Asset {
 		return cast this;
 	}
 	
+	@:native("execute_ext")
+	public function callExt(args:Array<Dynamic>, ?offset:Int, ?count:Int):Dynamic;
+	
 	/** Casts the script to a function type */
 	public inline function asFunc<T:Function>():T {
 		return cast this;

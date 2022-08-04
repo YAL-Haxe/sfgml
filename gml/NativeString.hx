@@ -66,4 +66,7 @@ extern class NativeString {
 	static function fromCharCode(i:Int):String;
 	
 	static function format(val:Float, total:Int, decimal:Int):String;
+	
+	@:expose("base64_encode") static function toBase64(str:String):String;
+	@:expose("base64_decode") static function fromBase64(b64:String):String;
 }

@@ -20,6 +20,11 @@ import gml.ds.ArrayList;
 	#end
 	
 	//{ insertion
+	#if (sfgml_version >= "2.3.1")
+	public static function unshift<T>(arr:Array<T>, val:T):Void {
+		NativeArray.insert(arr, 0, val);
+	}
+	#else
 	public static function push<T>(arr:Array<T>, val:T):Int {
 		var i:Int = arr.length;
 		arr[i] = val;
@@ -48,9 +53,19 @@ import gml.ds.ArrayList;
 		}
 		arr[pos] = val;
 	}
+	#end
 	//}
 	
 	//{ removal
+	#if (sfgml_version >= "2.3.1")
+	public static function shift<T>(arr:Array<T>):Null<T> {
+		var n = arr.length;
+		if (n == 0) return null;
+		var result = arr[0];
+		NativeArray.delete(arr, 0, 1);
+		return result;
+	}
+	#else
 	public static function pop<T>(arr:Array<T>):Null<T> {
 		#if sfgml.modern
 		var n = arr.length - 1;
@@ -77,6 +92,7 @@ import gml.ds.ArrayList;
 		throw modernOnly;
 		#end
 	}
+	#end
 	public static function remove<T>(arr:Array<T>, v:T):Bool {
 		#if sfgml.modern
 		var i = -1;
@@ -111,14 +127,14 @@ import gml.ds.ArrayList;
 		var r:Array<T> = NativeArray.createEmpty(len);
 		NativeArray.copyPart(r, 0, arr, pos, len);
 		#if (sfgml_version >= "2.3.1")
-		NativeArray.delete(arr, pos, len);
+			NativeArray.delete(arr, pos, len);
 		#else
-		pos += len;
-		while (pos < n) {
-			arr[pos - len] = arr[pos];
-			pos += 1;
-		}
-		arr.resize(n - len);
+			pos += len;
+			while (pos < n) {
+				arr[pos - len] = arr[pos];
+				pos += 1;
+			}
+			arr.resize(n - len);
 		#end
 		return r;
 		#else
@@ -283,6 +299,7 @@ import gml.ds.ArrayList;
 		acc.clear();
 		return out;
 	}
+	#if (sfgml_version < "2.3.2")
 	public static function sort<T>(arr:Array<T>, fn:T->T->Int):Void {
 		var i = 0;
 		var l = arr.length;
@@ -303,5 +320,6 @@ import gml.ds.ArrayList;
 			i += 1;
 		}
 	}
+	#end
 	//}
 }

@@ -25,4 +25,8 @@ class Syntax {
 	public static inline function div(a:Float, b:Float):Int {
 		return code("({0} div {1})", a, b);
 	}
+	
+	public static inline function delete(x:Any):Void {
+		return code("delete {0}", x);
+	}
 }
