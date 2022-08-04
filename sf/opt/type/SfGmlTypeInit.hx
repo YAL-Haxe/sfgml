@@ -113,7 +113,7 @@ class SfGmlTypeInit {
 			}
 		}
 		if (safeInit && setBuf.length > 0) {
-			setBuf.addTopLevelPrintIfPrefix();
+			if (init.addTopLevelPrintIfPrefix()) printf(init, "then`");
 			printf(init, "(function()`{\n");
 			init.addBuffer(setBuf);
 			printf(init, "})();\n");
