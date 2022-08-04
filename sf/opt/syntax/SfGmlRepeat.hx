@@ -15,6 +15,7 @@ import haxe.macro.Expr.Unop;
  * @author YellowAfterlife
  */
 class SfGmlRepeat extends SfOptImpl {
+	public static inline var snippet = "repeat ({0}) {1}";
 	override public function apply() {
 		if (!sfConfig.optRepeat) return;
 		forEachExpr(function(e:SfExpr, w:SfExprList, f:SfExprIter) {
@@ -66,7 +67,7 @@ class SfGmlRepeat extends SfOptImpl {
 					case SfConst(TInt(0)): iterTill;
 					default: iterFrom.mod(SfBinop(OpSub, iterTill, iterFrom));
 				};
-				e.setTo(SfDynamic("repeat ({0}) {1}", [times, expr]));
+				e.setTo(SfDynamic(snippet, [times, expr]));
 			} while (false);
 			// for (_ in 0 ... 5) x:
 			do {
@@ -105,7 +106,8 @@ class SfGmlRepeat extends SfOptImpl {
 				//
 				if (expr.countLocal(iter) != 0) continue;
 				//
-				e.setTo(SfDynamic("repeat (" + (end - start) + ") {0}", [expr]));
+				var times = init.mod(SfConst(TInt(end - start)));
+				e.setTo(SfDynamic(snippet, [times, expr]));
 			} while (false);
 			e.iter(w, f);
 		});

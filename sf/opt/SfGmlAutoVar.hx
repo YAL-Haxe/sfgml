@@ -15,7 +15,12 @@ using sf.type.expr.SfExprTools;
 class SfGmlAutoVar extends SfOptAutoVar {
 	override public function canInsertInto(expr:SfExpr):Bool {
 		return switch (expr.def) {
-			case SfDynamic(s, _) if (s == SfGmlWith.withCode): false;
+			case SfDynamic(s, _):
+				switch (s) {
+					case SfGmlWith.withCode: false;
+					case SfGmlRepeat.snippet: false;
+					default: true;
+				}
 			default: super.canInsertInto(expr);
 		}
 	}

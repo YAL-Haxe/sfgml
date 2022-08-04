@@ -580,11 +580,12 @@ class SfGenerator extends SfGeneratorImpl {
 			case SfDynamic(_code, _args): {
 				if (_args.length >= 10) error(expr, "Too many arguments");
 				var modWith = _code == SfGmlWith.withCode;
+				var modRepeat = _code == SfGmlRepeat.snippet;
 				var _isInSwitchBlock = isInSwitchBlock;
 				if (modWith) {
 					isInSwitchBlock = false;
 					if (selfLevel >= 0) selfLevel++; else selfLevel--;
-				}
+				} else if (modRepeat) isInSwitchBlock = false;
 				var start = 0;
 				var cubAt = _code.indexOf("{");
 				while (cubAt >= 0) {
@@ -614,7 +615,7 @@ class SfGenerator extends SfGeneratorImpl {
 				if (modWith) {
 					isInSwitchBlock = _isInSwitchBlock;
 					if (selfLevel >= 0) selfLevel--; else selfLevel++;
-				}
+				} else if (modRepeat) isInSwitchBlock = _isInSwitchBlock;
 			};
 			case SfArrayDecl(vals): {
 				r.addChar("[".code);
