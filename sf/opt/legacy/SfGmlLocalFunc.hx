@@ -162,9 +162,15 @@ class SfGmlLocalFunc extends SfOptImpl {
 						expr.warning('Variable ${v.name} is not accessible here.');
 					}
 				};
-				case SfVarDecl(v, set, expr): {
+				case SfVarDecl(v, set, val): {
 					locals[v.name] = true;
-					if (set) expr.iter(st, it);
+					if (set) verify(val, st, it);
+				};
+				case SfTry(expr, catches): {
+					for (_catch in catches) {
+						locals[_catch.v.name] = true;
+						verify(_catch.expr, st, it);
+					}
 				};
 				case SfFunction(fn): {
 					if (fn.name != null) locals[fn.name] = true;
