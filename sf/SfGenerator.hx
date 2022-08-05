@@ -1332,13 +1332,21 @@ class SfGenerator extends SfGeneratorImpl {
 				printSwitch(r, _expr, _cases, _default);
 			};
 			case SfReturn(z, x): { // return x
+				#if sfgml.modern
+				r.addString(z ? "return " : "exit");
+				#else
 				r.addString("return ");
+				#end
 				#if (sfgml_tracecall)
 				printf(r, 'tracecall("- %field_auto",`', currentField);
 				#end
 				if (z) {
 					r.addExpr(x, SfPrintFlags.ExprWrap);
-				} else r.addString("0");
+				} else {
+					#if !sfgml.modern
+					r.addString("0");
+					#end
+				}
 				#if (sfgml_tracecall)
 				printf(r, ")");
 				#end
