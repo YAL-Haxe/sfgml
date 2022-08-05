@@ -76,6 +76,9 @@ extern class NativeType {
 	}
 	public static function isIntNumber(value:Dynamic):Bool {
 		if (NativeType.isReal(value)) {
+			// can also use
+			// Mathf.sign(Mathf.frac(value)) == 0
+			// for an epsilon-less check
 			return (value | 0) == value;
 		}
 		#if sfgml.modern

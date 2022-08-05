@@ -39,6 +39,7 @@ class SfGml_ArrayImpl extends SfOptImpl {
 			expr: EConst(CString("array")),
 			pos: tArray.baseType.pos
 		}], tArray.baseType.pos);
+		tArray.exposePath = "array";
 		
 		//
 		var modern = sfConfig.modern;
