@@ -17,4 +17,14 @@ class SfEnumCtr extends SfEnumCtrImpl {
 		if (parentEnum.hasNativeEnum()) return false;
 		return true;
 	}
+	public function printIndexTo(b:SfBuffer):Void {
+		if (parentEnum.hasNativeEnum()) {
+			b.addTypePathAuto(parentEnum);
+			b.addChar(".".code);
+			b.addString(name);
+		} else {
+			b.addInt(index);
+			b.addHintString(name);
+		}
+	}
 }

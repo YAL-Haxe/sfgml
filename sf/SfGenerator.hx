@@ -1471,9 +1471,10 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addTypePathAuto(e);
 				r.addHintClose();
 				printBinOp(r, o, c);
-				r.addExpr(b, SfPrintFlags.ExprWrap);
 				var sfc = e.indexMap[i];
-				if (sfc != null) r.addHintString(e.indexMap[i].name);
+				if (sfc != null) {
+					sfc.printIndexTo(r);
+				} else r.addExpr(b, SfPrintFlags.ExprWrap);
 				printf(r, ")`");
 			};
 			default: printf(r, "if`%x`", c);
@@ -1496,7 +1497,7 @@ class SfGenerator extends SfGeneratorImpl {
 		}
 	}
 	
-	private inline function printSwitch(r:SfBuffer, expr:SfExpr, cw:Array<SfExprCase>, cd:SfExpr) {
+	private inline function printSwitch(r:SfBuffer, expr:SfExpr, cases:Array<SfExprCase>, cd:SfExpr) {
 		var z:Bool;
 		// enum data (if sf-hint is set):
 		var expru = expr.unpack();
@@ -1527,7 +1528,29 @@ class SfGenerator extends SfGeneratorImpl {
 		var trail = false;
 		var _isInSwitchBlock = isInSwitchBlock;
 		isInSwitchBlock = true;
-		for (cc in cw) {
+		// why does Haxe compiler shuffle the cases occasionally? I do not know.
+		var caseSort = cases.map((c) -> { cc: c, pos: Context.getPosInfos(c.expr.getPos()).min });
+		var hasDiff = false;
+		caseSort.sort(function(a, b) {
+			var d = a.pos - b.pos;
+			if (d == 0) {
+				if (em != null
+					&& a.cc.values.length > 0
+					&& b.cc.values.length > 0
+				) switch ([a.cc.values[0].def, b.cc.values[0].def]) {
+					case [
+						SfConst(TInt(i1)),
+						SfConst(TInt(i2)),
+					]: d = i1 - i2;
+					default:
+				}
+			}
+			if (d != 0) hasDiff = true;
+			return d;
+		});
+		if (hasDiff) cases = caseSort.map((casePair) -> casePair.cc);
+		//
+		for (cc in cases) {
 			if (trail) r.addLine(); else trail = true;
 			// "case v1: case v2:"
 			var cv = cc.values;
@@ -1535,22 +1558,12 @@ class SfGenerator extends SfGeneratorImpl {
 				if (k > 0) r.addSep();
 				r.addString("case ");
 				var v = cv[k];
-				if (nativeEnum) switch (v.def) {
-					case SfConst(TInt(i)) if (em[i] != null): {
-						printf(r, "%(type_auto).%s", e, em[i].name);
-					};
-					default: r.addExpr(v, SfPrintFlags.ExprWrap);
-				} else {
-					r.addExpr(v, SfPrintFlags.ExprWrap);
-					if (e != null) switch (v.def) {
-						case SfConst(TInt(i)): {
-							i |= 0; // neko bug?
-							var sfc = em[i];
-							r.addHintString(sfc != null ? sfc.name : "?");
-						}
-						default: 
-					}
-				}
+				switch (v.def) {
+					case SfConst(TInt(i)) if (em != null && em[i|0] != null):
+						em[i | 0].printIndexTo(r);
+					default:
+						r.addExpr(v, SfPrintFlags.ExprWrap);
+				};
 				r.addChar(":".code);
 			};
 			// "$expr;"
