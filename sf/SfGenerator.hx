@@ -111,6 +111,7 @@ class SfGenerator extends SfGeneratorImpl {
 		//
 		var splitRel = SfConfigImpl.string("sfgml-split");
 		if (splitRel != null) try {
+			var splitMap = new Map();
 			var splitText = sys.io.File.getContent(splitRel);
 			splitText = StringTools.replace(splitText, "\r\n", "\n");
 			var rx = ~/^(.+)->(.+?)(\/\/.+)?$/;
@@ -121,8 +122,11 @@ class SfGenerator extends SfGeneratorImpl {
 				var to = rx.matched(2).trim();
 				var note = rx.matched(3);
 				var file = new SfGmlSplitFile(from, to, outDir);
+				if (!splitMap.exists(to)) {
+					splitMap[to] = file;
+					for (line in headerLines) printf(file.buf, "%s\n", line);
+				} else file.buf = splitMap[to].buf;
 				splitFiles.push(file);
-				for (line in headerLines) printf(file.buf, "%s\n", line);
 				if (note != null) printf(file.buf, "\n%s", note);
 			}
 		} catch (x:Dynamic) {
