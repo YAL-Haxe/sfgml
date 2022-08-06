@@ -1,4 +1,7 @@
 package haxe;
+import gml.NativeArray;
+import gml.NativeStruct;
+import gml.NativeType;
 import gml.Syntax;
 import gml.Syntax.code;
 
@@ -8,7 +11,7 @@ import gml.Syntax.code;
  * https://github.com/HaxeFoundation/haxe/issues/9346
  * @author YellowAfterlife
  */
-#if (macro || display || eval)
+#if (macro || eval)
 extern class Exception {
 	/**
 		Exception message.
@@ -82,6 +85,106 @@ extern class Exception {
 		`super` calls.
 	**/
 	// @:noCompletion @:ifFeature("haxe.Exception.stack") private function __shiftStack():Void;
+}
+#elseif ((gml && sfgml.modern) || display)
+@:std
+class Exception {
+	public var message:String;
+	
+	// Haxe:
+	
+	/** The call stack at the moment of the exception creation. **/
+	public var stack(get, never):CallStack;
+	public function get_stack():CallStack {
+		if (__exceptionStack == null) {
+			var gmlStack = (native:NativeException).stacktrace;
+			var len = gmlStack.length;
+			var hxStack = NativeArray.createEmpty(len);
+			for (i in 0 ... len) hxStack[i] = haxe.CallStack.StackItem.Module(gmlStack[i]);
+			__exceptionStack = hxStack;
+		}
+		return __exceptionStack;
+	}
+	var __exceptionStack:CallStack;
+	
+	/** Contains an exception, which was passed to `previous` constructor argument. **/
+	public var previous:Null<Exception>;
+	
+	/**
+		Native exception, which caused this exception.
+		This is always a NativeException.
+	**/
+	public var native:Any;
+	
+	public function new(message:String, ?previous:Exception, ?native:Any) {
+		this.message = message;
+		this.previous = previous;
+		if (native == null) {
+			// this is the only way to instantiate a native exception as of 2022.6
+			var natEx:NativeException = null;
+			Syntax.code("try { show_error({1}, true); } catch(_e) { {0} = _e; }", natEx, message);
+			NativeArray.delete(natEx.stacktrace, 0, 1);
+			natEx.hxException = this;
+			native = natEx;
+		}
+		this.native = native;
+	}
+	
+	function unwrap():Any {
+		return native;
+	}
+	
+	@:keep public function toString():String {
+		// if we don't have toString(), an uncaught exception will show JSON of the entire struct
+		return message;
+	}
+	
+	static inline function isHaxeException(e:Any) {
+		return NativeStruct.hasField(e, "stack");
+	}
+	static inline function isNativeException(e:Any) {
+		return NativeStruct.hasField(e, "stacktrace");
+	}
+	
+	public static function caught(value:Any):Any {
+		if (NativeType.isStruct(value)) {
+			if (isHaxeException(value)) return value;
+			var hxEx = NativeStruct.getField(value, "hxException");
+			if (hxEx != null) return hxEx;
+			if (isNativeException(value)) {
+				hxEx = new Exception((value:NativeException).message, null, value);
+				// are there any caveats to caching?
+				(value:NativeException).hxException = hxEx;
+				return hxEx;
+			}
+		}
+		// GML code must have thrown a custom value
+		return new Exception(NativeType.toString(value));
+	}
+	public static function thrown(value:Any):Any {
+		if (NativeType.isStruct(value)) {
+			if (isHaxeException(value)) return (value:Exception).native;
+			if (isNativeException(value)) return value;
+		}
+		var message = value is String ? (value:String) : NativeType.toString(value);
+		var natEx:NativeException = null;
+		Syntax.code("try { show_error({1}, true); } catch(_e) { {0} = _e; }", natEx, message);
+		return natEx;
+	}
+}
+typedef NativeException = {
+	/** "division by zero" **/
+	message:String,
+	/** "ERROR in ..." **/
+	longMessage:String,
+	/** "gml_Script_mydiv" **/
+	script:String,
+	/** 1 **/
+	line:Int,
+	/** ["gml_Script_mydiv", "gml_Object_obj_test_Create_0"] **/
+	stacktrace:Array<String>,
+	
+	?hxException:Exception,
 }
 #else
 @:std class Exception {

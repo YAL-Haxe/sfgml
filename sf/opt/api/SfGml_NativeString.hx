@@ -20,7 +20,7 @@ class SfGml_NativeString extends SfOptImpl {
 		forEachExpr(function(e:SfExpr, st, fn) {
 			e.iter(st, fn);
 			switch (e.def) { case SfCall(_.def => SfStaticField(c, f), w): if (c == ns) {
-				switch (f.name) {
+				switch (f.realName) {
 					case "delete": switch (w) {
 						case [s, // `string_delete(s, 1, 0)` -> `s`
 							_.def => SfConst(TInt(1)),
