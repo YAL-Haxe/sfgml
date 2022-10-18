@@ -45,6 +45,11 @@ extern class NativeType {
 	}
 	#end
 	
+	/** >= 2022.6 */
+	static inline function isRef(v:Dynamic):Bool {
+		return typeof(v) == "ref";
+	}
+	
 	/** Returns whether the value is numeric and has no fractions */
 	static inline function isIntNumber(v:Dynamic):Bool {
 		return NativeTypeHelper.isIntNumber(v);
