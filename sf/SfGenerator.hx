@@ -622,13 +622,25 @@ class SfGenerator extends SfGeneratorImpl {
 					if (selfLevel >= 0) selfLevel--; else selfLevel++;
 				} else if (modRepeat) isInSwitchBlock = _isInSwitchBlock;
 			};
+			//
 			case SfArrayDecl(vals): {
+				#if sfgml_verbose_arraydecl
+				if (vals.length > 0) {
+					printf(r, "[%(+\n)");
+					for (i in 0 ... vals.length) {
+						if (i > 0) printf(r, ",\n");
+						r.addExpr(vals[i], SfPrintFlags.ExprWrap);
+					}
+					printf(r, "%(-\n)]");
+				} else r.addString("[]");
+				#else
 				r.addChar("[".code);
 				for (i in 0 ... vals.length) {
 					if (i > 0) r.addComma();
 					r.addExpr(vals[i], SfPrintFlags.ExprWrap);
 				}
 				r.addChar("]".code);
+				#end
 			};
 			case SfObjectDecl(pairs): {
 				if (sfConfig.modern) {
