@@ -37,6 +37,13 @@ class SfGml_Exception extends SfOptImpl {
 		return true;
 	}
 	override public function apply() {
+		// where'd you come from
+		var _MacroError = sfGenerator.realMap["haxe.macro.Error"];
+		if (_MacroError != null) {
+			trace(_MacroError.module);
+			_MacroError.isHidden = true;
+		}
+		//
 		var _Exception = sfGenerator.realMap["haxe.Exception"];
 		if (_Exception == null) return;
 		forEachExpr(function(e:SfExpr, st, fn) {
