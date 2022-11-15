@@ -66,9 +66,11 @@ class SfGml_ArrayImpl extends SfOptImpl {
 		forEachExpr(function(x:SfExpr, st, it) {
 			switch (x.def) {
 				case SfNew(c, _, []) if (c == tArray): {
+					// new Array() -> []
 					x.def = SfArrayDecl([]);
 				};
 				case SfBinop(OpAssign, _.def => SfInstField(inst, fd), len) if (fd == Array_length): {
+					//
 					if (modern) {
 						x.def = SfCall(x.mod(SfIdent("array_resize")), [inst, len]);
 					} else x.error("Array resizing is only supported in 2.3+");
@@ -96,6 +98,7 @@ class SfGml_ArrayImpl extends SfOptImpl {
 					}
 				};
 				case SfCall(_.def => SfInstField(arr, fd), args) if (fd.parentClass == tArray): {
+					// arr.func(...) -> ArrayImpl.func(arr, ...)
 					var fdi = fieldMap[fd.realName];
 					if (fdi != null) {
 						fdi.isHidden = false;
@@ -106,13 +109,32 @@ class SfGml_ArrayImpl extends SfOptImpl {
 				case SfCall(
 					_.def => SfDynamicField(_.def => SfCast(arr, null), "slice"), []
 				) if (exprIsArray(arr)): {
-					// because copy() is implemented in JS as
-					// return (cast this).slice();
+					// (cast arr).slice() -> arr.copy()
+					// [reverts JS-specific optimization]
 					var fdi = getImpl("copy");
 					if (fdi != null) {
 						var fdx = x.mod(SfStaticField(tArrayImpl, fdi));
 						x.def = SfCall(fdx, [arr]);
 					} else arr.error("No ArrayImpl.copy?");
+				};
+				case SfCall(
+					_.def => SfDynamicField(_.def => SfCast(arr, null), "splice"), [
+						ind,
+						_.def => SfConst(TInt(0)),
+						val,
+					]
+				) if (exprIsArray(arr)): {
+					// (cast arr).splice(ind, 0, val) -> arr.insert(arr, ind, val)
+					// [reverts JS-specific optimization]
+					if (modern) {
+						x.def = SfCall(x.mod(SfIdent("array_insert")), [arr, ind, val]);
+					} else {
+						var fdi = getImpl("insert");
+						if (fdi != null) {
+							var fdx = x.mod(SfStaticField(tArrayImpl, fdi));
+							x.def = SfCall(fdx, [arr]);
+						} else arr.error("No ArrayImpl.insert?");
+					}
 				};
 				default: 
 			}
