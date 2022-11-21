@@ -75,7 +75,11 @@ class SfConfig extends SfConfigImpl {
 	public var codePath:String = string("sfgml-code-path", null);
 	
 	/** If set, all scripts are wrapped in if (<expr>) { ... } else return @:defValue */
-	public var printIf:String = string("sfgml-print-if", null);
+	public var printIf:String = {
+		var s = string("sfgml-print-if", null);
+		if (s != null && StringTools.trim(s) == "") s = null;
+		s;
+	}
 	
 	/** https://bugs.yoyogames.com/view.php?id=24929 */
 	public var scriptLookup:String = string("sfgml-script-lookup", null);
