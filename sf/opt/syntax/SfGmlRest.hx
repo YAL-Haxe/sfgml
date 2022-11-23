@@ -19,6 +19,12 @@ class SfGmlRest extends SfOptImpl {
 			case TAbstract(_.get() => { name: "SfRest" }, [q]): {
 				return q;
 			};
+			case TAbstract(_.get() => at = { name: "SfRestMixed" }, []): {
+				switch (at.type) {
+					case TAbstract(_, [q]): return q;
+					default: return null;
+				};
+			};
 			case TAbstract(_.get() => { name: "Null" }, [
 				TAbstract(_.get() => { name: "SfRest" }, [q])
 			]): {
