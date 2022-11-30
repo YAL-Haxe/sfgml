@@ -153,7 +153,7 @@ import gml.ds.HashTable;
 		#if sfgml.modern
 		if (me().index < 0) {
 			r = NativeGlobal.getField(me().name + "_" + constr);
-			if (NativeType.isStruct(r)) return r;
+			if (!NativeType.isMethod(r)) return r;
 			return gml.internal.NativeFunctionInvoke.call(r, params, n);
 		}
 		#end
@@ -191,7 +191,7 @@ import gml.ds.HashTable;
 			var ctrs = me().constructors;
 			if (ctrs == null) throw 'Enum ${me().name} does not have a constructor array.';
 			r = NativeGlobal.getField(me().name + "_" + ctrs[index]);
-			if (NativeType.isStruct(r)) return r;
+			if (!NativeType.isMethod(r)) return r;
 			return gml.internal.NativeFunctionInvoke.call(r, params, n);
 		}
 		#end
