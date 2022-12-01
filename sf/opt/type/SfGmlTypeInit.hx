@@ -78,11 +78,9 @@ class SfGmlTypeInit {
 				printf(setBuf, "%s%(s)_create", stdPre, e != null ? "haxe_enum" : "haxe_class");
 			}
 			printf(setBuf, '(%d,`"%(type_auto)"', t.index, t);
-			if (e != null) do {
-				if (!e.ctrNames) break;
+			if (e != null && e.ctrNames) {
 				if (hasArrayDecl) {
-					printf(setBuf, ",`");
-					printf(setBuf, "[");
+					printf(setBuf, ",`[");
 				} else {
 					printf(setBuf, ",`%(field_auto)(", typeBoot.realMap["decl"]);
 				}
@@ -96,7 +94,22 @@ class SfGmlTypeInit {
 				} else {
 					printf(setBuf, ")");
 				}
-			} while (false);
+				#if sfgml.modern
+				if (e.ctrRefs) {
+					printf(setBuf, ",`[");
+					sep = false;
+					for (c in e.ctrList) {
+						if (sep) setBuf.addComma(); else sep = true;
+						if (c.args.length == 0 && !e.noRef) {
+							printf(setBuf, "function()/*=>*/{return`%(field_auto)}", c);
+						} else {
+							setBuf.addFieldPathAuto(c);
+						}
+					}
+					printf(setBuf, "]");
+				}
+				#end
+			}
 			printf(setBuf, ");\n");
 			if (safeInit) printf(init, "\n");
 			//

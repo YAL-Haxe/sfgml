@@ -149,6 +149,7 @@ class SfGml_Type_enumHelpers extends SfOptImpl {
 							x.def = SfCall(fx2, [w[2], w[1]]);
 						} else {
 							e.ctrNames = true;
+							e.ctrRefs = true;
 							f.isHidden = false;
 						}
 					} else dynNames = true;
@@ -174,6 +175,7 @@ class SfGml_Type_enumHelpers extends SfOptImpl {
 							x.def = SfCall(fx2, [w[2], fx1]);
 						} else {
 							e.ctrNames = true;
+							e.ctrRefs = true;
 							f.isHidden = false;
 						}
 					} else dynNames = true;

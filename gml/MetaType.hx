@@ -4,6 +4,7 @@ import gml.NativeArray;
 import gml.ds.Grid;
 import gml.MetaType.MetaClass;
 import SfTools.raw;
+import haxe.Constraints.Function;
 
 /**
  * Haxe Classes have their "type" stored in first item of second row.
@@ -131,12 +132,15 @@ class MetaClass<T> extends MetaType<T> {
 #end
 class MetaEnum<T> extends MetaType<T> {
 	public var constructors:Array<String>;
-	public function new(id:Int, name:String, ?constructors:Array<String>) {
+	/** creator function per constructor */
+	public var functions:Array<Function>;
+	public function new(id:Int, name:String, ?constructors:Array<String>, ?functions:Array<Function>) {
 		#if !sfgml_legacy_meta
 		marker = MetaType.markerValue;
 		#end
 		this.index = id;
 		this.name = name;
 		this.constructors = constructors;
+		this.functions = functions;
 	}
 }

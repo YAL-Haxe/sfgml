@@ -150,32 +150,34 @@ import gml.ds.HashTable;
 		inline function me():MetaEnum<T> {
 			return cast e;
 		}
-		#if sfgml.modern
-		if (me().index < 0) {
-			r = NativeGlobal.getField(me().name + "_" + constr);
-			if (NativeType.isStruct(r)) return r;
-			return gml.internal.NativeFunctionInvoke.call(r, params, n);
-		}
-		#end
 		var ctrs = me().constructors;
 		if (ctrs == null) throw 'Enum ${me().name} does not have a constructor array.';
-		#if sfgml_legacy_meta
-		r = null;
-		MetaType.copyset(r, e);
-		NativeArray.set2d(r, 0, 0, me().index);
-		if (js.Boot.isJS) {
-			var i = -1; while (++i < n) {
-				NativeArray.set2d(r, 0, i + 1, params[i]);
-			}
-		} else {
-			while (--n >= 0) {
-				NativeArray.set2d(r, 0, n + 1, params[n]);
-			}
+		#if sfgml.modern
+		if (me().index < 0) {
+			var i = gml.internal.ArrayImpl.indexOf(ctrs, constr, 0);
+			if (i < 0) return null;
+			var fns = me().functions;
+			if (fns == null) throw 'Enum ${me().name} does not have a function array.';
+			return gml.internal.NativeFunctionInvoke.call(fns[i], params, n);
 		}
+		#end
+		#if sfgml_legacy_meta
+			r = null;
+			MetaType.copyset(r, e);
+			NativeArray.set2d(r, 0, 0, me().index);
+			if (js.Boot.isJS) {
+				var i = -1; while (++i < n) {
+					NativeArray.set2d(r, 0, i + 1, params[i]);
+				}
+			} else {
+				while (--n >= 0) {
+					NativeArray.set2d(r, 0, n + 1, params[n]);
+				}
+			}
 		#else
-		r = NativeArray.createEmpty(n + 1);
-		r[0] = gml.internal.ArrayImpl.indexOf(ctrs, constr, 0);
-		if (n > 0) NativeArray.copyPart(r, 1, params, 0, n);
+			r = NativeArray.createEmpty(n + 1);
+			r[0] = gml.internal.ArrayImpl.indexOf(ctrs, constr, 0);
+			if (n > 0) NativeArray.copyPart(r, 1, params, 0, n);
 		#end
 		return r;
 	}
@@ -188,11 +190,9 @@ import gml.ds.HashTable;
 			return cast e;
 		}
 		if (me().index < 0) {
-			var ctrs = me().constructors;
-			if (ctrs == null) throw 'Enum ${me().name} does not have a constructor array.';
-			r = NativeGlobal.getField(me().name + "_" + ctrs[index]);
-			if (NativeType.isStruct(r)) return r;
-			return gml.internal.NativeFunctionInvoke.call(r, params, n);
+			var fns = me().functions;
+			if (fns == null) throw 'Enum ${me().name} does not have a constructor array.';
+			return gml.internal.NativeFunctionInvoke.call(fns[index], params, n);
 		}
 		#end
 		#if sfgml_legacy_meta

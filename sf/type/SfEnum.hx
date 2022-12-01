@@ -14,6 +14,8 @@ class SfEnum extends SfEnumImpl {
 	
 	/** Whether constructor names should be included */
 	public var ctrNames:Bool = false;
+	/** Whether references to constructors should be included */
+	public var ctrRefs:Bool = false;
 	public var nativeEnum:Bool = false;
 	
 	public function new(t) {
