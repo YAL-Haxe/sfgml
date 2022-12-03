@@ -1118,14 +1118,27 @@ class SfGenerator extends SfGeneratorImpl {
 					case SfInstField(_inst, _field): {
 						k = _field.index;
 						if (k >= 0) { // inst.dynMethod(...)
+							var indCall = true;
 							if (_field.callNeedsThis) {
 								if (!_inst.isSimple()) {
 									_inst.warning("This call may have side effects.");
 								}
-								printf(r, "script_execute(%x,`%x", x, _inst);
-							} else printf(r, "script_execute(%x", x);
-							sep = true;
-							callFlags = 0;
+								if (sfConfig.modern) {
+									indCall = false;
+								} else {
+									printf(r, "script_execute(%x,`%x", x, _inst);
+								}
+							} else {
+								if (sfConfig.modern) {
+									indCall = false;
+								} else {
+									printf(r, "script_execute(%x", x);
+								}
+							}
+							if (indCall) {
+								sep = true;
+								callFlags = 0;
+							} else callFlags = 3;
 						} else if (sfConfig.modern
 							&& _field.parentClass.dotAccess
 							&& !(_field.parentClass.isExtern && _field.exposePath != null)
