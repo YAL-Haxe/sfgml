@@ -34,4 +34,12 @@ extern class Display {
 	static var guiHeight(get, never):Float;
 	private static function get_guiHeight():Float;
 	//}
+	
+	//{
+	static var dpiX(get, never):Int;
+	private static function get_dpiX():Int;
+	
+	static var dpiY(get, never):Int;
+	private static function get_dpiY():Int;
+	//}
 }

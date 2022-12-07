@@ -72,14 +72,14 @@ extern class Lib {
 @:object("global") private extern class GlobalScope implements Dynamic { }
 
 private abstract Arguments(Array<Dynamic>) {
-	@:arrayAccess extern inline function get(index:Int):Dynamic {
+	@:pure @:arrayAccess extern inline function get(index:Int):Dynamic {
 		return untyped __raw__("argument[{0}]", index);
 	}
 	@:arrayAccess extern inline function set(index:Int, value:Dynamic):Dynamic {
 		return untyped __raw__("argument[{0}] = {1}]", index, value);
 	}
 	public var length(get, never):Int;
-	extern private inline function get_length():Int {
+	@:pure extern private inline function get_length():Int {
 		return untyped __raw__("argument_count");
 	}
 }

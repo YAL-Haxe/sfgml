@@ -56,7 +56,7 @@ extern class Draw {
 	static function textExtColor(x:Float, y:Float, s:String, sep:Float, w:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
 	static function textTransformed(x:Float, y:Float, s:String, xscale:Float, yscale:Float, angle:Float):Void;
 	static function textTransformedColor(x:Float, y:Float, s:String, xscale:Float, yscale:Float, angle:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
-	static function textExtTransformed(x:Float, y:Float, s:String, s:String, sep:Float, xscale:Float, yscale:Float, angle:Float):Void;
+	static function textExtTransformed(x:Float, y:Float, s:String, sep:Float, width:Float, xscale:Float, yscale:Float, angle:Float):Void;
 	static function textExtTransformedColor(x:Float, y:Float, s:String, s:String, sep:Float, xscale:Float, yscale:Float, angle:Float, c1:Color, c2:Color, c3:Color, c4:Color, alpha:Float):Void;
 	
 	//

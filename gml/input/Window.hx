@@ -55,6 +55,7 @@ package gml.input;
 		return s;
 	}
 }
+@:docName("window_cursor")
 @:native("cr") extern enum abstract WindowCursor(Int) {
 	var none;
 	var arrow;
