@@ -48,6 +48,9 @@ extern class Sprite extends Asset {
 	@:native("delete") public function destroy():Void;
 	//}
 	
+	@:native("save") public function saveFrame(subimg:Int, path:String):Void;
+	public function saveStrip(path:String):Void;
+	
 	//{ general
 	var name(get, never):String;
 	private function get_name():String;
