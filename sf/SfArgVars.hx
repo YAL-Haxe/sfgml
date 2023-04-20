@@ -307,12 +307,20 @@ class SfArgVars {
 			default: printf(r, "->%base_type", f.type);
 		}
 		if (jsdoc != null && argTypes) {
-			if (!f.isStructField && (f is SfClassField) && (cast f:SfClassField).parentClass.constructor == f) {
-				printf(jsdoc, "/// @returns {%(base_type)}", f.parentType.baseType);
-			} else {
-				printf(jsdoc, "/// @returns {%(base_type)}", f.type);
+			var isConstructor:Bool, cf:SfClassField;
+			if (f is SfClassField) {
+				cf = cast f;
+				isConstructor = cf.parentClass.constructor == cf;
 			}
-			jsdoc.addLine();
+			if (isConstructor) {
+				if (!f.isStructField) {
+					printf(jsdoc, "/// @returns {%(base_type)}\n", f.parentType.baseType);
+				} else if (cf.parentClass.superClass != null) {
+					printf(jsdoc, "/// @implements {%(base_type)}\n", cf.parentClass.superClass);
+				}
+			} else {
+				printf(jsdoc, "/// @returns {%(base_type)}\n", f.type);
+			}
 		}
 		// print @:doc:
 		if (flags & 2 != 0) r.addLine();
