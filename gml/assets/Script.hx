@@ -2,6 +2,7 @@ package gml.assets;
 import gml.assets.Asset;
 import SfTools.raw;
 import haxe.Constraints.Function;
+import haxe.DynamicAccess;
 
 /**
  * Scripts are functions in GML, but also a resource type.
@@ -54,6 +55,14 @@ extern class Script extends Asset {
 	public static inline function fromFunc(fn:Function):Script {
 		return cast fn;
 	}
+	
+	/** 2023.1 and newer */
+	@:expose("static_get")
+	public function getStatics():DynamicAccess<Any>;
+	
+	/** 2023.1 and newer */
+	@:expose("static_set")
+	public function setStatics(struct:DynamicAccess<Any>):Void;
 }
 
 private typedef ScriptCallable = haxe.extern.Rest<Dynamic>->Dynamic;

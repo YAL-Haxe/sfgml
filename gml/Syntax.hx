@@ -27,6 +27,6 @@ class Syntax {
 	}
 	
 	public static inline function delete(x:Any):Void {
-		return code("delete {0}", x);
+		code("delete {0}", x);
 	}
 }

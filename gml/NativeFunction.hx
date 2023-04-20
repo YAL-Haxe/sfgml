@@ -1,6 +1,7 @@
 package gml;
 import gml.assets.Script;
 import haxe.Constraints.Function;
+import haxe.DynamicAccess;
 
 /**
  * >=2.3
@@ -28,4 +29,12 @@ extern class NativeFunction {
 	public static inline function call(fn:Function, args:Array<Dynamic>, ?argc:Int):Dynamic {
 		return gml.internal.NativeFunctionInvoke.call(fn, args, argc);
 	}
+	
+	/** 2023.1 and newer */
+	@:expose("static_get")
+	public function getStatics():DynamicAccess<Any>;
+	
+	/** 2023.1 and newer */
+	@:expose("static_set")
+	public function setStatics(struct:DynamicAccess<Any>):Void;
 }
