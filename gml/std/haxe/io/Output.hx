@@ -8,7 +8,7 @@ import haxe.io.Bytes;
  * @author YellowAfterlife
  */
 #if !sfgml_native_bytes
-class Output {
+@:std class Output {
 	private static inline var dataLen0 = 32;
 	private var data:BytesData = NativeArray.createEmpty(dataLen0);
 	private var dataPos:Int = 0;
@@ -200,7 +200,7 @@ class Output {
 	}
 }
 #else
-class Output {
+@:std class Output {
 	private var buf:Buffer;
 	
 	public inline function writeByte(b:Int):Void buf.writeByteUnsigned(b);

@@ -6,7 +6,7 @@ import gml.io.Buffer;
  * @author YellowAfterlife
  */
 #if !sfgml_native_bytes
-class BytesOutput extends Output {
+@:std class BytesOutput extends Output {
 	
 	public var length(get, never):Int;
 	private inline function get_length():Int {
@@ -22,7 +22,7 @@ class BytesOutput extends Output {
 	}
 }
 #else
-class BytesOutput extends Output {
+@:std class BytesOutput extends Output {
 	
 	public var length(get, never):Int;
 	private inline function get_length():Int {
