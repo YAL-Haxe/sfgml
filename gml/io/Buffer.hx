@@ -74,6 +74,10 @@ extern class Buffer {
 	inline function readFloat():Float return read(f32);
 	inline function readDouble():Float return read(f64);
 	inline function readString():String return read(string);
+	// extensions:
+	inline function readBuffer(dst:Buffer, len:Int, dstPos:Int = 0):Int {
+		return BufferImpl.readBuffer(this, dst, dstPos, len);
+	}
 	//}
 	
 	//{ Write
@@ -223,6 +227,19 @@ extern class Buffer {
 	}
 }
 @:std private class BufferImpl {
+	public static function readBuffer(src:Buffer, dst:Buffer, dstPos:Int, len:Int):Int {
+		var srcPos = src.position;
+		var srcLen = Mathf.min(len, src.length - srcPos);
+		var dstLen = Mathf.min(srcLen, dst.length - dstPos);
+		if (srcLen < 0) return 0;
+		if (dstLen < 0) {
+			src.shiftPosition(srcLen);
+			return 0;
+		}
+		dst.copyFrom(dstPos, src, srcPos, dstLen);
+		src.shiftPosition(srcLen);
+		return dstLen;
+	}
 	public static function writeBuffer(dst:Buffer, src:Buffer):Bool {
 		var dstPos = dst.position;
 		var srcLen = src.length;
