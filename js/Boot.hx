@@ -114,9 +114,9 @@ class Boot {
 		#else
 		r = null;
 		if (System.isBrowser) {
-			i = 0; while (i < size) r[i] = null;
+			i = 0; while (i < size) NativeArray.copyset(r, i, null);
 		} else {
-			i = size; while (--i >= 0) r[i] = null;
+			i = size; while (--i >= 0) NativeArray.copyset(r, i, null);
 		}
 		#end
 		#if sfgml_legacy_meta
