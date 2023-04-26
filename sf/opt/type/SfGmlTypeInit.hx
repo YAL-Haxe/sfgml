@@ -154,7 +154,7 @@ class SfGmlTypeInit {
 			//
 			printf(pbuf, "globalvar mq_%(type_auto);`mq_%(type_auto)`=`", c, c);
 			if (!hasArrayDecl) {
-				if (stdPack != null) printf(pbuf, "%s_", stdPack);
+				if (stdPack != null) printf(pbuf, "%(s)_", stdPack);
 				pbuf.addString("haxe_type_proto(");
 			} else pbuf.addChar("[".code);
 			if (c.indexes > 0) {
