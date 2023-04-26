@@ -267,7 +267,7 @@ class SfBuffer extends SfBufferImpl {
 						addChar(":".code);
 					}
 					addMacroTypeName(args[i].t);
-					addString("; ");
+					addString(";");
 					i += 1;
 				}
 				addMacroTypeName(ret);
