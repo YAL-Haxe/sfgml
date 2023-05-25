@@ -25,6 +25,12 @@ class SfClass extends SfClassImpl {
 	/** If this is based on an object instance, indicates object to create */
 	public var objName:String = null;
 	
+	/**
+	 * Overrides how constructor will be invoked for extern types
+	 * (no effect on code generation)
+	 */
+	public var structNew:Null<Bool> = null;
+	
 	public function new(t:ClassType) {
 		super(t);
 		//
@@ -62,6 +68,9 @@ class SfClass extends SfClassImpl {
 		}
 		//
 		if (t.meta.has(":noRefWrite")) for (fd in fieldList) fd.noRefWrite = true;
+		//
+		if (t.meta.has(":gml.flat_new")) structNew = false;
+		if (t.meta.has(":gml.struct_new")) structNew = true;
 	}
 	
 	override public function removeField(field:SfClassField):Void {

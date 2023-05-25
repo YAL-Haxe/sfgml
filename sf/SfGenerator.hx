@@ -1246,7 +1246,8 @@ class SfGenerator extends SfGeneratorImpl {
 				r.addParClose();
 			};
 			case SfNew(t, _, m): {
-				if (t.isStruct) {
+				var structNew = t.structNew != null ? t.structNew : t.isStruct;
+				if (structNew) {
 					printf(r, "new %(type_auto)", t);
 				} else {
 					var ctr:SfClassField = t.constructor;
