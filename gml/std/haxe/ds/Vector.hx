@@ -56,5 +56,10 @@ abstract Vector<T>(VectorData<T>) {
 	public inline function sort(f:T->T->Int):Void {
 		this.sort(f);
 	}
+	
+	public function fill(v:T):Void {
+		// todo: copy across self to do 1->2->4->...
+		for (i in 0 ... this.length) this[i] = v;
+	}
 }
 private typedef VectorData<T> = Array<T>;

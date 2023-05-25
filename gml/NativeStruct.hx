@@ -1,4 +1,5 @@
 package gml;
+// referencing DynamicAccess<Any> here breaks DynamicAccess..?
 
 /**
  * v2.3 introduced structs and some Reflection-like functions for them.
@@ -33,4 +34,10 @@ package gml;
 	 */
 	@:expose("instanceof")
 	static function instanceOf(obj:Dynamic):String;
+	
+	@:expose("static_get")
+	static function getStatics(obj:Dynamic):Any;
+	
+	@:expose("static_set")
+	static function setStatics(obj:Dynamic, proto:Any):Void;
 }
