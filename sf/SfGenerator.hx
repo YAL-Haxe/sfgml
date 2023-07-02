@@ -9,6 +9,7 @@ import haxe.macro.Expr.Binop.*;
 import haxe.macro.Expr.Unop.*;
 import haxe.macro.Type.TConstant;
 import haxe.macro.Type.TypedExpr;
+import haxe.macro.TypeTools;
 import sf.SfArgVars;
 import sf.opt.*;
 import sf.opt.api.*;
@@ -730,7 +731,9 @@ class SfGenerator extends SfGeneratorImpl {
 				}
 			};
 			case SfEnumParameter(_expr, _ctr, _index): {
-				if (_ctr.isStructField) {
+				if (_ctr.parentEnum.isFake && _index == 0) {
+					printf(r, "%x", _expr);
+				} else if (_ctr.isStructField) {
 					if (_index >= 0) {
 						printf(r, "%x.%s", _expr, _ctr.args[_index].v.name);
 					} else {
@@ -1544,11 +1547,22 @@ class SfGenerator extends SfGeneratorImpl {
 		var nativeEnum = false;
 		switch (expru.def) {
 			case SfEnumAccess(_, et, _.def => SfConst(TInt(0))): e = et;
-			default: switch (expru.getType()) {
+			case SfArrayAccess(a, _.def => SfConst(TInt(0))): {
+				// usually happens when you typedef-ed your enum - maybe a compiler bug?
+				switch (TypeTools.followWithAbstracts(a.getType())) {
+					case TEnum(_.get() => et, _): {
+						e = sfGenerator.enumMap.baseGet(et);
+						if (e != null && e.isFake) expru = a;
+					};
+					default: e = null;
+				}
+			};
+			default: switch (TypeTools.followWithAbstracts(expru.getType())) {
 				case TEnum(_.get() => et, _): e = sfGenerator.enumMap.baseGet(et);
 				default: e = null;
 			}
 		};
+		//expr.warning(expru.getType() + " -> " + e);
 		if (e != null) {
 			em = e.indexMap;
 			nativeEnum = e.hasNativeEnum();
