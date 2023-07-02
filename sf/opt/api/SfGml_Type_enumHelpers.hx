@@ -87,8 +87,17 @@ class SfGml_Type_enumHelpers extends SfOptImpl {
 				}
 			}
 		}
-		inline function checkEnum(e:SfEnum):Bool {
-			return e != null && (e.isFake || (e.nativeGen && !e.isStruct));
+		// is this a kind of enum that does not have a ref back to its metatype?
+		function checkEnum(e:SfEnum):Bool {
+			if (e == null) return false;
+			if (e.isFake) return true; // fake enums are just their index
+			if (sfConfig.modern) {
+				// array-based enums in ≥2.3 do not contain a metatype
+				return !e.isStruct;
+			} else {
+				// @:nativeGen enums in <2.3 are 1d and do not have a row with metatype
+				return e.nativeGen;
+			}
 		}
 		//
 		var hideField_count = 0;
