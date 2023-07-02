@@ -15,10 +15,10 @@ extern class Instance {
 	//
 	#if (sfgml_next)
 	@:expose("instance_create_depth")
-	static function createAtDepth(x:Float, y:Float, depth:Float, t:Object):Instance;
+	static function createAtDepth(x:Float, y:Float, depth:Float, t:Object, ?varStruct:Any):Instance;
 	
 	@:expose("instance_create_layer")
-	static function createAtLayer(x:Float, y:Float, layer:gml.layers.LayerID, t:Object):Instance;
+	static function createAtLayer(x:Float, y:Float, layer:gml.layers.LayerID, t:Object, ?varStruct:Any):Instance;
 	#else
 	static function create(x:Float, y:Float, t:Object):Instance;
 	#end

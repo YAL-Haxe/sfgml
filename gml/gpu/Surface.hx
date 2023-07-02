@@ -12,7 +12,7 @@ extern class Surface {
 	@:native("exists") static function isValid(q:Surface):Bool;
 	
 	//
-	function new(width:Int, height:Int):Void;
+	function new(width:Int, height:Int, ?format:Int):Void;
 	@:native("create_ext") static function createCanvas(elName:String, width:Int, height:Int):Void;
 	@:native("free") function destroy():Void;
 	

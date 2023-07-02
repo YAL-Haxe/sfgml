@@ -40,6 +40,8 @@ extern class Buffer {
 	public function tell():Int;
 	public function seek(mode:BufferSeek, offset:Int):Void;
 	
+	public function setUsedSize(size:Int):Void;
+	
 	public function new(size:Int, kind:BufferKind, alignment:Int);
 	
 	/** Removes a previously created buffer from the memory. */
@@ -75,6 +77,7 @@ extern class Buffer {
 	inline function readDouble():Float return read(f64);
 	inline function readString():String return read(string);
 	// extensions:
+	/** NB! this takes pos, len in reverse order for some reason */
 	inline function readBuffer(dst:Buffer, len:Int, dstPos:Int = 0):Int {
 		return BufferImpl.readBuffer(this, dst, dstPos, len);
 	}

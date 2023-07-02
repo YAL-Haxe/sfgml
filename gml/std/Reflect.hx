@@ -139,16 +139,17 @@ import gml.internal.NativeFunctionInvoke;
 	}
 	
 	public static inline function isEnumValue(v:Dynamic):Bool {
+		// todo: we've got struct enums too now
 		return Std.is(v, Array);
 	}
 
 	public static function deleteField(o:Dynamic, field:String):Bool {
 		#if sfgml.modern
-		// ... GML doesn't actually have field deletion yet
 		if (NativeType.isStruct(o)) {
 			#if (sfgml_version >= "2.3.1")
 			gml.NativeStruct.deleteField(o, field);
 			#else
+			// new enough for structs, not new enough for field deletion
 			setField(o, field, null);
 			#end
 			return true;
