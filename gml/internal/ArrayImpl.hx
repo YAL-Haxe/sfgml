@@ -195,7 +195,7 @@ import gml.ds.ArrayList;
 	}
 	
 	public static function concatFront<T>(arr:Array<T>, item:T):Array<T> {
-		if (NativeType.isArray(arr)) return [item];
+		if (!NativeType.isArray(arr)) return [item];
 		var n = NativeArray.length1d(arr);
 		var res = NativeArray.createEmpty(1 + n);
 		res[0] = item;
