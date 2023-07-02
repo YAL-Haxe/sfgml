@@ -60,6 +60,11 @@ class SfArgVars {
 				var s = arg.v.name;
 				printf(r, "if`(%(var)`==`undefined)`%(var)`=`%(const);\n", s, s, v);
 			}
+			#if sfgml.debug_args_array
+			printf(r, "var __args__`=`array_create(argument_count);\n");
+			printf(r, "for (var __argi__`=`argument_count;`--__argi__`>=`0;)`");
+			printf(r, "__args__[__argi__]`=`argument[__argi__];\n");
+			#end
 			// this is purely a countermeasure for IDE not shutting up about "extra arguments"
 			if (hasRest) {
 				printf(r, "if`(false)`show_debug_message(argument[argument_count`-`1]);\n");
