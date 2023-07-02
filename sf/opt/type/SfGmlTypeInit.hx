@@ -54,7 +54,7 @@ class SfGmlTypeInit {
 		#end
 		//
 		var qMetaClass = sfGenerator.findRealClass("gml.MetaClass");
-		var qMetaClass_super = qMetaClass != null ? qMetaClass.realMap["superClass"] : null;
+		var qMetaClass_super:SfClassField = qMetaClass != null ? qMetaClass.realMap["superClass"] : null;
 		
 		//
 		var typeBoot = sfGenerator.typeBoot;
@@ -114,7 +114,9 @@ class SfGmlTypeInit {
 			if (safeInit) printf(init, "\n");
 			//
 			if (modern && c != null && c.superClass != null && c.module != SfGmlType.mtModule) {
-				if (qMetaClass_super != null) {
+				if (!c.superClass.hasMetaType()) {
+					//
+				} else if (qMetaClass_super != null) {
 					if (!safeInit) setBuf.addTopLevelPrintIfPrefix();
 					printf(setBuf, "mt_%(type_auto).%s`=`mt_%(type_auto);\n",
 						c, qMetaClass_super.name, c.superClass);
