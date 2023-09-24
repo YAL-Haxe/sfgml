@@ -97,10 +97,10 @@ class GridIterator<T> {
 		this.cols = grid.cols;
 		this.rows = grid.rows;
 	}
-	@:runtime @:extern public inline function hasNext():Bool {
+	@:runtime extern public inline function hasNext():Bool {
 		return row < rows;
 	}
-	@:runtime @:extern public inline function next():T {
+	@:runtime extern public inline function next():T {
 		var r = grid.get(col, row);
 		if (++col >= cols) {
 			col = 0;

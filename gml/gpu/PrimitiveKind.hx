@@ -4,7 +4,7 @@ package gml.gpu;
  * ...
  * @author YellowAfterlife
  */
-@:enum abstract PrimitiveKind(Int) from Int to Int {
+enum abstract PrimitiveKind(Int) from Int to Int {
 	var PointList = 1;
 	var LineList = 2;
 	var LineStrip = 3;

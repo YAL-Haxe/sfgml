@@ -167,7 +167,7 @@ class StringTools {
 		if (cl <= 0) return s;
 		return s + NativeString.repeat(c, div((l - s.length), cl));
 	}
-	@:extern public static inline function replace(s:String, sub:String, by:String):String {
+	extern public static inline function replace(s:String, sub:String, by:String):String {
 		return NativeString.replaceAll(s, sub, by);
 	}
 	public static function hex(n:Int, ?digits:Int):String {

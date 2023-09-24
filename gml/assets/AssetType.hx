@@ -4,7 +4,7 @@ package gml.assets;
  * Note - should remain pure as is also used in macros
  * @author YellowAfterlife
  */
-@:enum abstract AssetType(Int) from Int to Int {
+enum abstract AssetType(Int) from Int to Int {
 	var AUnknown = -1;
 	var AObject = 0;
 	var ASprite = 1;

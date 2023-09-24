@@ -4,7 +4,7 @@ package gml.input;
  * ...
  * @author YellowAfterlife
  */
-@:enum abstract KeyCode(Int) from Int to Int {
+enum abstract KeyCode(Int) from Int to Int {
 	var NoKey = 0;
 	var AnyKey = 1;
 	var Backspace = 8;

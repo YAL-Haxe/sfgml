@@ -4,7 +4,7 @@ package gml.gpu;
  * ...
  * @author YellowAfterlife
  */
-@:enum abstract VertexFormatUsage(Int) from Int to Int {
+enum abstract VertexFormatUsage(Int) from Int to Int {
 	var Position = 1;
 	var Color = 2;
 	var Normal = 3;

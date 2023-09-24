@@ -4,7 +4,7 @@ package gml.gpu;
  * ...
  * @author YellowAfterlife
  */
-@:enum abstract VertexFormatType(Int) from Int to Int {
+enum abstract VertexFormatType(Int) from Int to Int {
 	var Float1 = 1;
 	var Float2 = 2;
 	var Float3 = 3;

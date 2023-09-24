@@ -59,7 +59,7 @@ extern class Lib {
 	 */
 	@:native("argument_count") static var argc(default, never):Int;
 	
-	@:noCompletion @:extern static inline function raw(gml:String):Dynamic {
+	@:noCompletion extern static inline function raw(gml:String):Dynamic {
 		return untyped __raw__(gml);
 	}
 	
