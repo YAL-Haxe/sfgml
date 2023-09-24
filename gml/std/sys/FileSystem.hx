@@ -1,35 +1,39 @@
 package sys;
 import SfTools.raw;
+import gml.io.NativeFileSystem;
 
 /**
  * ...
  * @author YellowAfterlife
  */
-#if !macro @:native("file") #end
+#if !macro
+@:native("haxe.filesys") @:std
+#end
 class FileSystem {
-	
-	@:remove public static function exists(path:String):Bool {
-		return raw("file_exists")(path);
+	public static function exists(path:String):Bool {
+		return NativeFileSystem.exists(path) || NativeFileSystem.isDirectory(path);
+	}
+	public static inline function rename(oldPath:String, newPath:String):Void {
+		NativeFileSystem.rename(oldPath, newPath);
+	}
+	public static inline function copy(oldPath:String, newPath:String):Void {
+		NativeFileSystem.copy(oldPath, newPath);
 	}
 	
-	@:remove public static function rename(path:String, next:String):Void {
-		raw("file_rename")(path, next);
+	public static inline function isDirectory(path:String) {
+		return NativeFileSystem.isDirectory(path);
+	}
+	public static inline function createDirectory(path:String):Void {
+		NativeFileSystem.createDirectory(path);
 	}
 	
-	@:extern public static inline function isDirectory(path:String):Bool {
-		return raw("directory_exists")(path);
+	public static inline function deleteFile(path:String):Bool {
+		NativeFileSystem.deleteFile(path);
+		return true;
 	}
 	
-	@:extern public static inline function createDirectory(path:String):Void {
-		raw("directory_create")(path);
-	}
-	
-	@:extern public static inline function deleteFile(path:String):Bool {
-		return raw("file_delete")(path);
-	}
-	
-	@:extern public static inline function deleteDirectory(path:String):Void {
-		raw("directory_destroy")(path);
+	public static inline function deleteDirectory(path:String):Void {
+		NativeFileSystem.deleteDirectory(path);
 	}
 	
 	@:native("find_all")
@@ -38,15 +42,16 @@ class FileSystem {
 			case "/".code, "\\".code: { };
 			default: path += "/";
 		}
-		var next:String = raw("file_find_first")(path + "*.*", raw("fa_readonly|fa_hidden|fa_directory"));
+		var attrs = gml.Syntax.code("fa_readonly|fa_hidden|fa_directory");
+		var next = NativeFileSystem.findFirst(path + "*.*", attrs);
 		var out:Array<String> = [];
 		var found:Int = 0;
 		while (next != "") {
 			out[found] = next;
 			found += 1;
-			next = raw("file_find_next")();
+			next = NativeFileSystem.findNext();
 		}
-		raw("file_find_close")();
+		NativeFileSystem.findClose();
 		return out;
 	}
 }
