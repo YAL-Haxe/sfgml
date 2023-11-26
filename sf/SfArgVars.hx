@@ -182,11 +182,14 @@ class SfArgVars {
 			}
 		}
 		//
+		var wantIgnore = false;
 		if (flags & 3 == 3) {
 			if (sfConfig.noCodeDoc) return;
-			if (next && !ext && showDoc) {
-				jsdoc = new SfBuffer();
-				jsdoc.indent = r.indent;
+			if (next && !ext) {
+				if (showDoc) {
+					jsdoc = new SfBuffer();
+					jsdoc.indent = r.indent;
+				} else if (modern) wantIgnore = true;
 			}
 		}
 		if (flags & 1 != 0) {
@@ -247,51 +250,53 @@ class SfArgVars {
 			}
 			return avn;
 		}
+		
 		// print actual arguments:
 		for (i in 0 ... emStart) {
 			arg = args[i];
 			if (comma) printf(r, ", "); else comma = true;
 			var def = arg.value;
-			var avn = arg.v.name;
-			var avt = arg.v.type;
+			var argName = arg.v.name;
+			var argType = arg.v.type;
 			// `arg:Null<T>` -> `?arg:T`:
 			var opt = false;
 			if (def != null && def.match(TNull)) {
 				opt = true;
 				def = null;
-				switch (avt) {
-					case TAbstract(_.get() => { name: "Null" }, [t]): avt = t;
+				switch (argType) {
+					case TAbstract(_.get() => { name: "Null" }, [t]): argType = t;
 					default: 
 				}
 			}
 			//
 			if (opt) r.addChar("?".code);
-			if (rxArgSuffix.match(avn)) {
+			if (rxArgSuffix.match(argName)) {
 				var avi:Int;
-				avn = rxArgSuffix.matched(1);
-				if (argSfxCounters.exists(avn)) {
-					avi = argSfxCounters[avn];
+				argName = rxArgSuffix.matched(1);
+				if (argSfxCounters.exists(argName)) {
+					avi = argSfxCounters[argName];
 				} else avi = 0;
-				argSfxCounters.set(avn, avi);
-				if (avi > 0) avn += avi;
+				argSfxCounters.set(argName, avi);
+				if (avi > 0) argName += avi;
 			}
-			avn = desuffix(avn);
-			r.addString(avn);
-			if (argTypes) printf(r, ":%(base_type)", avt);
+			argName = desuffix(argName);
+			r.addString(argName);
+			if (argTypes) printf(r, ":%(base_type)", argType);
 			if (def != null) printf(r, " = %(const)", def);
 			//
 			if (jsdoc != null) {
 				jsdoc.addString("/// @param ");
-				if (argTypes) printf(jsdoc, "{%(base_type)} ", avt);
+				if (argTypes) printf(jsdoc, "{%(base_type)} ", argType);
 				if (opt) jsdoc.addChar("?".code);
 				if (def != null) jsdoc.addChar("[".code);
-				jsdoc.addString(avn);
+				jsdoc.addString(argName);
 				if (def != null) printf(jsdoc, "=%(const)", def);
 				if (def != null) jsdoc.addChar("]".code);
 				jsdoc.addLine();
 			}
-		}
-		// print rest-argument:
+		} // argument printing loop
+		
+		// print the rest-argument, if any:
 		if (emStart < argc) {
 			if (comma) printf(r, ", ");
 			emName = desuffix(emName);
@@ -299,12 +304,12 @@ class SfArgVars {
 			if (argTypes) printf(r, ":%(base_type)", emType);
 			if (jsdoc != null) {
 				jsdoc.addString("/// @param ");
-				//if (argTypes) printf(r2, "{%(base_type)} ", emType);
+				if (argTypes) printf(jsdoc, "{%(base_type)} ", emType);
 				printf(jsdoc, "...%s", emName);
-				if (argTypes) printf(r, ":%(base_type)", emType);
 				jsdoc.addLine();
 			}
 		}
+		
 		r.addParClose();
 		// print return type:
 		if (argTypes) switch (f.type) {
@@ -329,7 +334,11 @@ class SfArgVars {
 		}
 		// print @:doc:
 		if (flags & 2 != 0) r.addLine();
-		if (jsdoc != null && jsdoc.length > 0) r.addString(jsdoc.toString());
+		if (jsdoc != null && jsdoc.length > 0) {
+			r.addString(jsdoc.toString());
+		} else if (wantIgnore) {
+			printf(r, "/// @ignore\n");
+		}
 		if ((ext || jsdoc == null) && doc != null && doc.indexOf("\n") < 0) printf(r, "// %s", doc);
 	}
 	public static function hint(r:SfBuffer, fd:SfField) {
