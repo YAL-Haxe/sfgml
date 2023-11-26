@@ -104,6 +104,15 @@ class SfClass extends SfClassImpl {
 				case TAbstract(_.get() => { name: "Int"|"Float" }, _): "0";
 				case TAbstract(_.get() => { name: "Bool" }, _): "false";
 				default: "undefined";
+			} else {
+				static var rx = ~/...argument\b/;
+				if (rx.match(v)) {
+					var mp = rx.matchedPos();
+					var lp = sfConfig.localPrefix;
+					v = v.substr(0, mp.pos)
+						+ f.args.map(a -> lp + a.v.name).join(", ")
+						+ v.substr(mp.pos + mp.len);
+				}
 			}
 			if (v != null) printf(r, "`else return %s;", v);
 		}
