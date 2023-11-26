@@ -834,7 +834,11 @@ class SfGenerator extends SfGeneratorImpl {
 								if (at.isDsMap) {
 									var fd = at.fieldMap[s];
 									if (fd != null) s = fd.name;
+									#if sfgml_no_accessors
+									printf(r, 'ds_map_find_value(%x, "%s")', obj, s);
+									#else
 									printf(r, '%x[?"%s"]', obj, s);
+									#end
 									z = false;
 								} else if (at.dotAccess) {
 									printf(r, '%x.%s', obj, s);
@@ -1086,6 +1090,7 @@ class SfGenerator extends SfGeneratorImpl {
 									printf(r, "%x[@%x,`%x]`=`%x", _args[0], _args[1], _args[2], _args[3]);
 									return;
 								}
+							#if !sfgml_no_accessors
 							case "gml.NativeStruct":
 								var mode = -1;
 								switch (fd.realName) {
@@ -1102,6 +1107,7 @@ class SfGenerator extends SfGeneratorImpl {
 									if (mode == 1) printf(r, "`=`%x", _args[2]);
 									return;
 								}
+							#end
 						}
 						if (cl.dotStatic || !fd.isVar || fd.meta.has(":script")) {
 							r.addFieldPathAuto(fd);
