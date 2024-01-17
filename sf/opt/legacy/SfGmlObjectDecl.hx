@@ -23,6 +23,7 @@ class SfGmlObjectDecl extends SfOptImpl {
 	var mdeclField:SfClassField;
 	var mdeclUsed = false;
 	var hasArrayDecl:Bool;
+	var currentExprFunc:SfExprFunction = null;
 	var hint:Bool;
 	
 	public function getTypeFromParent(orig:SfExpr, par:SfExpr):haxe.macro.Type {
@@ -37,6 +38,9 @@ class SfGmlObjectDecl extends SfOptImpl {
 				}
 			};
 			case SfReturn(true, _): {
+				if (currentExprFunc != null) {
+					return currentExprFunc.ret;
+				}
 				if (currentField == null) return null;
 				return currentField.type;
 			}
@@ -287,7 +291,20 @@ class SfGmlObjectDecl extends SfOptImpl {
 		//
 		forEachExpr(function(e:SfExpr, st, f:SfExprIter) {
 			implOuter(e, st);
-			e.iter(st, f);
+			switch (e.def) {
+				case SfFunction(ef):
+					var ef0 = currentExprFunc;
+					
+					st.unshift(e);
+					currentExprFunc = ef;
+					
+					f(currentExprFunc.expr, st, f);
+					
+					currentExprFunc = ef0;
+					st.shift();
+				default:
+					e.iter(st, f);
+			}
 		}, []);
 		//
 		if (!odeclUsed && odeclField != null) bootClass.removeField(odeclField);
