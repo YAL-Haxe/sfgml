@@ -8,6 +8,7 @@ import haxe.io.Bytes;
  * ...
  * @author YellowAfterlife
  */
+#if !sfgml_native_bytes
 @:coreApi
 class BytesBuffer {
 	var buffer:Array<Int> = [];
@@ -111,3 +112,52 @@ class BytesBuffer {
 		return b;
 	}
 }
+#else
+//@:coreApi // extra field: destroy()
+class BytesBuffer {
+	var buffer:Buffer;
+	
+	public var length(get, never):Int;
+	inline function get_length():Int {
+		return buffer.position;
+	}
+	
+	public function new() {
+		buffer = new Buffer(128, Grow, 1);
+	}
+	public function destroy():Void {
+		buffer.destroy();
+	}
+	public function addByte(byte:Int):Void {
+		buffer.writeByteUnsigned(byte);
+	}
+	public function add(src:Bytes):Void {
+		buffer.writeBuffer(src.getData());
+	}
+	public function addString(v:String, ?encoding:Encoding):Void {
+		// TODO: encoding
+		buffer.writeChars(v);
+	}
+	public function addInt32(v:Int):Void {
+		buffer.writeInt(v);
+	}
+	public function addInt64(v:Int64):Void {
+		buffer.writeInt64(v);
+	}
+	public function addFloat(v:Float):Void {
+		buffer.writeFloat(v);
+	}
+	public function addDouble(v:Float):Void {
+		buffer.writeDouble(v);
+	}
+	public function addBytes(src:Bytes, pos:Int, len:Int):Void {
+		buffer.writeBufferExt(src.getData(), pos, len);
+	}
+	public function getBytes():Bytes {
+		var n = length;
+		var bytes = Bytes.alloc(n);
+		bytes.getData().copyFrom(0, buffer, 0, n);
+		return bytes;
+	}
+}
+#end
