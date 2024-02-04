@@ -1,4 +1,6 @@
 package;
+#if gmlgenapi
+import sys.FileSystem;
 import sys.io.File;
 
 /**
@@ -28,10 +30,20 @@ class GmlGenAPI {
 	}
 	
 	static function proc(v2:Bool) {
-		var raw = File.getContent("api/" + (v2 ? "fnames" : "fnames14"));
+		var vi = v2 ? 2 : 1;
+		var rawPath = "api/" + (v2 ? "fnames" : "fnames14");
+		if (!FileSystem.exists(rawPath)) {
+			Sys.println('"$rawPath" doesn\'t exist!');
+			return;
+		}
+		var raw = File.getContent(rawPath);
 		raw = ~/\r\n/g.replace(raw, "\n");
 		//
 		var repl = File.getContent('api/repl.gml');
+		var replVer = 'api/repl$vi.gml';
+		if (FileSystem.exists(replVer)) {
+			repl += "\n" + File.getContent(replVer);
+		}
 		repl = ~/\r\n/g.replace(repl, "\n");
 		each(~/^:?(\w+).+$/gm, repl, function(rx:EReg) {
 			var name = rx.matched(1);
@@ -45,6 +57,7 @@ class GmlGenAPI {
 			});
 		});
 		//
+		var className = "GmlAPI" + vi;
 		var out = new StringBuf();
 		out.add('package gml.__macro;\r\n');
 		out.add('\r\n');
@@ -52,12 +65,13 @@ class GmlGenAPI {
 		out.add('import haxe.extern.Rest;\r\n');
 		out.add('\r\n');
 		out.add('/** @author gml/__macro/api/GmlGenAPI.hx */\r\n');
-		out.add('@:native("") @:std extern class GmlAPI' + (v2 ? 2 : 1) + ' {');
+		out.add('@:native("") @:std extern class $className {');
 		//
 		var ukSpelling = false;
 		var rxProp = ~/^(\w+)(\[.*?\])?([#*@&$£!;]*)$/;
 		var rxFunc = ~/^(:)?(\w+)\((.*?)\)([~\$#*@&£!:;]*)$/;
-		var rxArg = ~/(\w+)(?::(\w+))?/;
+		var rxArg = ~/(\[)?(\w+)(?::(\w+))?/;
+		var rxWordN = ~/^\w+?\d+$/;
 		var found = new Map<String, Bool>();
 		each(~/^.+$/gm, raw, function(r:EReg) {
 			var row = StringTools.rtrim(r.matched(0));
@@ -88,10 +102,11 @@ class GmlGenAPI {
 				out.add('Dynamic');
 				if (isArray) out.add('>');
 				out.add(';');
-			} else if (rxFunc.match(row)) {
+			}
+			else if (rxFunc.match(row)) {
 				var isInst = rxFunc.matched(1) != null;
 				var name = rxFunc.matched(2);
-				var argd = rxFunc.matched(3);
+				var argData = rxFunc.matched(3);
 				flags = rxFunc.matched(4);
 				if (hasFlag("&")) return;
 				if (found[name]) return;
@@ -100,37 +115,63 @@ class GmlGenAPI {
 				if (hasFlag("£") && !ukSpelling) out.add('@:noCompletion ');
 				if (hasFlag("$") &&  ukSpelling) out.add('@:noCompletion ');
 				out.add('static function $name(');
-				if (argd != "") {
-					var args = argd.split(",");
-					for (i in 0 ... args.length) {
-						var arg = args[i];
-						if (i > 0) out.add(', ');
-						var isRest = arg.indexOf("...") >= 0;
-						if (rxArg.match(arg)) {
-							var argName = rxArg.matched(1);
+				if (argData != "") {
+					var argPairs = [];
+					var restAt = -1;
+					for (i => argStr in argData.split(",")) {
+						var isRest = argStr.indexOf("...") >= 0;
+						if (isRest) restAt = i;
+						if (rxArg.match(argStr)) {
+							var isOpt = rxArg.matched(1) != null;
+							var argName = rxArg.matched(2);
 							switch (argName) {
-								case "default": {
-									out.add("_");
+								case "var", "default", "function": {
+									argName = "_" + argName;
 								};
 							}
-							out.add(argName);
-							out.add(':');
-							if (isRest) out.add('Rest<');
-							out.add(mapType(rxArg.matched(2)));
-							if (isRest) out.add('>');
+							var argType = mapType(rxArg.matched(3));
+							if (isRest) argType = 'Rest<$argType>';
+							argPairs.push({
+								name: argName,
+								type: argType,
+							});
 						} else if (isRest) {
-							out.add('rest:Rest<Dynamic>');
-						} else out.add('arg' + i + ':Dynamic');
+							argPairs.push({
+								name: "rest",
+								type: "Rest<Dynamic>",
+							});
+						} else {
+							argPairs.push({
+								name: "arg" + i,
+								type: "Dynamic",
+							});
+						}
+					}
+					while (restAt > 0) {
+						var lastArg = argPairs[restAt - 1].name;
+						if (rxWordN.match(lastArg)) {
+							argPairs.splice(restAt - 1, 1);
+							restAt -= 1;
+							Sys.println('Removed "$lastArg" from "$name"');
+						} else break;
+					}
+					for (i => argPair in argPairs) {
+						if (i > 0) out.add(", ");
+						out.add(argPair.name);
+						out.add(":");
+						out.add(argPair.type);
 					}
 				}
 				out.add('):');
-				out.add(hasFlag(":") ? "Dynamic" : "Void");
+				out.add("Dynamic");
+				//out.add(hasFlag(":") ? "Dynamic" : "Void");
 				out.add(';');
 			}
 		});
 		//
 		out.add('\r\n}\r\n');
-		File.saveContent('GmlAPI' + (v2 ? 2 : 1) + '.hx', out.toString());
+		File.saveContent('$className.hx', out.toString());
+		Sys.println('Updated $className!');
 	}
 	
 	static function main() {
@@ -140,3 +181,4 @@ class GmlGenAPI {
 	}
 	
 }
+#end

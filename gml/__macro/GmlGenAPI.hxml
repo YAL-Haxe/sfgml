@@ -1,0 +1,4 @@
+-cp api
+-neko api/GmlGenAPI.n
+-main GmlGenAPI
+-D gmlgenapi

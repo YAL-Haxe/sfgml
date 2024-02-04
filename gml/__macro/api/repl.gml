@@ -471,6 +471,7 @@ ugc_query_CreatedByFollowedUsersRankedByPublicationDate#
 //}
 
 // Mishaps:
+external_define(dll,name,calltype,restype,argnumb,...)!
 font_replace(...)&
 bm_complex&
 ge_lose&
