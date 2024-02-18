@@ -19,6 +19,7 @@ class SfGml_Exception extends SfOptImpl {
 			case SfThrow(e): e;
 			default: return false;
 		}
+		throwExpr = throwExpr.unpack();
 		var arg = switch (throwExpr.def) {
 			case SfCall(
 				_.def => SfStaticField(c = { realName: "Exception" }, { realName: "thrown" }),
