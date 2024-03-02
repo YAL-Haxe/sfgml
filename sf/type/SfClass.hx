@@ -1,5 +1,6 @@
 package sf.type;
 
+import haxe.macro.Context;
 import haxe.macro.Type.ClassType;
 import sf.SfCore.*;
 import sf.SfGmlBuiltin;
@@ -510,7 +511,9 @@ class SfClass extends SfClassImpl {
 					}
 					//
 				}; // static function
-				case FVar(AccCall | AccInline, AccNo | AccNever): {
+				case FVar(AccCall | AccInline, AccNo | AccNever): { // @:doc inline var
+					// `@:doc inline var X = 1` => `#macro X 1`
+					// `@:doc inline var X(get, never)` => `#macro X get_X()`
 					if (!sfConfig.gmxMode && f.checkDocState(docState)) {
 						var val = f.getGetterMacro();
 						if (val != null) {
@@ -566,6 +569,39 @@ class SfClass extends SfClassImpl {
 				printFieldExpr(r, fd);
 				r.addTopLevelFuncClose();
 			}
+			
+			// macros:
+			for (fd in fieldList) if (fd.meta.has(":gml.macro")) {
+				switch (fd.kind) {
+					case FMethod(_):
+					default: continue;
+				};
+				init.addString("#macro ");
+				var name = fd.metaString(":gml.macro");
+				if (name != null && name != "") {
+					init.addString(name);
+				} else {
+					init.addFieldPath(fd, "_".code, "_".code);
+					if (!fd.isHidden) init.addString("_mcr");
+				}
+				init.addChar(" ".code);
+				
+				var exprBuf = new SfBuffer();
+				exprBuf.indent = init.indent;
+				var _selfLevel = sfGenerator.selfLevel;
+				sfGenerator.selfLevel = 0;
+				exprBuf.addExpr(fd.expr, SfPrintFlags.Stat);
+				sfGenerator.selfLevel = _selfLevel;
+				var exprStr = exprBuf.toString();
+				if (exprStr.indexOf("\r") >= 0) {
+					exprStr = StringTools.replace(exprStr, "\r\n", "\\\r\n");
+				} else {
+					exprStr = StringTools.replace(exprStr, "\n", "\\\n");
+				}
+				init.addString(exprStr);
+				init.addLine();
+			}
+			
 			//
 			sfGenerator.currentClass = null;
 		} // if (!isHidden)
