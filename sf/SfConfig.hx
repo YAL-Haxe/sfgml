@@ -12,7 +12,7 @@ class SfConfig extends SfConfigImpl {
 	// default target versions (if not specified):
 	static inline var defVersion1:String = "1.4.1804";
 	static inline var defVersion2:String = "2.2.5";
-	static inline var defVersion23:String = "2.3.1";
+	static inline var defVersion23:String = "2023.8";
 	
 	/** */
 	public var version = string("sfgml-version", null);
@@ -221,12 +221,12 @@ class SfConfig extends SfConfigImpl {
 			case "yy": {
 				var yy = SfYyGen.getText(path);
 				next = true;
-				if (yy.indexOf('"resourceType": "GMExtension"') >= 0) { // 2.3 extension
+				if (~/"resourceType":\s*"GMExtension"/.match(yy)) { // 2.3 extension
 					isExtension = true;
 					modern = true;
 					if (v == null) v = defVersion23;
 				}
-				else if (yy.indexOf('"resourceType": "GMScript"') >= 0) { // 2.3 script
+				else if (~/"resourceType":\s*"GMScript"/.match(yy)) { // 2.3 script
 					isExtension = false;
 					modern = true;
 					if (v == null) v = defVersion23;

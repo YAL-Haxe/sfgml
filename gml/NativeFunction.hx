@@ -26,9 +26,20 @@ extern class NativeFunction {
 	@:expose("method_get_self")
 	public static function getSelf(fn:Function):Dynamic;
 	
+	#if (sfgml_version >= "2023.8")
+	@:expose("method_call")
+	public static function callExt(fn:Function, args:Array<Dynamic>, ?offset:Int, ?argCount:Int):Dynamic;
+	
+	public static inline function call(fn:Function, args:Array<Dynamic>, ?argc:Int):Dynamic {
+		return argc != null
+			? callExt(fn, args, 0, argc)
+			: callExt(fn, args);
+	}
+	#else
 	public static inline function call(fn:Function, args:Array<Dynamic>, ?argc:Int):Dynamic {
 		return gml.internal.NativeFunctionInvoke.call(fn, args, argc);
 	}
+	#end
 	
 	/** 2023.1 and newer */
 	@:expose("static_get")
