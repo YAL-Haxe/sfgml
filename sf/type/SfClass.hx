@@ -115,7 +115,12 @@ class SfClass extends SfClassImpl {
 						+ v.substr(mp.pos + mp.len);
 				}
 			}
-			if (v != null) printf(r, "`else return %s;", v);
+			if (v != null) switch (f.type) {
+				case TAbstract(_.get() => { name: "Void" }, _):
+					printf(r, "`else %s;", v);
+				default:
+					printf(r, "`else return %s;", v);
+			}
 		}
 		sfGenerator.currentField = null;
 	}
