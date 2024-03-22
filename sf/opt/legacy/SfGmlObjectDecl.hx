@@ -1,5 +1,6 @@
 package sf.opt.legacy;
 
+import haxe.macro.Type.DefType;
 import sf.opt.SfOptImpl;
 import sf.type.expr.SfExprDef.*;
 import sf.type.*;
@@ -255,8 +256,12 @@ class SfGmlObjectDecl extends SfOptImpl {
 		if (t == null) return;
 		
 		// look up the typedef:
+		inline function lookup(dt:DefType) {
+			return sfGenerator.anonMap.baseGet(dt);
+		}
 		var at:SfAnon = switch (t) {
-			case TType(_.get() => dt, _): sfGenerator.anonMap.baseGet(dt);
+			case TType(_.get() => dt, _): lookup(dt);
+			case TAbstract(_.get() => { type: TType(_.get() => dt, _) }, _): lookup(dt);
 			default: null;
 		};
 		if (at == null) return;
