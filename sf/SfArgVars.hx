@@ -206,6 +206,14 @@ class SfArgVars {
 				if (jsdoc != null) printf(jsdoc, "/// @description %s\n", doc);
 			} else doc = null;
 		}
+		
+		// templates...
+		if (f is SfClassField) for (tp in (cast f:SfClassField).classField.params) {
+			if (jsdoc != null) {
+				printf(jsdoc, "/// @template %s\n", tp.name);
+			}
+		}
+		
 		var argTypes = sfConfig.argTypes;
 		r.addFieldPathAuto(f);
 		r.addParOpen();
@@ -235,6 +243,7 @@ class SfArgVars {
 				} else emStart = argc;
 			}
 		}
+		
 		//
 		var argSfxCounters = new Map();
 		var rxArgSuffix = ~/^(\w+)(\d+)$/;
