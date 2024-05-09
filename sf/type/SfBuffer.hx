@@ -260,15 +260,15 @@ class SfBuffer extends SfBufferImpl {
 			case TFun(args, ret): {
 				n = args.length;
 				addString("function<");
-				i = 0; while (i < n) {
-					var s = args[i].name;
-					if (s != null && s != "") {
-						addString(args[i].name);
+				for (arg in args) {
+					// todo: arg.opt
+					var name = arg.name;
+					if (name != null && name != "") {
+						addString(name);
 						addChar(":".code);
 					}
-					addMacroTypeName(args[i].t);
+					addMacroTypeName(arg.t);
 					addString(";");
-					i += 1;
 				}
 				addMacroTypeName(ret);
 				addChar(">".code);
@@ -292,6 +292,7 @@ class SfBuffer extends SfBufferImpl {
 						case "Void": addString("void");
 						default: af(at, p);
 					};
+					case "haxe.Constraints" if (at.name == "Function"): addString("function");
 					case "Any": addString("any");
 					case "EnumValue": addString("any");
 					case "haxe.ds.Vector": {
@@ -307,6 +308,10 @@ class SfBuffer extends SfBufferImpl {
 						}
 						addString(")");
 					}
+					case "SfRest": {
+						addString("rest");
+						if (p.length > 0) printf(this, "<%base_type>", p[0]);
+					};
 					case "Class": {
 						if (p.length > 0) switch (p[0]) {
 							case TInst(_.get() => { name: "instance" }, _): {

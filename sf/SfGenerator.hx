@@ -26,6 +26,7 @@ import SfTools.*;
 import sf.SfCore.*;
 import sys.io.File;
 import haxe.macro.Type;
+import sf.gen.*;
 using sf.type.expr.SfExprTools;
 using StringTools;
 
