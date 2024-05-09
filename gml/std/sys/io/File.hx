@@ -25,16 +25,17 @@ import haxe.io.BytesData;
 	}
 	#end
 	
-	public static inline function getContent(path:String):String {
+	public static function getContent(path:String):String {
 		if (sys.FileSystem.exists(path)) {
 			var loadBuf = Buffer.load(path);
+			if (loadBuf == Buffer.defValue) return null;
 			var loadStr = loadBuf.length > 0 ? loadBuf.readString() : "";
 			loadBuf.destroy();
 			return loadStr;
 		} else return null;
 	}
 	
-	public static inline function saveContent(path:String, text:String):Void {
+	public static function saveContent(path:String, text:String):Void {
 		var saveFile = TextFile.write(path);
 		if (saveFile != TextFile.none) {
 			saveFile.writeString(text);

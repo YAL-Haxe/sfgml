@@ -16,7 +16,7 @@ package gml.io;
 	@:expose("directory_create") static function createDirectory(path:String):Void;
 	@:expose("directory_destroy") static function deleteDirectory(path:String):Void;
 	
-	static function findFirst(mask:String, attr:Int):String;
+	static function findFirst(mask:String, attr:FileAttributes):String;
 	static function findNext():String;
 	static function findClose():Void;
 }
