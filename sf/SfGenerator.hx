@@ -1362,6 +1362,19 @@ class SfGenerator extends SfGeneratorImpl {
 				isInSwitchBlock = false;
 				switch (q.def) {
 					case SfBlock([]): r.addString(";");
+					case SfBlock([
+						_.def => SfVarDecl(v1, z1, x1),
+						_.def => SfVarDecl(v2, z2, x2),
+					]): {
+						printf(r, "var %l_%s", v1.name);
+						printVarType(v1);
+						if (z1) printf(r, "`=`%x", x1);
+						//
+						printf(r, ",`%l_%s", v2.name);
+						printVarType(v2);
+						if (z2) printf(r, "`=`%x", x2);
+						printf(r, ";");
+					};
 					default: printf(r, "%sx;", q);
 				}
 				printf(r, "`%x;`%sx)`", c.unpack(), p);

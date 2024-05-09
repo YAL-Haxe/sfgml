@@ -16,6 +16,10 @@ class SfGmlCFor extends SfOptImpl {
 			switch (e.def) {
 				case SfCFor(q, c, p, x): {
 					switch (q.def) {
+						case SfBlock([
+							_.def => SfVarDecl(v1, z1, x1),
+							_.def => SfVarDecl(v2, z2, x2),
+						]): return;
 						case SfBlock(_), SfCall(_, _): {};
 						default: return;
 					};
