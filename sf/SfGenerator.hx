@@ -287,7 +287,13 @@ class SfGenerator extends SfGeneratorImpl {
 							printf(r, 'ord("\\\\")');
 						} else printf(r, 'ord("\\")');
 					} else if (i >= 32) {
-						printf(r, 'ord("%c")', i);
+						if (i == '"'.code) {
+							#if sfgml.modern
+							printf(r, 'ord(@\'"\')');
+							#else
+							printf(r, 'ord(\'"\')');
+							#end
+						} else printf(r, 'ord("%c")', i);
 						//printf(r, "/* '%c' */", i);
 						z = false;
 					} else if (sfConfig.next) {
