@@ -67,6 +67,20 @@ extern class Draw {
 	static function setHAlign(h:TextAlign):Void;
 	static function setVAlign(v:TextAlign):Void;
 	
+	static var halign(get, set):TextAlign;
+	private static function get_halign():TextAlign;
+	private static inline function set_halign(a:TextAlign):TextAlign {
+		setHAlign(a);
+		return a;
+	}
+	
+	static var valign(get, set):TextAlign;
+	private static function get_valign():TextAlign;
+	private static inline function set_valign(a:TextAlign):TextAlign {
+		setVAlign(a);
+		return a;
+	}
+	
 	//
 	@:expose("string_width") static function textWidth(s:String):Float;
 	@:expose("string_width_ext") static function textWidthExt(s:String, sep:Float, w:Float):Float;
