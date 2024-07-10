@@ -81,4 +81,13 @@ extern class NativeArray {
 	
 	/** GMS 2.3+ */
 	static function sort<T>(arr:Array<T>, comparator:T->T->Int):Void;
+	
+	/** GMS 2.3+ */
+	static function pop<T>(arr:Array<T>):Null<T>;
+	
+	/** GM2024+ */
+	static function shift<T>(arr:Array<T>):Null<T>;
+	
+	/** GM2024+ */
+	static function union<T>(array:Array<T>, arrays:Rest<Array<T>>):Array<T>;
 }

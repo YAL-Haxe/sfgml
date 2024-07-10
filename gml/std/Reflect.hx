@@ -139,8 +139,12 @@ import gml.internal.NativeFunctionInvoke;
 	}
 	
 	public static inline function isEnumValue(v:Dynamic):Bool {
-		// todo: we've got struct enums too now
-		return Std.is(v, Array);
+		return (
+			#if sfgml.modern
+			NativeType.isStruct(v) ||
+			#end
+			NativeType.isArray(v)
+		);
 	}
 
 	public static function deleteField(o:Dynamic, field:String):Bool {
