@@ -264,7 +264,9 @@ class SfGmxGen {
 		}
 		//
 		if (sfConfig.codePath == null) {
-			var filePath:String = Path.directory(xmlPath) + "/" + extName + "/" + fileName;
+			var extDir = Path.directory(xmlPath) + "/" + extName;
+			if (!FileSystem.exists(extDir)) FileSystem.createDirectory(extDir);
+			var filePath:String = extDir + "/" + fileName;
 			sfg.printTo(filePath);
 		} else sfg.printTo(sfConfig.codePath);
 		//}
