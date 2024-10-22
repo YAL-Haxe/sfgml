@@ -606,6 +606,18 @@ class SfClass extends SfClassImpl {
 				init.addString(exprStr);
 				init.addLine();
 			}
+			/*for (fd in fieldList) if (fd.meta.has(":gml.macro")) {
+				var name = fd.metaString(":gml.macro");
+				if (name == null) {
+					Context.warning("@:gml.macro requires a name", fd.classField.pos);
+					continue;
+				}
+				var exprBuf = new SfBuffer();
+				switch (fd.kind) {
+					case FVar(_, _
+				}
+				printf(init, "#macro %s ", name);
+			}*/
 			
 			//
 			sfGenerator.currentClass = null;

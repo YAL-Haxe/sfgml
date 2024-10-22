@@ -144,9 +144,17 @@ class SfEnum extends SfEnumImpl {
 			if (avoidStaticArrayDeclarations) {
 				printf(out, "global.__mp_%(field_auto)", ctr);
 			} else addEnumParamsLiteral(ctr);
+			
 			printf(out, ";\n");
 			printf(out, "static __enumIndex__`=`");
 			printCtrIndexLiteral(out, ctr);
+			
+			#if 0
+			printf(out, ";\n");
+			printf(out, "static __enumName__`=`");
+			printf(out, '"%s"', ctr.realName);
+			#end
+			
 			printf(out, ";%(-\n)};\n");
 			//
 			if (ctr.args.length == 0 && !noRef) {

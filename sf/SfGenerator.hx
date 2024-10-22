@@ -925,6 +925,11 @@ class SfGenerator extends SfGeneratorImpl {
 			
 			//{ calls
 			case SfCall(x, _args): { // func(...args)
+				/*switch (x.def) {
+					case SfArrayAccess(_.def => SfStaticField(_, f), _):
+						x.warning("Wrong self in 2024.2. Field: " + f.toString());
+					default:
+				}*/
 				n = _args.length;
 				sep = false;
 				/** |1: print expr, |2: print `(`, <0: print nothing */

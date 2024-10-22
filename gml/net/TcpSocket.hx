@@ -7,8 +7,8 @@ import gml.io.Buffer;
  */
 @:std @:docName("network_socket")
 @:forward(destroy)
-abstract TcpSocket(Socket) {
-	public static var defValue:TcpSocket = cast -1;
+abstract TcpSocket(Socket) to Socket {
+	public static inline var defValue:TcpSocket = cast -1;
 	//
 	public inline function new() {
 		this = Socket.createClient(SocketType.TCP);
@@ -32,6 +32,16 @@ abstract TcpSocket(Socket) {
 	 */
 	public inline function connect(url:String, port:Int):Int {
 		return this.connect(url, port);
+	}
+	
+	/**
+	 * Attempts to connect to the given address.
+	 * @param	url  IP to connect to
+	 * @param	port Port to use
+	 * @return       Connection status. Below zero on failure.
+	 */
+	 public inline function connectAsync(url:String, port:Int):Int {
+		return this.connectAsync(url, port);
 	}
 	
 	/**
