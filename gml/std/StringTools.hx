@@ -172,11 +172,14 @@ class StringTools {
 	}
 	public static function hex(n:Int, ?digits:Int):String {
 		var s = "";
-		var h = "0123456789ABCDEF";
-		if (n < 0) n += cast 4294967295;
-		while (n > 0) {
-			s = NativeString.charAt(h, 1 + (n & 15)) + s;
-			n >>= 4;
+		for (_ in 0 ... 16) {
+			s = NativeString.charAt("0123456789ABCDEF", 1 + (n & 15)) + s;
+			if (n < 0) {
+				// remove the sign bit and add it back afterwards
+				n = gml.Syntax.code("(({0} & $7FFF" + "FFFF" + "FFFF" + "FFFF) >> 4)"
+					+ " | $0800" + "0000" + "0000" + "0000", n);
+			} else n >>= 4;
+			if (n == 0) break;
 		}
 		if (digits != null) {
 			digits -= s.length;
