@@ -1004,7 +1004,7 @@ class SfGenerator extends SfGeneratorImpl {
 									case "setField": mode = 1;
 								}
 								if (mode >= 0) {
-									printf(r, "%x[$", _args[0]);
+									printf(r, "%x[$ ", _args[0]);
 									switch (_args[1].def) {
 										case SfConst(TString(_)): {};
 										default: r.addChar(" ".code);
