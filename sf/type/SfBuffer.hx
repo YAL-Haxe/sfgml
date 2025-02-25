@@ -292,6 +292,7 @@ class SfBuffer extends SfBufferImpl {
 						case "Void": addString("void");
 						default: af(at, p);
 					};
+					case "haxe.Int64" if (at.name == "Int64"): addString("int");
 					case "haxe.Constraints" if (at.name == "Function"): addString("function");
 					case "Any": addString("any");
 					case "EnumValue": addString("any");
