@@ -538,10 +538,28 @@ class SfClass extends SfClassImpl {
 					var fx:SfExpr = f.expr;
 					if (fx != null) {
 						//if (!dotStatic) init.addSep();
-						var fd = fx.getData();
 						var fsf = fx.mod(SfStaticField(this, f));
 						init.addTopLevelPrintIfPrefix();
 						switch (fx.def) {
+							case SfBlock([]): {
+								printf(init, "%s%(field_auto)`=`", g_, f);
+								var mv = f.meta.extract(":value");
+								switch (mv) {
+									case [{ params: [{ expr: EFunction(kind, f) }] }]: {
+										printf(init, "function(");
+										var sep = false;
+										for (arg in f.args) {
+											if (sep) init.addComma(); else sep = true;
+											printf(init, "%l_%s", arg.name);
+										}
+										printf(init, ")`{};\n");
+									};
+									default: {
+										fx.warning("Empty block assign!");
+										printf(init, "undefined;\n");
+									}
+								}
+							};
 							case SfBlock(w): { // v = { ...; x; } -> { ...; v = x; }
 								var wn = w.length;
 								var wx = w.slice(0, wn - 1);
