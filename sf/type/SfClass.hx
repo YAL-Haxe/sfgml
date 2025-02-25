@@ -79,6 +79,7 @@ class SfClass extends SfClassImpl {
 		if (field != null && field.index >= 0) fieldsByIndex[field.index] = null;
 	}
 	
+	static var rxArgumentRest = ~/\.\.\.argument\b/;
 	static function printFieldExpr(r:SfBuffer, f:SfClassField) {
 		sfGenerator.currentField = f;
 		var printCond = sfConfig.printIf;
@@ -106,9 +107,8 @@ class SfClass extends SfClassImpl {
 				case TAbstract(_.get() => { name: "Bool" }, _): "false";
 				default: "undefined";
 			} else {
-				static var rx = ~/...argument\b/;
-				if (rx.match(v)) {
-					var mp = rx.matchedPos();
+				if (rxArgumentRest.match(v)) {
+					var mp = rxArgumentRest.matchedPos();
 					var lp = sfConfig.localPrefix;
 					v = v.substr(0, mp.pos)
 						+ f.args.map(a -> lp + a.v.name).join(", ")
