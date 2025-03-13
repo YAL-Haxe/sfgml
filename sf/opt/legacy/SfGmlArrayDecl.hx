@@ -19,17 +19,29 @@ class SfGmlArrayDecl extends SfOptImpl {
 		var arrayType:SfClass = sfGenerator.typeArray;
 		var bootType:SfClass = sfGenerator.typeBoot;
 		if (bootType == null) return;
+		//
 		var arrayDecl = bootType.staticMap["decl"];
 		var arrayDeclUsed = SfGmlType.usesProto && !sfConfig.next;
+		var arrayDeclUsedKind = arrayDeclUsed ? 1 : 0;
+		var arrayDeclUsedAt = null;
+		//
 		var arrayTrail = bootType.staticMap["trail"];
 		var arrayTrailUsed = false;
+		//
 		var hasArrayCreate = sfConfig.hasArrayCreate;
 		var noArrayDecl = !sfConfig.hasArrayDecl;
 		if (noArrayDecl) {
 			var rType:SfClass = cast sfGenerator.realMap["Type"];
-			if (rType != null && rType.staticMap.exists("enumConstructor")) arrayDeclUsed = true;
-			if (sf.opt.api.SfGml_Type_enumHelpers.code.length > 0) arrayDeclUsed = true;
+			if (rType != null && rType.staticMap.exists("enumConstructor")) {
+				arrayDeclUsed = true;
+				arrayDeclUsedKind = 2;
+			}
+			if (sf.opt.api.SfGml_Type_enumHelpers.code.length > 0) {
+				arrayDeclUsed = true;
+				arrayDeclUsedKind = 3;
+			}
 		}
+		ignoreHidden = true;
 		forEachExpr(function(e:SfExpr, w, f:SfExprIter) {
 			switch (e.def) {
 				case SfArrayDecl(values): if (noArrayDecl) {
@@ -41,6 +53,8 @@ class SfGmlArrayDecl extends SfOptImpl {
 					} else {
 						e.setTo(SfCall(e.mod(SfStaticField(bootType, arrayDecl)), values));
 						arrayDeclUsed = true;
+						arrayDeclUsedKind = 4;
+						arrayDeclUsedAt = e.getPos();
 					}
 				};
 				case SfNew(c, _, args) if (c == arrayType): {
@@ -50,7 +64,9 @@ class SfGmlArrayDecl extends SfOptImpl {
 			}
 			e.iter(w, f);
 		});
-		if (!arrayDeclUsed) bootType.removeField(arrayDecl);
+		if (arrayDeclUsedKind != 0) {
+			trace(arrayDeclUsedKind, arrayDeclUsedAt);
+		} else bootType.removeField(arrayDecl);
 		if (!arrayTrailUsed) bootType.removeField(arrayTrail);
 	}
 	
