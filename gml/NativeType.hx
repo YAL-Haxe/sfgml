@@ -66,6 +66,8 @@ extern class NativeType {
 	@:expose("real") static function toReal(v:Dynamic):Float;
 	@:expose("bool") static function toBool(v:Dynamic):Bool;
 	@:expose("int64") static function toInt64(v:Dynamic):haxe.Int64;
+	/** Returns an int64(v) as a regular int **/
+	@:expose("int64") static function toInt(v:Dynamic):Int;
 	@:expose("ptr") static function toPtr(v:Dynamic):Pointer;
 }
 @:noCompletion @:std class NativeTypeHelper {

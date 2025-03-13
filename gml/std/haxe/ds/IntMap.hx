@@ -6,6 +6,7 @@ import gml.io.Buffer;
  * ...
  * @author YellowAfterlife
  */
+@:std
 class IntMap<T> extends BasicMap<Int, T> implements haxe.Constraints.IMap<Int,T> {
 	#if sfgml.modern
 	override private function keysArray():Array<Int> {

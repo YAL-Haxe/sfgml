@@ -3,9 +3,9 @@ import gml.NativeArray;
 import gml.io.Buffer;
 
 /**
- * ...
- * @author YellowAfterlife
- */
+	
+**/
+@:std
 class StringMap<T> extends BasicMap<String, T> implements haxe.Constraints.IMap<String,T> {
 	#if sfgml.modern
 	override private function keysArray():Array<String> {

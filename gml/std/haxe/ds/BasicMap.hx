@@ -5,6 +5,7 @@ import haxe.DynamicAccess;
 import haxe.Constraints.IMap;
 
 #if sfgml.modern
+@:std 
 class BasicMap<K, V> implements haxe.Constraints.IMap<K, V> {
 	var obj:DynamicAccess<V> = {};
 	

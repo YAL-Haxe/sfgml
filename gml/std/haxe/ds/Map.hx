@@ -70,6 +70,7 @@ abstract Map<K,V>(IMap<K,V>) {
 import SfTools.raw;
 import gml.ds.HashTable;
 
+@:std
 @:forward(destroy, exists, remove, get, set, keys, iterator, toString)
 abstract Map<K, V>(HashTable<K, V>) from HashTable<K, V> to HashTable<K, V> {
 	public inline function new() {

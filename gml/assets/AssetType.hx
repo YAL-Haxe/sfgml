@@ -4,17 +4,50 @@ package gml.assets;
  * Note - should remain pure as is also used in macros
  * @author YellowAfterlife
  */
-enum abstract AssetType(Int) from Int to Int {
-	var AUnknown = -1;
-	var AObject = 0;
-	var ASprite = 1;
-	var ASound = 2;
-	var ARoom = 3;
-	var ABackground = 4;
-	var APath = 5;
-	var AScript = 6;
-	var AFont = 7;
-	var ATimeline = 8;
-	var ATiles = 9;
-	var AShader = 10;
+@:native("asset") @:snakeCase
+extern enum abstract AssetType(Int) from Int to Int {
+	@:native("unknown")
+	var AUnknown;
+	
+	@:native("object")
+	var AObject;
+	
+	@:native("sprite")
+	var ASprite;
+	
+	@:native("sound")
+	var ASound;
+	
+	@:native("room")
+	var ARoom;
+	
+	@:native("background")
+	var ABackground;
+	
+	@:native("path")
+	var APath;
+	
+	@:native("script")
+	var AScript;
+	
+	@:native("font")
+	var AFont;
+	
+	@:native("timeline")
+	var ATimeline;
+	
+	@:native("tiles")
+	var ATiles;
+	
+	@:native("shader")
+	var AShader;
+	
+	@:native("animationcurve")
+	var AAnimCurve;
+	
+	@:native("sequence")
+	var ASequence;
+	
+	@:native("particlesystem")
+	var AParticleSystem;
 }

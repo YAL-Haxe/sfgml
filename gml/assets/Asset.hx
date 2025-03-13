@@ -1,10 +1,11 @@
 package gml.assets;
+import gml.assets.AssetType;
 
 /**
  * ...
  * @author YellowAfterlife
  */
-@:native("asset")
+@:snakeCase @:native("asset")
 extern class Asset {
 	static inline var defValue:Asset = cast -1;
 	
@@ -13,6 +14,8 @@ extern class Asset {
 	
 	@:native("get_type")
 	static function type(name:String):AssetType;
+	
+	static function getIDs<T:Asset>(type:AssetType):Array<T>;
 	
 	static inline function fromIndex<T:Asset>(index:Int):T {
 		return cast index;
