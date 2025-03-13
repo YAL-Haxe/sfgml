@@ -300,7 +300,9 @@ class SfEnum extends SfEnumImpl {
 			outb.addBuffer(out);
 			if (sfConfig.hintFolds) printf(outb, "\n%(-region)\n");
 		}
-		printf(initb, "/// @typedef {array} %type_auto\n", this);
+		if (sfConfig.jsDocTypeDefs) {
+			printf(initb, "/// @typedef {array} %type_auto\n", this);
+		}
 		if (init.length > 0) {
 			if (sfConfig.hintFolds) printf(initb, "// %(type_dot):\n", this);
 			initb.addBuffer(init);

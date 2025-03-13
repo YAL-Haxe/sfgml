@@ -140,10 +140,14 @@ class SfConfig extends SfConfigImpl {
 	/** [2.3.0,2.3.3][req 177719, 186114] `static a=[]` produces broken JS on HTML5  */
 	public var avoidStaticArrayDeclarations:Bool = false;
 	
-	/** Stores type information in [1,0] instead of [0] */
+	/** [1.4] Stores type information in [1,0] instead of [0] */
 	public var legacyMeta:Bool = bool("sfgml-legacy-meta");
 	
+	/** Should we convert `for (_ in 0 ... n)` to a `repeat (n)`? **/
 	public var optRepeat:Bool = bool("sfgml-repeat", true);
+	
+	/** Should we include `/// @typedef` for GMEdit? **/
+	public var jsDocTypeDefs:Bool = bool("sfgml-jsdoc-typedefs", true);
 	
 	public function new() {
 		super();

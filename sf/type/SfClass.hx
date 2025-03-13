@@ -242,7 +242,7 @@ class SfClass extends SfClassImpl {
 				protoCopyOffset, this, protoCopyOffset, indexes - protoCopyOffset
 			);
 		}
-		if (!isStruct && objName == null) {
+		if (!isStruct && objName == null && sfConfig.jsDocTypeDefs) {
 			printf(r, "/// @typedef {tuple");
 			var sep = false;
 			for (fd in fieldsByIndex) {

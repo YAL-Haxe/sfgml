@@ -203,7 +203,9 @@ class SfGenerator extends SfGeneratorImpl {
 			printf(mixed, "// Generated at %s (%(d)ms) for v%s+\n", now, ms, ver);
 		}
 		printf(mixed, "/// @lint nullToAny true\n");
-		printf(mixed, "// Feather disable all\n");
+		if (sfConfig.modern) {
+			printf(mixed, "// Feather disable all\n");
+		}
 		
 		//
 		function addMainExpr(b:SfBuffer):Void {
@@ -232,7 +234,7 @@ class SfGenerator extends SfGeneratorImpl {
 			mixed.addBuffer(init);
 			mixed.addBuffer(out);
 		}
-		jsdocTypedefMap.forEach(function(_, _, pair) {
+		if (sfConfig.jsDocTypeDefs) jsdocTypedefMap.forEach(function(_, _, pair) {
 			var dst:String = null;
 			var dstType = pair.type;
 			for (i in 0 ... 16) switch (pair.type) {
