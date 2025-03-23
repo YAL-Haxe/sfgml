@@ -7,8 +7,8 @@ extern class Shader extends Asset {
 	static inline function fromIndex(i:Int):Shader return cast i;
 	
 	public static inline function isValid(sh:Shader):Bool {
-		// aha, mhm
-		return sh.name.charCodeAt(0) != "<".code;
+		// aha, no shader_exists()
+		return ShaderHacks.isValid(sh);
 	}
 	//{
 	/** GMS2 only */
@@ -18,4 +18,14 @@ extern class Shader extends Asset {
 	var index(get, never):Int;
 	private inline function get_index():Int return cast this;
 	//}
+}
+@:std class ShaderHacks {
+	public static function isValid(sh:Shader) {
+		try {
+			var name = sh.name;
+			return name != null && name != "" && name.charCodeAt(0) != "<".code;
+		} catch (x:Dynamic) {
+			return false;
+		}
+	}
 }
