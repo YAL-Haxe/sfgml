@@ -7,6 +7,7 @@ import haxe.iterators.DynamicAccessKeyValueIterator;
 /**
  * Takes some shortcuts instead of using Reflect.
  */
+@:std
 abstract DynamicAccess<T>(Dynamic<T>) from Dynamic<T> to Dynamic<T> {
 	
 	public inline function new() this = {};
