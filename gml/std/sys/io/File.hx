@@ -29,7 +29,17 @@ import haxe.io.BytesData;
 		if (sys.FileSystem.exists(path)) {
 			var loadBuf = Buffer.load(path);
 			if (loadBuf == Buffer.defValue) return null;
-			var loadStr = loadBuf.length > 0 ? loadBuf.readString() : "";
+			// step over the byte order mark!
+			var len = loadBuf.length;
+			if (len >= 3
+				&& loadBuf.peekByte(0) == 0xEF
+				&& loadBuf.peekByte(1) == 0xBB
+				&& loadBuf.peekByte(2) == 0xBF
+			) {
+				loadBuf.seek(Relative, 3);
+				len -= 3;
+			}
+			var loadStr = len > 0 ? loadBuf.readString() : "";
 			loadBuf.destroy();
 			return loadStr;
 		} else return null;
