@@ -27,6 +27,7 @@ class SfArgVars {
 				showArgs = true;
 			}
 		}
+		
 		//
 		var checkThis = flags.hasAny(SfArgVarsExt.ThisArg | SfArgVarsExt.ThisSelf);
 		var showThis:Bool;
@@ -39,6 +40,11 @@ class SfArgVars {
 				showThis = argc == 0 || expr.countThis() > 0;
 			}
 		} else showThis = false;
+		
+		//
+		if (flags.has(ForceInline)) {
+			printf(r, 'gml_pragma("forceinline");\n');
+		}
 		
 		//
 		var lp = sfConfig.localPrefix;
@@ -75,7 +81,6 @@ class SfArgVars {
 		}
 		
 		//
-		var ropt:SfBuffer = null;
 		var found:Int = 0;
 		var arid:Int = 0;
 		if (showThis) {
@@ -92,6 +97,7 @@ class SfArgVars {
 			arid += 1;
 		}
 		//
+		var ropt:SfBuffer = null;
 		if (showArgs) {
 			var ternary = sfConfig.ternary && !sfConfig.avoidTernaries;
 			i = -1; while (++i < argc) {
@@ -148,6 +154,7 @@ class SfArgVars {
 		} else {
 			if (modern && !f.isInst && !f.parentClass.dotStatic && sfConfig.gmxMode) flags |= SfArgVarsExt.XVarArgs;
 		}
+		if (f.meta.has(":gml.inline")) flags |= SfArgVarsExt.ForceInline;
 		printExt(r, f.expr, f.args, flags);
 	}
 	
@@ -422,6 +429,8 @@ enum abstract SfArgVarsExt(Int) from Int to Int {
 	var ThisSelf = 2;
 	/** Use argument variables even though we're on 2.3 */
 	var XVarArgs = 4;
+	/** Add `gml_pragma("forceinline")` **/
+	var ForceInline = 8;
 	
 	public function has(flag:SfArgVarsExt):Bool {
 		return (this & flag) == flag;
