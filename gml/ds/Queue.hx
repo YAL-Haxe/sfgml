@@ -7,6 +7,8 @@ import haxe.extern.Rest;
  */
 @:native("ds_queue")
 extern class Queue<T> {
+	public static inline var defValue:Dynamic = cast -1;
+	
 	function new():Void;
 	function destroy():Void;
 	
