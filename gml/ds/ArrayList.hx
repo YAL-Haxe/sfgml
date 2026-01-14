@@ -41,15 +41,12 @@ extern class ArrayList<T> implements ArrayAccess<T> {
 }
 #else
 @:native("ds.list") @:docName("ds_list")
-@:forward abstract ArrayList<T>(ArrayListImpl<T>) from ArrayListImpl<T> to ArrayListImpl<T> {
+@:forward @:forward.new
+abstract ArrayList<T>(ArrayListImpl<T>) from ArrayListImpl<T> to ArrayListImpl<T> {
 	public static inline var defValue:Dynamic = cast -1;
 	
 	public static inline function isValid<T>(list:ArrayList<T>):Bool {
 		return raw("ds_exists")(list, raw("ds_type_list"));
-	}
-	
-	public inline function new() {
-		this = raw("ds_list_create")();
 	}
 	
 	@:arrayAccess inline function arrayRead(index:Int):T {
