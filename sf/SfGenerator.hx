@@ -671,7 +671,7 @@ class SfGenerator extends SfGeneratorImpl {
 						var name = pairs[i].name;
             var key = "%s:`";
             if(sfConfig.quoteStructKeys){
-              key = "\"%s\":`";
+              key = '"%s":`';
             }  
           
 						printf(r, key, rxValidName.match(name) ? name : haxe.Json.stringify(name));
