@@ -668,13 +668,11 @@ class SfGenerator extends SfGeneratorImpl {
 								printf(r, ",\n");
 							} else r.addComma();
 						}
+
 						var name = pairs[i].name;
             var key = "%s:`";
-            if(sfConfig.quoteStructKeys){
-              key = '"%s":`';
-            }  
-          
-						printf(r, key, rxValidName.match(name) ? name : haxe.Json.stringify(name));
+            var value = rxValidName.match(name) && !sfConfig.quoteStructKeys ? name : haxe.Json.stringify(name);
+						printf(r, key, value);
 						r.addExpr(pairs[i].expr, SfPrintFlags.ExprWrap);
 					}
 					if (lineSep) {
