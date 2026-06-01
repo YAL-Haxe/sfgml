@@ -149,6 +149,9 @@ class SfConfig extends SfConfigImpl {
 	/** Should we include `/// @typedef` for GMEdit? **/
 	public var jsDocTypeDefs:Bool = bool("sfgml-jsdoc-typedefs", true);
 	
+  /** Should we generate { "key": v } instead of { key: v } for structures?  **/
+	public var quoteStructKeys:Bool = bool("sfgml-quote-struct-keys", false);
+
 	public function new() {
 		super();
 		instanceof = true;
