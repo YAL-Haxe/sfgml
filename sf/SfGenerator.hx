@@ -661,7 +661,13 @@ class SfGenerator extends SfGeneratorImpl {
 						printf(r, "{`");
 						r.indent++;
 					}
-					var rxValidName = ~/^\w+$/;
+					static var rxValidName = ~/^\w+$/;
+					static var undesirableNames:Map<String, Bool> = {
+						var map = new Map();
+						var names = ["static"];
+						for (name in names) map[name] = true;
+						map;
+					};
 					for (i in 0 ... pairs.length) {
 						if (i > 0) {
 							if (lineSep) {
@@ -670,9 +676,11 @@ class SfGenerator extends SfGeneratorImpl {
 						}
 
 						var name = pairs[i].name;
-            var key = "%s:`";
-            var value = rxValidName.match(name) && !sfConfig.quoteStructKeys ? name : haxe.Json.stringify(name);
-						printf(r, key, value);
+						var key = (sfConfig.quoteStructKeys
+							|| undesirableNames.exists(name)
+							|| !rxValidName.match(name)
+						) ? haxe.Json.stringify(name) : name;
+						printf(r, "%s:`", key);
 						r.addExpr(pairs[i].expr, SfPrintFlags.ExprWrap);
 					}
 					if (lineSep) {
