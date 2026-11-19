@@ -46,9 +46,13 @@ extern class NativeType {
 	#end
 	
 	/** >= 2022.6 */
+	#if (sfgml_version && sfgml_version < "2024")
 	static inline function isRef(v:Dynamic):Bool {
 		return typeof(v) == "ref";
 	}
+	#else
+	@:expose("is_handle") static function isRef(v:Dynamic):Bool;
+	#end
 	
 	/** Returns whether the value is numeric and has no fractions */
 	static inline function isIntNumber(v:Dynamic):Bool {

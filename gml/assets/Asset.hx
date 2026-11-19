@@ -9,8 +9,12 @@ import gml.assets.AssetType;
 extern class Asset {
 	static inline var defValue:Asset = cast -1;
 	
+	static inline function find<T:Asset>(name:String, ?c:Class<T>):T {
+		return findImpl(name);
+	}
+	
 	@:native("get_index")
-	static function find<T:Asset>(name:String):T;
+	private static function findImpl<T:Asset>(name:String):T;
 	
 	@:native("get_type")
 	static function type(name:String):AssetType;

@@ -6,6 +6,8 @@ package gml.ds;
  */
 @:std @:native("ds_priority") @:final
 extern class PriorityQueue<T> {
+	static inline var defValue:Dynamic = cast -1;
+	//
 	function new();
 	function destroy():Void;
 	function clear():Void;
